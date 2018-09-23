@@ -9,6 +9,8 @@ Set you GitHub user name permanently or git will always ask for it after every
 push or pull:
 
     git config --global credential.https://github.com.username <github-usr-name>
+    git config --global user.email "you@example.com"
+    git config --global user.name "Your Name"
 
 If you want save your work local:
 
