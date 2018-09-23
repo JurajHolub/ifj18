@@ -1,0 +1,45 @@
+About GIT
+---------
+
+First clone repo:
+
+    git clone <link-from-github>
+
+Set you GitHub user name permanently or git will always ask for it after every
+push or pull:
+
+    git config --global credential.https://github.com.username <github-usr-name>
+
+If you want save your work local:
+
+    git add <modified-files>
+    git commit <-- this open editor where post what's your changes
+
+If you want know which files you put to commit:
+
+    git status
+    
+If you want share your work to all:
+
+    git push
+
+If you want update your repo (every time before start make changes):
+
+    git pull
+
+More useful commands (see https://git-scm.com/book/cs/v2):
+
+    git branch
+    git checkout
+    git stash
+
+About testing
+-------------
+
+To run program written in IFJ18 (input of translator):
+
+    ruby -r ./ifj18.rb <IFJ18-src-file>
+
+To run program written in IFJcode18 (output of translator):
+
+    ./ic18int <IFJcode18-src-file> 
