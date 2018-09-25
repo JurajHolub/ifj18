@@ -1,0 +1,21 @@
+Rozdelenie prekladacu na "nejaké" samostatné časti, kt. by si určená osoba prestudovala a premyslela
+(úlohy si este prerozdelíme, ale nejako zacat musíme)
+
+Samo - lexikálna analýza (scanner)
+        - rozpozná lexikálne jedonty v zdrojovom kóde a vytvorí tokeny
+        - implementuje sa ako konecny automat
+Vitalina - tabulka symbolov
+        - mala by byť datova štruktura do ktorej sa ukladajú tie tokeny zo scanneru
+        - implementácia podla zaregistrovaného zadania
+Mato - syntaktická analýza (bez zpracovania výrazov)
+        - analýza jazykových konštrukcií (deklaracie, definicie premenných a funkcií, riadiace, priradovacie príkazy...)
+        - LL výrazy (povinne pomocou metody rekurzivného sestupu)
+        - jednoduchá štruktúra pomocou FSM
+Juraj - syntaktická analýza výrazov
+        - aritmetické a logicke výrazy
+        - precedenčná syntaktická analýza (zdola-nahor)
+
+Nevieme zatial ako rozdelit toto:
+- generovanie výstupného kódu - neviem ci si to má zobrat 1 a tú syntakticku anal. tiez potom len 1
+- programovanie vstavaných funkcií - neviem do akej časti to má patriť
+- testovanie - riesil by som az ked bude co testovat
