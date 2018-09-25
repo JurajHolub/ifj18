@@ -18,7 +18,7 @@ void dummy(char *str)
 
 int main(int argc, char **argv)
 {
-    dummy("Hello world!\n");
+    dummy("Hell0 world!\n");
 
     return 1;
 }
