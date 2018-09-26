@@ -2,7 +2,7 @@ Rozdelenie prekladacu na "nejaké" samostatné časti, kt. by si určená osoba 
 (úlohy si este prerozdelíme, ale nejako zacat musíme)
 
 Samo - lexikálna analýza (scanner)
-        - rozpozná lexikálne jedonty v zdrojovom kóde a vytvorí tokeny
+        - rozpozná lexikálne jednotky v zdrojovom kóde a vytvorí tokeny
         - implementuje sa ako konecny automat
 Vitalina - tabulka symbolov
         - mala by byť datova štruktura do ktorej sa ukladajú tie tokeny zo scanneru
