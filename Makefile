@@ -1,6 +1,9 @@
 CC = gcc
-CFLAGS = -std=c99 -pg
-OBJ = main.o
+CFLAGS = -I -std=c99 -g -Werror -Wall
+OBJ = main.o \
+	  expressions_parser.o \
+	  stack.o \
+	  scanner.o
 EXECUTABLE = main
 
 #vpath %.c src

@@ -6,19 +6,17 @@
  */
 
 #include <stdio.h>
-
-/**
- * @brief Some dumy code style example function witch print input parameter.
- * @param str Printed string.
- */
-void dummy(char *str)
-{
-    printf("%s", str);
-}
+#include "stack.h"
+#include "expressions_parser.h"
+#include "scanner.h"
 
 int main(int argc, char **argv)
 {
-    dummy("Hello world!\n");
+    
+    //call of scanner (not implemented yet, so it return hard coded values)
+    token_t *token = get_token(); 
+    // testing parser of arithmetic and logic expressions
+    printf("Parse succes: %d\n", parse_expression(token));
 
-    return 1;
+    return 0;
 }
