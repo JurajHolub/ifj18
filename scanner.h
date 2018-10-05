@@ -14,7 +14,7 @@
  */
 #define INT_K "int"
 #define FLOAT_K "float"
-#define STRING "string"
+#define STRING_K "string"
 #define NIL_K "nil"
 #define END_K "$"
 #define LEFTB_K "("

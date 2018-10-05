@@ -11,43 +11,27 @@
 /**********************     WORKING VERSION OF GRAMATIC  **********************
 
 Gram = (Nonterm,Term,Rule,Start)
-
-Nonterm = {ADD, SUB, DIV, MUL, OPR, GLO, EQO, OPA, EQA, ALL}
-
+Nonterm = {E}
 Term = {int, float, string, nil, $, (, ), <, >, <=, >=, ==, !=, +, -, *, /}
-
 Rule = {
-    ADD -> OPR + OPR
-    SUB -> OPR - OPR
-    DIV -> OPR / OPR
-    MUL -> OPR * OPR
-
-    OPR -> ADD
-    OPR -> SUB
-    OPR -> DIV
-    OPR -> MUL
-    OPR -> (OPR)
-    OPR -> int
-    OPR -> float
-
-    GLO -> OPR OPA OPR
-    GLO -> string OPA string
-
-    EQO -> ALL EQA ALL
-    EQO -> ALL EQA ALL
-
-    OPA -> <
-    OPA -> >
-    OPA -> <=
-    OPA -> >=
-
-    EQA -> ==
-    EQA -> !=
-
-    ALL -> OPR
-    ALL -> string
-    ALL -> nil
+    E -> int
+    E -> float
+    E -> string
+    E -> nil
+    E -> (E)
+    E -> - E
+    E -> E + E 
+    E -> E - E 
+    E -> E / E 
+    E -> E * E 
+    E -> E < E
+    E -> E > E
+    E -> E <= E
+    E -> E >= E
+    E -> E == E
+    E -> E != E
 }
+Start = {$}
 
 ******************************************************************************/
 
@@ -105,19 +89,19 @@ char* prec_table(int top, int token)
 {
     char *table[13][13] = {
     //    *    /    +    -    <    ==  int  flt  str  nil   $    (    )  
-        {">", ">", ">", ">", " ", " ", "<", "<", " ", " ", ">", "<", " "},// *
-        {">", ">", ">", ">", " ", " ", "<", "<", " ", " ", ">", "<", " "},// /
-        {"<", "<", ">", ">", " ", " ", "<", "<", "<", " ", ">", "<", " "},// +
-        {"<", "<", ">", ">", " ", " ", "<", "<", " ", " ", ">", "<", " "},// -
-        {" ", " ", ">", ">", " ", " ", "<", "<", "<", " ", " ", "<", " "},// <
-        {" ", " ", ">", ">", " ", " ", "<", "<", "<", "<", " ", "<", " "},// ==
-        {">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", " ", "<"},// int
-        {">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", " ", "<"},// flt
-        {" ", " ", ">", " ", ">", ">", " ", " ", " ", " ", ">", " ", "<"},// str
-        {" ", " ", " ", " ", " ", ">", " ", " ", " ", " ", ">", " ", "<"},// nil
-        {" ", " ", "<", "<", " ", " ", "<", "<", "<", "<", " ", "<", " "},// $
-        {" ", " ", " ", " ", " ", " ", "<", "<", " ", " ", " ", "<", "<"},// (
-        {"<", "<", "<", "<", "<", "<", ">", ">", ">", ">", "<", "=", ">"},// )
+        {">", ">", ">", ">", ">", ">", "<", "<", " ", " ", ">", "<", ">"},// *
+        {">", ">", ">", ">", ">", ">", "<", "<", " ", " ", ">", "<", ">"},// /
+        {"<", "<", ">", ">", ">", ">", "<", "<", "<", " ", ">", "<", ">"},// +
+        {"<", "<", ">", ">", ">", ">", "<", "<", " ", " ", ">", "<", ">"},// -
+        {"<", "<", "<", "<", "<", "<", "<", "<", "<", " ", ">", "<", ">"},// <
+        {"<", "<", "<", "<", "<", ">", "<", "<", "<", "<", ">", "<", ">"},// ==
+        {">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", " ", ">"},// int
+        {">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", " ", ">"},// flt
+        {" ", " ", ">", " ", ">", ">", " ", " ", " ", " ", ">", " ", ">"},// str
+        {" ", " ", " ", " ", " ", ">", " ", " ", " ", " ", ">", " ", ">"},// nil
+        {"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", " ", "<", ">"},// $
+        {"<", "<", "<", "<", "<", "<", "<", "<", " ", " ", " ", "<", "="},// (
+        {">", ">", ">", ">", ">", ">", ">", ">", ">", ">", ">", " ", ">"},// )
     };
 
     if (top < 13 || token < 13)
@@ -133,22 +117,40 @@ bool find_rule(stack_t *stack)
     if (top == NULL)
         return false;
 
-    if (strcmp(top, INT_K)==0 || strcmp(top, FLOAT_K)==0 || strcmp(top, "(OPR)")==0
-        || strcmp(top, "MUL")==0 || strcmp(top, "DIV")==0 || strcmp(top, "SUB")==0
-        || strcmp(top, "ADD")==0)
-    {
-        apply_rule("OPR", stack);
-    }
-    else if (strcmp(top, "OPR+OPR")==0)
-        apply_rule("OPR", stack);
-    else if (strcmp(top, "OPR-OPR")==0)
-        apply_rule("OPR", stack);
-    else if (strcmp(top, "OPR*OPR")==0)
-        apply_rule("OPR", stack);
-    else if (strcmp(top, "OPR/OPR")==0)
-        apply_rule("OPR", stack);
-    else if (strcmp(top, "OPR/OPR")==0)
-        apply_rule("OPR", stack);
+    if (strcmp(top, INT_K)==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, FLOAT_K)==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, STRING_K)==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, NIL_K)==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "(E)")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E+E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E-E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "-E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E*E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E/E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E/E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E==E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E!=E")==0) 
+        apply_rule("E", stack);
+    else if (strcmp(top, "E<E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E>E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E<=E")==0)
+        apply_rule("E", stack);
+    else if (strcmp(top, "E>=E")==0) 
+        apply_rule("E", stack);
     else
         return false;
 
