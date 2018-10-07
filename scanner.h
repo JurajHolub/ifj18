@@ -5,73 +5,58 @@
  * @file scanner.h
  * @brief Declaration of scanner interface for parser.
  * @date October 2018
- * @note You can create your token as you need but I need here declared part
- * of it for parser (this values in structure). Juraj
  */
 
 /**
- * Possible values of token key.
+ * @brief Data types of input symbols from IFJ18 language. Never change
+ * possition of enum items please (possition is important for parser), if you
+ * want add more symbols add it at the end of enum.
  */
-#define INT_K "int"
-#define FLOAT_K "float"
-#define STRING_K "string"
-#define NIL_K "nil"
-#define END_K "$"
-#define LEFTB_K "("
-#define RIGHTB_K ")"
-#define LESS_K "<"
-#define GREATER_K ">"
-#define LEQ_K "<="
-#define REQ_K ">="
-#define EQ_K "=="
-#define NEQ_K "!="
-#define ADD_K "+"
-#define SUB_K "-"
-#define MUL_K "*"
-#define DIV_K "/"
-
-
-/**
- * @brief Every value is index to Precedence Table for actual scanned token.
- */
-enum expression_terms {
-    _mul = 0, ///< Index to Precedence Table for multipication term "*".
-    _div, ///< Index to Precedence Table for divitation term "/".
-    _add,///< Index to Precedence Table for addition term "+".
-    _sub,///< Index to Precedence Table for substract term "-".
-    /**
-     * Index to Precedence Table for comparation (less or greater)
-     * term "<,>,<=,>=".
-     */
-    _less,
-    _eq,///< Index to Precedence Table for comparation (equal) term "==, !=".
-    _integer,///< Index to Precedence Table for integer term "30, intVar".
-    _float,///< Index to Precedence Table for float term "30.3, floatVar".
-    _string,///< Index to Precedence Table for string term (constant or variable).
-    _nil,///< Index to Precedence Table for nil data type term.
-    /**
-     * Index to Precedence Table for possible end of arit. expression term.
-     * "EOL, then, do"
-     */
-    _end,
-    _leftB,///< Index to Precedence Table for left bracket term "(".
-    _rightB///< Index to Precedence Table for right bracket term ")".
+enum data_type_e {
+    NOT = 0,    ///< Term "not".
+    SUB,        ///< Term "-".
+    ADD,        ///< Term "+".
+    MUL,        ///< Term "*".
+    DIV,        ///< Term "/".
+    NOT_EQUAL,  ///< Term "!=".
+    LESS,       ///< Term "<".
+    INTEGER,    ///< Term "integer".
+    STRING,     ///< Term "string".
+    NIL,        ///< Term "nil".
+    LEFT_B,     ///< Term "(".
+    RIGHT_B,    ///< Term ")".
+    LINE_END,   ///< Term "\n".
+    EQUAL,      ///< Term "==".
+    GREATER,    ///< Term ">".
+    LESS_EQ,    ///< Term "<=".
+    GREATER_EQ, ///< Term ">=".
+    FLOAT,      ///< Term "float".
+    DEF,        ///< Term "def".
+    DO,         ///< Term "do".
+    ELSE,       ///< Term "else".
+    END,        ///< Term "end".
+    IF,         ///< Term "if".
+    THEN,       ///< Term "then".
+    WHILE,      ///< Term "while".
+    ASSIG,      ///< Term "=".
+    FUN,        ///< Term "function()".
+    DELIM,      ///< Term ",".
+    VAR         ///< Term "variable".
 };
 
 /**
- * @brief Describe one terminal of input src file in IFJ18 language. Created by
+ * @brief Describe one terminal (symbol) of input IFJ18 language. Created by
  * scanner (lexical analyse) and used in parser (syntax/semantic analyse).
  */
 typedef struct token_s {
+    int type;   ///< Type of parsed symbol. Always value of enum type "data_type_e".
     /**
-     * Index to Precedence Table (used in parser of aritmetic and logic
-     *  expressions). Always set to value of enum type expression_terms.
+     * Value of parsed symbol.
+     * NULL if type is one of *,/,-,+,(,) ...
+     * String representation of parsed value if type is integer, float or string.
+     * Name of variable if type is VAR (variable).
      */
-   int tab_idx; 
-   /**
-    * Key value of scanned term, for every type of token there is one.
-    */
-   char *key;
+    char *attribute; 
 } token_t;
 
 /**
@@ -80,5 +65,15 @@ typedef struct token_s {
  *  @return Scanned token.
  */
 token_t* get_token();
+
+/**
+ * @brief Return token from parser to scanner. After that if parser call
+ * get_token(), it will return this token (same as return at last time
+ * of call get_token()). Always and only called by parser.
+ * Parser can return 2 tokens in row so scanner must save always last 2 tokens.
+ * @param token Token witch will be returned to scanner and will be first witch
+ * parser recieve after nearest call of get_token().
+ */
+void ret_token(token_t *token);
 
 #endif // _SCANER_H_IFJ_18_

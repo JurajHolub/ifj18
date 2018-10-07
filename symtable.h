@@ -3,34 +3,67 @@
 
 /**
  * @file symtable.h
- * @brief Declaration table of symbols.
+ * @brief Declaration symbol table implemented by hash table.
  * @date October 2018
  */
 
 #define HASH_SIZE 30
 
-table_item_t hash_table[HASH_SIZE];
-
-typedef struct list_s {
-    data_t data;
-    struct list_s *next;
-} list_t;
-
+/**
+ * @brief Data about one symbol saved in symbol table (implemented by hash table).
+ * Symbols saved to Symbol table are variables and functions (not constants).
+ */
 typedef struct data_s {
-    char *data_type;    ///< Data type of symbol. For function it is return val.
-    char *name;         ///< Name of variable or indication of constant.
-    char *value;        ///< Value of constant (string, number).
-    bool init;          ///< True if variable is initialized;
-    char *fun_name;     ///< Name of function.
-    int param_cnt;      ///< Number of parameters of function.
-    char *param_type;    ///< Data types of function parameters.
+    int data_type;      ///< Data type of symbol. Always value of enum type "data_type_e".
+    char *id;           ///< Name of identificator for variable.
+    /** 
+     * Return data type of function if "data_type" is "FUN". Always value of
+     * enum type "data_type_e".
+     */
+    int fun_type;
+    char *frame;        ///< Frame where is this variable valid.
+    int param_cnt;      ///< Number of function parameters.
+    char *param_id;     ///< Name of function parameters identificators, delimered by space.
 } data_t;
 
+/**
+ * @brief Linked list used for saving more items hashed to same index of hash table.
+ */
+typedef struct list_s {
+    data_t data;        ///< Data about symbol saved in this item of list.
+    struct list_s *next;///< Next item of list.
+} list_t;
+
+/**
+ * @brief One item of Hash Table. Hash Table is static array of pointers to
+ * list of items hashed to this index.
+ */
 typedef struct table_item_s {
-    int key;
-    list_t *head;
+    list_t *head;       ///< List of symbols hashed to same key.
 } table_item_t;
 
-int hash_fun(int key);
+/**
+ * @brief Global hash table array.
+ */
+table_item_t hash_table[HASH_SIZE];
+
+/**
+ * @brief Hash function. Hash input key to index of hash table.
+ * @param key Key for hash table is "data_t.id" because it is unicate for each
+ * symbol.
+ * @return Index to hash table array.
+ */
+int hash_fun(char *key);
+
+/**
+ * @brief By hash function search and return item in symbol table witch fit to
+ * search key.
+ */
+data_t* search(char *key);
+/**
+ * @brief By hash function found ideal place in hash table and insert there
+ * new item of symbol table.
+ */
+void insert(data_t *data);
 
 #endif // _SYM_TABLE_H_IFJ_18_

@@ -3,7 +3,8 @@ CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = main.o \
 	  expressions_parser.o \
 	  stack.o \
-	  scanner.o
+	  scanner.o \
+	  symtable.o
 EXECUTABLE = main
 
 #vpath %.c src
