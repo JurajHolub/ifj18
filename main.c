@@ -14,9 +14,8 @@ int main(int argc, char **argv)
 {
     
     //call of scanner (not implemented yet, so it return hard coded values)
-    token_t *token = get_token(); 
     // testing parser of arithmetic and logic expressions
-    printf("Parse succes: %d\n", parse_expression(token));
+    // printf("Parse succes: %d\n", parse_expression());
 
     return 0;
 }

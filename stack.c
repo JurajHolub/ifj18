@@ -7,6 +7,8 @@
  */
 
 #include "stack.h"
+#include "scanner.h"
+#include "expressions_parser.h"
 
 void print_stack(stack_t *stack)
 {
@@ -14,7 +16,7 @@ void print_stack(stack_t *stack)
     stack_item_t *bot = stack->bot;
     while (bot != NULL)
     {
-        printf("%s", bot->key);
+        printf("%s", get_type(bot->type));
         for (int i = 0; i < bot->mark; i++)
             printf("%c", '<');
         bot = bot->next;
@@ -27,10 +29,7 @@ stack_item_t* get_marked_part(stack_t *stack)
 {
     for (stack_item_t *i = stack->top; i != NULL; i = i->prev)
         if (i->mark > 0)
-        {
-            if (i->next != NULL)
             return i;
-        }
 
     return NULL;
 }
@@ -49,31 +48,24 @@ void set_top_term(stack_t *stack)
     stack->top_term = stack->bot;
 }
 
-void apply_rule(char *rule, stack_t *stack)
+void apply_rule(int type, stack_item_t *marked_part)
 {
-    stack_item_t *marked_part = get_marked_part(stack);
-    if (marked_part == NULL)
-        return; // should not happend
+    marked_part->prev->mark -= 1;
+    marked_part->is_term = false;
+    marked_part->type = type;
 
-    marked_part->next->key = rule;
-    marked_part->next->is_term = false;
-    marked_part->mark -= 1;
-
-    stack_item_t *i = marked_part->next;
-
-    stack->top = i;
-
-    i = i->next;
-    while (i != NULL)
+    marked_part = marked_part->next;
+    while (marked_part != NULL)
     {
-        stack_item_t *deleted = i;
+        stack_item_t *deleted = marked_part;
 
-        if (i->next != NULL)
-            i->next->prev = i->prev;
-        if (i->prev != NULL)
-            i->prev->next = i->next;
+        if (marked_part->next != NULL)
+            marked_part->next->prev = marked_part->prev;
+        if (marked_part->prev != NULL)
+            marked_part->prev->next = marked_part->next;
 
-        i = i->next;
+        free(deleted->val);
+        marked_part = marked_part->next;
         free(deleted);
     }
 }
@@ -90,10 +82,11 @@ stack_t* init_stack()
 
     first->prev = NULL;
     first->next = NULL;
-    first->tab_idx = _end;
-    first->key = "";
+    first->type = LINE_END;
+    first->val = "";
     first->mark = 0;
     first->is_term = true;
+    first->is_const = false;
 
     new->bot = first;
     new->top_term = first;
@@ -114,6 +107,8 @@ void destroy_stack(stack_t *stack)
         if (i->prev != NULL)
             i->prev->next = i->next;
 
+        if (i != stack->bot)
+            free(deleted->val);
         i = i->next;
         free(deleted);
     }
@@ -121,54 +116,17 @@ void destroy_stack(stack_t *stack)
     free(stack);
 }
 
-char* get_concat_stack(stack_t *stack)
-{
-    int size = 1;
-    
-    stack_item_t *marked_part = get_marked_part(stack);
-
-    if (marked_part == NULL)
-        return NULL;
-
-    for (stack_item_t *i = marked_part->next; i != NULL; i = i->next)
-        size += strlen(i->key);
-
-    char *top = malloc(size*sizeof(char));
-    if (top == NULL)
-    {
-        fprintf(stderr, "Not enough memory!\n");
-        return NULL;
-    }
-
-    for (stack_item_t *i = marked_part->next; i != NULL; i = i->next)
-        strcat(top, i->key);
-
-    return top;
-}
-
 void mark_stack_term(stack_t *stack)
 {
     stack->top_term->mark += 1;
 }
 
-void stack_push(stack_t *stack, token_t *token)
+void stack_push(stack_t *stack, stack_item_t *item)
 {
-    stack_item_t* new = (stack_item_t*)malloc(sizeof(stack_item_t));
-    if (new == NULL)
-    {
-        fprintf(stderr, "Not enough memory!\n");
-        return;
-    }
-    
-    new->tab_idx = token->tab_idx;
-    new->key = token->key;
-    new->mark = 0;
-    new->is_term = true;
+    item->next = NULL;
+    stack->top->next = item;
+    item->prev = stack->top;
 
-    new->next = NULL;
-    stack->top->next = new;
-    new->prev = stack->top;
-
-    stack->top = new;
-    stack->top_term = new;
+    stack->top = item;
+    stack->top_term = item;
 }

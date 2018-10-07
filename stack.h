@@ -25,9 +25,10 @@ typedef struct stack_item_s {
      * Index to Precedence Table. Always set to value of enum type
      * expression_terms. 
      */
-    int tab_idx; 
+    int type;
+    bool is_const;
+    char *val;
     int mark; ///< Number of mark of this item in stack.
-    char *key; ///< Key value of scanned term, for every type of token there is one.
     bool is_term; ///< True if this item of stack is term, else its nonterm.
 } stack_item_t;
 
@@ -53,14 +54,6 @@ stack_t* init_stack();
  */
 void destroy_stack(stack_t *stack);
 /**
- * @brief Concatente marked part of stack to one string.
- * @param str1 First concatenated string, it is start of new string.
- * @param str2 Second concatenated string, it is end of new string.
- * @post Expect call free() at the end of using new allocated string.
- * @return Dynamicly created concatenated string.
- */
-char* get_concat_stack(stack_t *stack);
-/**
  * @brief Set one mark after term witch is on the top of the stack.
  * @param stack Stack where is set mark to top term.
  */
@@ -70,7 +63,7 @@ void mark_stack_term(stack_t *stack);
  * @param stack Stack where will be new item pushed.
  * @param token Token (term) witch will be copyied to stack item.
  */
-void stack_push(stack_t *stack, token_t *token);
+void stack_push(stack_t *stack, stack_item_t *item);
 /**
  * @brief Set stack pointer to top term.
  * @param stack Stack where will be top term setted.
@@ -82,7 +75,7 @@ void set_top_term(stack_t *stack);
  * @param stack Stack where will be applyed choosen rule.
  * @pre Stack must have at least one mark.
  */
-void apply_rule(char *rule, stack_t *stack);
+void apply_rule(int type, stack_item_t *marked_part);
 /**
  * @brief Find marked part of stack.
  * @param stack Stack where we search for marked part.

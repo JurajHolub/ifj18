@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "stack.h"
 #include "scanner.h"
+#include "symtable.h"
 #include <stdbool.h>
 
 /**
@@ -25,7 +26,7 @@
  * this token to this parser.
  * @return True if parsed arithmetic or logic expression is correct, else false.
  */
-bool parse_expression(token_t *token);
+bool parse_expression();
 
 /**
  * @brief Precedence Table of arithmetic and logic expression parser.
@@ -45,6 +46,16 @@ char* prec_table(int top, int token);
  * @return True if found fitting rule else false.
  */
 bool find_rule(stack_t *stack);
+int map_index(int idx);
+bool handle_one(stack_item_t *marked);
+bool handle_two(stack_item_t *marked);
+bool handle_three(stack_item_t *marked);
     
+stack_item_t* create_stack_item(token_t *token);
+
+/**
+ * @brief Debug convert enum type data_type_e to string representation.
+ */
+char *get_type(int type);
     
 #endif // _EXPRESSIONS_PARSER_H_IFJ_18_
