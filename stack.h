@@ -9,10 +9,6 @@
  * above it.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "scanner.h"
 #include <stdbool.h>
 
 /**
@@ -21,10 +17,6 @@
 typedef struct stack_item_s {
     struct stack_item_s *prev; ///< Previous item in stack (nearer to bottom).
     struct stack_item_s *next; ///< Next item in stack (nearer to top).
-    /**
-     * Index to Precedence Table. Always set to value of enum type
-     * expression_terms. 
-     */
     int type;
     bool is_const;
     char *val;

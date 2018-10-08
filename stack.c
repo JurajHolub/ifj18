@@ -7,7 +7,12 @@
  */
 
 #include "stack.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "scanner.h"
+#include "error_handle.h"
 #include "expressions_parser.h"
 
 void print_stack(stack_t *stack)
@@ -74,9 +79,11 @@ stack_t* init_stack()
 {
     stack_t* new = (stack_t*)malloc(sizeof(stack_t));
     stack_item_t* first = (stack_item_t*)malloc(sizeof(stack_item_t));
-    if (new == NULL && first == NULL)
+    if (new == NULL || first == NULL)
     {
-        fprintf(stderr, "Not enough memory!\n");
+        free(new);
+        free(first);
+        mem_error();
         return NULL;
     }
 

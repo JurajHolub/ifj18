@@ -1,5 +1,11 @@
 #include "expressions_parser.h"
 
+#include <stdio.h>
+#include <string.h>
+#include "symtable.h"
+#include "error_handle.h"
+#include <stdlib.h>
+
 /**
  * @file expression:parser.h
  * @date October 2018
@@ -103,7 +109,7 @@ stack_item_t* create_stack_item(token_t *token)
     stack_item_t* new = (stack_item_t*)malloc(sizeof(stack_item_t));
     if (new == NULL)
     {
-        fprintf(stderr, "Not enough memory!\n");
+        mem_error();
         return NULL;
     }
 
@@ -129,7 +135,8 @@ stack_item_t* create_stack_item(token_t *token)
     new->val = malloc(sizeof(char)*val_size+1);
     if (new->val == NULL)
     {
-        fprintf(stderr, "Not enough memory!\n");
+        free(new);
+        mem_error();
         return NULL;
     }
     strcpy(new->val, val);
@@ -154,38 +161,42 @@ bool parse_expression()
     char *prec_tab;
     stack_item_t *input_sym = create_stack_item(get_token());
     stack_t *stack = init_stack();
-    stack_item_t *top = stack->top_term;
+    if (stack == NULL || input_sym == NULL)
+        return ERR_COMPILER;
+    int top = stack->top_term->type;
+    int input = input_sym->type;
     set_top_term(stack);
 
-    while (input_sym->type < LINE_END || top->type < LINE_END)
+    while (input < LINE_END || top < LINE_END)
     {
-        prec_tab = prec_table(top->type, input_sym->type);
-        //print_prec_table(top->type, input_sym->type, prec_tab);
+        prec_tab = prec_table(top, input);
+        print_prec_table(top, input, prec_tab);
 
         if (strcmp(prec_tab, "=") == 0)
         {
             stack_push(stack, input_sym);
-            //print_stack(stack);
+            print_stack(stack);
             input_sym = create_stack_item(get_token());
         }
         else if (strcmp(prec_tab, "<") == 0)
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
-            //print_stack(stack);
+            print_stack(stack);
             input_sym = create_stack_item(get_token());
         }
         else if (strcmp(prec_tab, ">") == 0)
         {
             if (!find_rule(stack))
                 return false; //error
-            //print_stack(stack);
+            print_stack(stack);
         }
         else
             return false; //ERROR
         
         set_top_term(stack);
-        top = stack->top_term;
+        input = map_index(input_sym->type);
+        top = map_index(stack->top_term->type);
     } 
 
     free(input_sym->val);
@@ -226,7 +237,7 @@ char* prec_table(int top, int token)
         {" " ,">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", ">"},// int 
         {" " ," ", ">", " ", " ", ">", ">", " ", " ", " ", " ", ">", ">"},// str
         {" " ," ", " ", " ", " ", ">", " ", " ", " ", " ", " ", ">", ">"},// nil
-        {" " ,"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", "<", " "},// (
+        {" " ,"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", "=", " "},// (
         {" " ,">", ">", ">", ">", ">", ">", ">", ">", ">", " ", ">", ">"},// )
         {" " ,"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", "<", " "},// $
     };
@@ -242,17 +253,17 @@ bool handle_one(stack_item_t *marked)
     //define variable
     if (marked->type == INTEGER)
     {
-        printf("INT VAR %s\n", marked->val);
+        printf("PUSHS %s\n", marked->val);
         apply_rule(INTEGER, marked);
     }
     else if (marked->type == FLOAT)
     {
-        printf("FLOAT VAR %s\n", marked->val);
+        printf("PUSHS %s\n", marked->val);
         apply_rule(FLOAT, marked);
     }
     else if (marked->type == STRING) 
     {
-        printf("STRING VAR %s\n", marked->val);
+        printf("PUSHS VAR %s\n", marked->val);
         apply_rule(STRING, marked);
     }
     else if (marked->type == NIL) 

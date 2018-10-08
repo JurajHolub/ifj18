@@ -1,6 +1,10 @@
 #ifndef _EXPRESSIONS_PARSER_H_IFJ_18_
 #define _EXPRESSIONS_PARSER_H_IFJ_18_
 
+#include <stdbool.h>
+#include "stack.h"
+#include "scanner.h"
+
 /**
  * @file expression:parser.h
  * @date October 2018
@@ -8,12 +12,6 @@
  * @brief Declaration of Expression Parser of language IFJ18. Parser use
  * precedence syntax analyse algorithm with precedence table.
  */
-
-#include <stdio.h>
-#include "stack.h"
-#include "scanner.h"
-#include "symtable.h"
-#include <stdbool.h>
 
 /**
  * @brief Parsing of arithmetic and logic expressions. Called by Recursive
