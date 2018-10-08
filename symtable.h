@@ -14,16 +14,16 @@
  * Symbols saved to Symbol table are variables and functions (not constants).
  */
 typedef struct data_s {
-    int data_type;      ///< Data type of symbol. Always value of enum type "data_type_e".
-    char *id;           ///< Name of identificator for variable.
+    int data_type;  ///< Data type of symbol. Always value of enum type "data_type_e".
+    char *id;       ///< Name of identificator for variable.
+    char *value;    ///< Value of variable, it is assigned when variable was defined.
     /** 
      * Return data type of function if "data_type" is "FUN". Always value of
      * enum type "data_type_e".
      */
     int fun_type;
-    char *frame;        ///< Frame where is this variable valid.
-    int param_cnt;      ///< Number of function parameters.
-    char *param_id;     ///< Name of function parameters identificators, delimered by space.
+    int param_cnt;  ///< Number of function parameters.
+    char *param_id; ///< Name of function parameters identificators, delimered by space.
 } data_t;
 
 /**
@@ -43,9 +43,15 @@ typedef struct table_item_s {
 } table_item_t;
 
 /**
- * @brief Global hash table array.
+ * @brief Create array of table_item_t of size HASH_SIZE and init.
+ * @return Allocated and initialized hash_table.
  */
-table_item_t hash_table[HASH_SIZE];
+table_item_t* get_hash_table();
+
+/**
+ * @brief Destroy array of table_item_t and free all allocated memory.
+ */
+void free_hash_table(table_item_t* hash_table);
 
 /**
  * @brief Hash function. Hash input key to index of hash table.
