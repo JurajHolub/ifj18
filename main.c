@@ -6,16 +6,16 @@
  */
 
 #include <stdio.h>
-#include "stack.h"
 #include "expressions_parser.h"
 #include "scanner.h"
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
     
     //call of scanner (not implemented yet, so it return hard coded values)
     // testing parser of arithmetic and logic expressions
-    // printf("Parse succes: %d\n", parse_expression());
+    //printf("Parse succes: %d\n", parse_expression());
 
     return 0;
 }

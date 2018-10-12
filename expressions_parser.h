@@ -1,10 +1,3 @@
-#ifndef _EXPRESSIONS_PARSER_H_IFJ_18_
-#define _EXPRESSIONS_PARSER_H_IFJ_18_
-
-#include <stdbool.h>
-#include "stack.h"
-#include "scanner.h"
-
 /**
  * @file expression:parser.h
  * @date October 2018
@@ -12,6 +5,93 @@
  * @brief Declaration of Expression Parser of language IFJ18. Parser use
  * precedence syntax analyse algorithm with precedence table.
  */
+
+#ifndef _EXPRESSIONS_PARSER_H_IFJ_18_
+#define _EXPRESSIONS_PARSER_H_IFJ_18_
+
+#include <stdbool.h>
+#include "scanner.h"
+
+enum prec_tab_idx_e {
+    PT_NOT = 0,
+    PT_SUB,
+    PT_ADD,
+    PT_MUL,
+    PT_EQ,
+    PT_ASSIG,
+    PT_ID,
+    PT_LEFT_B,
+    PT_RIGHT_B,
+    PT_END, 
+    PT_ERR
+};
+
+/**
+ * @brief One item of pseudo stack data structure.
+ */
+typedef struct stack_item_s {
+    struct stack_item_s *prev; ///< Previous item in stack (nearer to bottom).
+    struct stack_item_s *next; ///< Next item in stack (nearer to top).
+    token_t *token;
+    int mark; ///< Number of mark of this item in stack.
+    bool is_term; ///< True if this item of stack is term, else its nonterm.
+} stack_item_t;
+
+/**
+ * @brief Pseudo stack representation (mostly double linked list).
+ * Used to simulate stack for Precedence Table Parser algorithm.
+ */
+typedef struct stack_s {
+    stack_item_t *bot; ///< Bottom of the stack.
+    stack_item_t *top_term; ///< Term highest on the stack.
+    stack_item_t *top; ///< Top of the stack.
+} stack_t;
+
+/**
+ * @brief  Initialize stack, create first item necessary for Precedance Table
+ * algorithm.
+ * @return Initialized ptr to stack.
+ */
+stack_t* init_stack();
+/**
+ * @brief Destroy stack, free all alocated memory.
+ * @param stack Destroyed stack.
+ */
+void destroy_stack(stack_t *stack);
+/**
+ * @brief Set one mark after term witch is on the top of the stack.
+ * @param stack Stack where is set mark to top term.
+ */
+void mark_stack_term(stack_t *stack);
+/**
+ * @brief Push new item to stack with value of actual token.
+ * @param stack Stack where will be new item pushed.
+ * @param token Token (term) witch will be copyied to stack item.
+ */
+void stack_push(stack_t *stack, stack_item_t *item);
+/**
+ * @brief Set stack pointer to top term.
+ * @param stack Stack where will be top term setted.
+ */
+void set_top_term(stack_t *stack);
+/**
+ * @brief Apply choosen rule to stack -> transform marked part of stack by this
+ * rule.
+ * @param stack Stack where will be applyed choosen rule.
+ * @pre Stack must have at least one mark.
+ */
+void apply_rule(stack_item_t *marked_part);
+/**
+ * @brief Find marked part of stack.
+ * @param stack Stack where we search for marked part.
+ * @return Marked part of stack or NULL if not exist any mark in stack.
+ */
+stack_item_t* get_marked_part(stack_t *stack);
+/**
+ * @brief Debug print of stack.
+ */
+void print_stack(stack_t *stack);
+
 
 /**
  * @brief Parsing of arithmetic and logic expressions. Called by Recursive
@@ -54,6 +134,7 @@ stack_item_t* create_stack_item(token_t *token);
 /**
  * @brief Debug convert enum type data_type_e to string representation.
  */
-char *get_type(int type);
+char *get_real_type(int type);
+char *get_syntax_type(int type);
     
 #endif // _EXPRESSIONS_PARSER_H_IFJ_18_

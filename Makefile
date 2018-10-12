@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = main.o \
 	  expressions_parser.o \
-	  stack.o \
 	  scanner.o \
-	  symtable.o
+	  symtable.o \
+	  error_handle.o
 EXECUTABLE = main
 
 #vpath %.c src

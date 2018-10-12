@@ -14,57 +14,26 @@
  * precedence syntax analyse algorithm with precedence table.
  */
 
-/**
- * Possible values of token key.
- */
-#define INT_K "int"
-#define FLOAT_K "float"
-#define STRING_K "string"
-#define NIL_K "nil"
-#define END_K "$"
-#define LEFTB_K "("
-#define RIGHTB_K ")"
-#define LESS_K "<"
-#define GREATER_K ">"
-#define LEQ_K "<="
-#define REQ_K ">="
-#define EQ_K "=="
-#define NEQ_K "!="
-#define ADD_K "+"
-#define SUB_K "-"
-#define MUL_K "*"
-#define DIV_K "/"
-
-
-
 /**********************     WORKING VERSION OF GRAMATIC  **********************
-
 Gram = (Nonterm,Term,Rule,Start)
 Nonterm = {E}
-Term = {int, float, string, nil, $, (, ), <, >, <=, >=, ==, !=, +, -, *, /}
+Term = {int, float, string, nil, $, (, ), <, >, <=, >=, ==, !=, +, -, *, /, EOL, EOF}
 Rule = {
-    E -> int
-    E -> float
-    E -> string
-    E -> nil
-    E -> (E)
-    E -> - E
-    E -> E + E 
-    E -> E - E 
-    E -> E / E 
-    E -> E * E 
-    E -> E < E
-    E -> E > E
-    E -> E <= E
-    E -> E >= E
-    E -> E == E
-    E -> E != E
+     1: E -> id
+     2: E -> nil
+     3: E -> (E)
+     4: E -> - E
+     5: E -> not E
+     6: E -> E + E 
+     7: E -> E - E 
+     8: E -> E / E 
+     9: E -> E == E
+    10: E -> E = E
 }
 Start = {$}
-
 ******************************************************************************/
 
-char *get_type(int type)
+char *get_real_type(int type)
 {
     switch (type)
     {
@@ -80,7 +49,7 @@ char *get_type(int type)
         case NIL: return "nil"; break;
         case LEFT_B: return "("; break;
         case RIGHT_B: return ")"; break;
-        case LINE_END: return "EOL"; break;
+        case EOL: return "EOL"; break;
         case EQUAL: return "=="; break;
         case GREATER: return ">"; break;
         case LESS_EQ: return "<="; break;
@@ -101,45 +70,59 @@ char *get_type(int type)
     }
 }
 
+char *get_syntax_type(int type)
+{
+    switch(type)
+    {
+        case PT_NOT:
+            return "not";
+        case PT_SUB:
+            return "-";
+        case PT_ADD:
+            return "+";
+        case PT_MUL:
+            return "*";
+        case PT_EQ:
+            return "==";
+        case PT_ASSIG:
+            return "=";
+        case PT_ID:
+            return "id";
+        case PT_LEFT_B:
+            return "(";
+        case PT_RIGHT_B:
+            return ")";
+        case PT_END:
+            return "$";
+        default:
+            return "unknown";
+    }
+
+}
+
 stack_item_t* create_stack_item(token_t *token)
 {
-    int val_size;
-    char *val;
-
-    stack_item_t* new = (stack_item_t*)malloc(sizeof(stack_item_t));
-    if (new == NULL)
-    {
-        mem_error();
-        return NULL;
-    }
-
-    if (token->type == VAR)
-    {
-        data_t *symbol = search(token->attribute);
-        if (symbol == NULL) //not found -> should not happend
-            return NULL;
-
-        val_size = strlen(symbol->id);
-        new->type = symbol->data_type;
-        val = symbol->id;
-        new->is_const = false;
-    }
-    else
-    {
-        val_size = strlen(token->attribute);
-        new->type = token->type;
-        val = token->attribute;
-        new->is_const = true;
-    }
-
-    new->val = malloc(sizeof(char)*val_size+1);
-    if (new->val == NULL)
+    stack_item_t* new = malloc(sizeof(stack_item_t));
+    token_t* copy_of_token = malloc(sizeof(token_t));
+    if (new == NULL || copy_of_token == NULL)
     {
         free(new);
+        free(copy_of_token);
         mem_error();
         return NULL;
     }
-    strcpy(new->val, val);
+    copy_of_token->attribute = malloc(sizeof(char) * strlen(token->attribute) + 1);
+    if (copy_of_token->attribute == NULL)
+    {
+        free(new);
+        free(copy_of_token);
+        mem_error();
+        return NULL;
+    }
+
+    strcpy(copy_of_token->attribute, token->attribute);
+    copy_of_token->type = token->type;
+    new->token = copy_of_token;
     new->mark = 0;
     new->is_term = true;
     
@@ -149,9 +132,9 @@ stack_item_t* create_stack_item(token_t *token)
 void print_prec_table(int top, int input_sym, char *prec_tab)
 {
     printf("table[top=\"%s\",%d; token=\"%s\",%d]=%s\n",
-        get_type(map_index(top)),
+        get_syntax_type(top),
         map_index(top),
-        get_type(map_index(input_sym)),
+        get_syntax_type(input_sym),
         map_index(input_sym),
         prec_tab);
 }
@@ -160,14 +143,15 @@ bool parse_expression()
 {
     char *prec_tab;
     stack_item_t *input_sym = create_stack_item(get_token());
+    printf("%d\n", input_sym->token->type);
     stack_t *stack = init_stack();
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
-    int top = stack->top_term->type;
-    int input = input_sym->type;
-    set_top_term(stack);
+    int top = map_index(stack->top_term->token->type);
+    int input = map_index(input_sym->token->type);
+    printf("%d\n", input);
 
-    while (input < LINE_END || top < LINE_END)
+    while (input != PT_END || top != PT_END)
     {
         prec_tab = prec_table(top, input);
         print_prec_table(top, input, prec_tab);
@@ -193,13 +177,14 @@ bool parse_expression()
         }
         else
             return false; //ERROR
-        
+
         set_top_term(stack);
-        input = map_index(input_sym->type);
-        top = map_index(stack->top_term->type);
+        top = map_index(stack->top_term->token->type);
+        input = map_index(input_sym->token->type);
     } 
 
-    free(input_sym->val);
+    free(input_sym->token->attribute);
+    free(input_sym->token);
     free(input_sym);
     destroy_stack(stack);
 
@@ -208,46 +193,69 @@ bool parse_expression()
 
 int map_index(int idx)
 {
-    if (idx == GREATER || idx == LESS_EQ || idx == GREATER_EQ)
-        idx = LESS;
-    else if (idx == EQUAL)
-        idx = NOT_EQUAL;
-    else if (idx == FLOAT)
-        idx = INTEGER;
-    else if (idx == DO || idx == THEN || idx == DELIM)
-        idx = LINE_END;
-
-    return idx;
+    switch (idx)
+    {
+        case NOT:
+            return PT_NOT;
+        case SUB:
+            return PT_SUB;
+        case ADD:
+            return PT_ADD;
+        case MUL:
+        case DIV:
+            return PT_MUL;
+        case EQUAL:
+        case NOT_EQUAL:
+        case LESS:
+        case LESS_EQ:
+        case GREATER:
+        case GREATER_EQ:
+            return PT_EQ;
+        case ASSIG:
+            return PT_ASSIG;
+        case VAR:
+        case INTEGER:
+        case FLOAT:
+        case STRING:
+        case NIL:
+            return PT_ID;
+        case LEFT_B:
+            return PT_LEFT_B;
+        case RIGHT_B:
+            return PT_RIGHT_B;
+        case EOL:
+        case THEN:
+        case DO:
+        case EOF:
+            return PT_END;
+        default:
+            return PT_ERR;
+    }
 }
 
 char* prec_table(int top, int token)
 {
-    top = map_index(top);
-    token = map_index(token);
-
-    char *table[13][13] = {
-    //   not   -    +    *    /    ==   <   int  str  nil   (    )    $      
-        {" " ," ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "},// not
-        {" " ,">", ">", "<", "<", ">", ">", "<", "<", " ", "<", ">", ">"},// -
-        {" " ,">", ">", "<", "<", ">", ">", "<", " ", " ", "<", ">", ">"},// +
-        {" " ,">", ">", ">", ">", ">", ">", "<", " ", " ", "<", ">", ">"},// *
-        {" " ,">", ">", ">", ">", ">", ">", "<", "<", "<", "<", ">", ">"},// /
-        {" " ,"<", "<", "<", "<", ">", ">", "<", "<", " ", "<", ">", ">"},// ==
-        {" " ,"<", "<", "<", "<", "<", "<", "<", " ", " ", "<", ">", ">"},// <
-        {" " ,">", ">", ">", ">", ">", ">", " ", " ", " ", " ", ">", ">"},// int 
-        {" " ," ", ">", " ", " ", ">", ">", " ", " ", " ", " ", ">", ">"},// str
-        {" " ," ", " ", " ", " ", ">", " ", " ", " ", " ", " ", ">", ">"},// nil
-        {" " ,"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", "=", " "},// (
-        {" " ,">", ">", ">", ">", ">", ">", ">", ">", ">", " ", ">", ">"},// )
-        {" " ,"<", "<", "<", "<", "<", "<", "<", "<", "<", "<", "<", " "},// $
+    char *table[10][10] = {
+    //   not   -    +    /    ==   =    id   (    )    $      
+        {" " ," ", " ", " ", "<", "<", "<", "<", ">", ">"},// not
+        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">"},// -
+        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">"},// +
+        {">" ,">", ">", ">", ">", ">", "<", "<", ">", ">"},// /
+        {">" ,"<", "<", "<", "<", "<", "<", "<", ">", ">"},// ==
+        {">" ,"<", "<", "<", "<", ">", "<", "<", ">", ">"},// <
+        {">" ,">", ">", ">", ">", ">", " ", " ", ">", ">"},// id 
+        {"<" ,"<", "<", "<", "<", "<", "<", "<", "=", " "},// (
+        {">" ,">", ">", ">", ">", ">", ">", " ", ">", ">"},// )
+        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " "},// $
     };
 
-    if (top < 13 && token < 13)
+    if (top != PT_ERR && token != PT_ERR)
         return table[top][token];
     else
         return " ";
 }
 
+/*
 bool handle_one(stack_item_t *marked)
 {
     //define variable
@@ -327,15 +335,15 @@ bool handle_three(stack_item_t *marked)
 
     return true;
 }
-
+*/
 bool find_rule(stack_t *stack)
 {
-    int size = 0;
     stack_item_t *marked_part = get_marked_part(stack);
     stack->top = marked_part->next;
-    for (stack_item_t *i = marked_part->next; i != NULL; i = i->next)
-        size++;
 
+    apply_rule(marked_part->next);
+
+    /*
     if (size == 1)
         return handle_one(marked_part->next);
     else if (size == 2)
@@ -344,4 +352,129 @@ bool find_rule(stack_t *stack)
         return handle_three(marked_part->next);
     else
         return false;
+        */
+    return true;
+}
+
+void print_stack(stack_t *stack)
+{
+    printf("stack: \"");
+    stack_item_t *bot = stack->bot;
+    while (bot != NULL)
+    {
+        printf("%s", get_real_type(bot->token->type));
+        for (int i = 0; i < bot->mark; i++)
+            printf("%c", '<');
+        bot = bot->next;
+    }
+
+    printf("\"\n");
+}
+
+stack_item_t* get_marked_part(stack_t *stack)
+{
+    for (stack_item_t *i = stack->top; i != NULL; i = i->prev)
+        if (i->mark > 0)
+            return i;
+
+    return NULL;
+}
+
+void set_top_term(stack_t *stack)
+{
+    for (stack_item_t *i = stack->top; i != NULL; i = i->prev)
+    {
+        if (i->is_term)
+        {
+            stack->top_term = i;
+            return;
+        }
+    }
+
+    stack->top_term = stack->bot;
+}
+
+void apply_rule(stack_item_t *marked_part)
+{
+    marked_part->prev->mark -= 1;
+    marked_part->is_term = false;
+
+    marked_part = marked_part->next;
+    while (marked_part != NULL)
+    {
+        stack_item_t *deleted = marked_part;
+
+        if (marked_part->next != NULL)
+            marked_part->next->prev = marked_part->prev;
+        if (marked_part->prev != NULL)
+            marked_part->prev->next = marked_part->next;
+
+        free(deleted->token->attribute);
+        free(deleted->token);
+        marked_part = marked_part->next;
+        free(deleted);
+    }
+}
+
+stack_t* init_stack()
+{
+    token_t t = {.type=EOL, .attribute=""};
+    stack_t* new = (stack_t*)malloc(sizeof(stack_t));
+    stack_item_t *first = create_stack_item(&t);
+    if (new == NULL || first == NULL)
+    {
+        free(new);
+        mem_error();
+        return NULL;
+    }
+
+    first->prev = NULL;
+    first->next = NULL;
+    first->mark = 0;
+    first->is_term = true;
+
+    new->bot = first;
+    new->top_term = first;
+    new->top = first;
+
+    return new;
+}
+
+void destroy_stack(stack_t *stack)
+{
+    stack_item_t *i = stack->bot;
+    while (i != NULL)
+    {
+        stack_item_t *deleted = i;
+
+        if (i->next != NULL)
+            i->next->prev = i->prev;
+        if (i->prev != NULL)
+            i->prev->next = i->next;
+
+        if (i != stack->bot)
+        {
+            free(deleted->token->attribute);
+            free(deleted->token);
+        }
+        i = i->next;
+        free(deleted);
+    }
+
+    free(stack);
+}
+
+void mark_stack_term(stack_t *stack)
+{
+    stack->top_term->mark += 1;
+}
+
+void stack_push(stack_t *stack, stack_item_t *item)
+{
+    item->next = NULL;
+    stack->top->next = item;
+    item->prev = stack->top;
+
+    stack->top = item;
+    stack->top_term = item;
 }

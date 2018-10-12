@@ -13,6 +13,7 @@
  * want add more symbols add it at the end of enum.
  */
 enum data_type_e {
+//  EOF = -1    Scanner make token also from end of file symbol.
     NOT = 0,    ///< Term "not".
     SUB,        ///< Term "-".
     ADD,        ///< Term "+".
@@ -25,7 +26,7 @@ enum data_type_e {
     NIL,        ///< Term "nil".
     LEFT_B,     ///< Term "(".
     RIGHT_B,    ///< Term ")".
-    LINE_END,   ///< Term "\n".
+    EOL,        ///< Term "\n".
     EQUAL,      ///< Term "==".
     GREATER,    ///< Term ">".
     LESS_EQ,    ///< Term "<=".
