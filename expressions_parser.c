@@ -94,6 +94,10 @@ char *get_syntax_type(int type)
             return ")";
         case PT_END:
             return "$";
+        case PT_DELIM:
+            return ",";
+        case PT_FUN:
+            return "fun";
         default:
             return "unknown";
     }
@@ -120,6 +124,17 @@ stack_item_t* create_stack_item(token_t *token)
         return NULL;
     }
 
+    if (token->type == VAR)
+    {
+        data_t *sym = search(token->attribute);
+        if (sym != NULL)
+        {
+            if (sym->data_type == FUN)
+                token->type = FUN;
+        }
+    }
+
+
     strcpy(copy_of_token->attribute, token->attribute);
     copy_of_token->type = token->type;
     new->token = copy_of_token;
@@ -131,7 +146,7 @@ stack_item_t* create_stack_item(token_t *token)
 
 void print_prec_table(int top, int input_sym, char *prec_tab)
 {
-    printf("table[top=\"%s\",%d; token=\"%s\",%d]=%s\n",
+    fprintf(stderr,"table[top=\"%s\",%d; token=\"%s\",%d]=%s\n",
         get_syntax_type(top),
         map_index(top),
         get_syntax_type(input_sym),
@@ -143,13 +158,13 @@ bool parse_expression()
 {
     char *prec_tab;
     stack_item_t *input_sym = create_stack_item(get_token());
-    printf("%d\n", input_sym->token->type);
+    fprintf(stderr,"%d\n", input_sym->token->type);
     stack_t *stack = init_stack();
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
     int top = map_index(stack->top_term->token->type);
     int input = map_index(input_sym->token->type);
-    printf("%d\n", input);
+    fprintf(stderr,"%d\n", input);
 
     while (input != PT_END || top != PT_END)
     {
@@ -223,6 +238,10 @@ int map_index(int idx)
             return PT_LEFT_B;
         case RIGHT_B:
             return PT_RIGHT_B;
+        case DELIM:
+            return PT_DELIM;
+        case FUN:
+            return PT_FUN;
         case EOL:
         case THEN:
         case DO:
@@ -235,18 +254,20 @@ int map_index(int idx)
 
 char* prec_table(int top, int token)
 {
-    char *table[10][10] = {
-    //   not   -    +    /    ==   =    id   (    )    $      
-        {" " ," ", " ", " ", "<", "<", "<", "<", ">", ">"},// not
-        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">"},// -
-        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">"},// +
-        {">" ,">", ">", ">", ">", ">", "<", "<", ">", ">"},// /
-        {">" ,"<", "<", "<", "<", "<", "<", "<", ">", ">"},// ==
-        {">" ,"<", "<", "<", "<", ">", "<", "<", ">", ">"},// <
-        {">" ,">", ">", ">", ">", ">", " ", " ", ">", ">"},// id 
-        {"<" ,"<", "<", "<", "<", "<", "<", "<", "=", " "},// (
-        {">" ,">", ">", ">", ">", ">", ">", " ", ">", ">"},// )
-        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " "},// $
+    char *table[12][12] = {
+    //   not   -    +    /    ==   =    id   (    )    $    ,    f   
+        {" " ," ", " ", " ", "<", "<", "<", "<", ">", ">", ">", "<"},// not
+        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// -
+        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// +
+        {">" ,">", ">", ">", ">", ">", "<", "<", ">", ">", ">", "<"},// /
+        {">" ,"<", "<", "<", "<", "<", "<", "<", ">", ">", ">", "<"},// ==
+        {">" ,"<", "<", "<", "<", ">", "<", "<", ">", ">", ">", "<"},// <
+        {">" ,">", ">", ">", ">", ">", " ", " ", ">", ">", ">", " "},// id 
+        {"<" ,"<", "<", "<", "<", "<", "<", "<", "=", " ", "=", "<"},// (
+        {">" ,">", ">", ">", ">", ">", ">", " ", ">", ">", ">", " "},// )
+        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " ", " ", " "},// $
+        {"<" ,"<", "<", "<", " ", "<", "<", "<", "=", ">", "=", "<"},// ,
+        {"<" ,"<", "<", "<", " ", "<", "<", "=", " ", ">", "=", " "} // f
     };
 
     if (top != PT_ERR && token != PT_ERR)
@@ -358,17 +379,17 @@ bool find_rule(stack_t *stack)
 
 void print_stack(stack_t *stack)
 {
-    printf("stack: \"");
+    fprintf(stderr,"stack: \"");
     stack_item_t *bot = stack->bot;
     while (bot != NULL)
     {
-        printf("%s", get_real_type(bot->token->type));
+        fprintf(stderr,"%s", get_real_type(bot->token->type));
         for (int i = 0; i < bot->mark; i++)
-            printf("%c", '<');
+            fprintf(stderr,"%c", '<');
         bot = bot->next;
     }
 
-    printf("\"\n");
+    fprintf(stderr,"\"\n");
 }
 
 stack_item_t* get_marked_part(stack_t *stack)

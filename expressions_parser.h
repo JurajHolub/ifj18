@@ -23,6 +23,8 @@ enum prec_tab_idx_e {
     PT_LEFT_B,
     PT_RIGHT_B,
     PT_END, 
+    PT_DELIM, 
+    PT_FUN, 
     PT_ERR
 };
 
