@@ -10,6 +10,7 @@
  */
 
 
+#define SUCCESS 0
 #define ERR_LEX 1
 #define ERR_SYNTAX 2
 #define ERR_SEM_DEF 3
