@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 /**
- * @file expression:parser.h
+ * @file expressions_parser.c
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Definition of Expression Parser of language IFJ18. Parser use
@@ -20,18 +20,269 @@ Nonterm = {E}
 Term = {int, float, string, nil, $, (, ), <, >, <=, >=, ==, !=, +, -, *, /, EOL, EOF}
 Rule = {
      1: E -> id
-     2: E -> nil
-     3: E -> (E)
-     4: E -> - E
-     5: E -> not E
-     6: E -> E + E 
-     7: E -> E - E 
-     8: E -> E / E 
-     9: E -> E == E
-    10: E -> E = E
+     2: E -> ( E )
+     3: E -> - E
+     4: E -> not E
+     5: E -> E [-,+,/,*] E 
+     6: E -> E [==, !=, <, >, <=, >=] E
+     7: E -> E = E
+     8: E -> f ([E^n])
+     9: E -> f [E^n]
 }
 Start = {$}
 ******************************************************************************/
+
+void destroy_stack_item(stack_item_t *item)
+{
+    stack_item_t *deleted = item;
+
+    if (item->next != NULL)
+        item->next->prev = item->prev;
+    if (item->prev != NULL)
+        item->prev->next = item->next;
+
+    free(deleted->token->attribute);
+    free(deleted->token);
+    item = item->next;
+    free(deleted);
+}
+
+// 1: E -> id
+int apply_rule_1(table_item_t *hash_tb, stack_item_t *marked)
+{
+    if (marked->token->type != VAR)
+        return ERR_SYNTAX;
+    if (marked->next != NULL)
+        return ERR_SYNTAX;
+
+    //TODO apply semantic analyse for rule_1
+    return SUCCESS;
+}
+// 2: E -> ( E )
+int apply_rule_2(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => ( E )
+    if (marked->token->type != LEFT_B)
+        return ERR_SYNTAX;
+
+    if (marked->next == NULL)
+        return ERR_SYNTAX;
+
+    if (marked->next->is_term != false)
+        return ERR_SYNTAX;
+
+    // marked => E )
+
+    if (marked->next->next == NULL)
+        return ERR_SYNTAX;
+        
+    if (marked->next->next->token->type != RIGHT_B)
+        return ERR_SYNTAX;
+
+    // marked => E
+
+    if (marked->next->next->next != NULL)
+        return ERR_SYNTAX;
+
+    destroy_stack_item(marked); 
+    destroy_stack_item(marked->next); 
+    //TODO apply semantic analyse for rule_2
+    return SUCCESS;
+}
+// 3: E -> - E
+int apply_rule_3(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => - E
+
+    if (marked->token->type != SUB)
+        return ERR_SYNTAX;
+
+    if (marked->next == NULL)
+        return ERR_SYNTAX;
+
+    if (marked->next->is_term != false)
+        return ERR_SYNTAX;
+    // marked => E
+
+    if (marked->next->next != NULL)
+        return ERR_SYNTAX;
+
+    destroy_stack_item(marked); 
+    //TODO apply semantic analyse for rule_3
+    return SUCCESS;
+}
+//   5: E -> E [-,+,/,*] E 
+int apply_rule_5(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => E [-,+,/,*] E
+    if (marked->is_term != false)
+        return ERR_SYNTAX;
+
+    if (marked->next == NULL)
+        return ERR_SYNTAX;
+
+    if (marked->next->token->type != SUB && marked->next->token->type != ADD &&
+            marked->next->token->type != MUL && marked->next->token->type != DIV)
+        return ERR_SYNTAX;
+
+    // marked => E E
+
+    if (marked->next->next == NULL)
+        return ERR_SYNTAX;
+        
+    if (marked->next->next->is_term != false)
+        return ERR_SYNTAX;
+
+    // marked => E
+
+    if (marked->next->next->next != NULL)
+        return ERR_SYNTAX;
+
+    destroy_stack_item(marked->next); 
+    destroy_stack_item(marked->next); 
+    //TODO apply semantic analyse for rule_5
+    return SUCCESS;
+}
+//     6: E -> E [==, !=, <, >, <=, >=] E
+int apply_rule_6(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => E [==, !=, <, >, <=, >=] E
+    if (marked->is_term != false)
+        return ERR_SYNTAX;
+
+    if (marked->next == NULL)
+        return ERR_SYNTAX;
+
+    if (marked->next->token->type != EQUAL && marked->next->token->type != NOT_EQUAL &&
+            marked->next->token->type != LESS && marked->next->token->type != GREATER &&
+            marked->next->token->type != LESS_EQ && marked->next->token->type != GREATER_EQ)
+        return ERR_SYNTAX;
+
+    // marked => E E
+
+    if (marked->next->next == NULL)
+        return ERR_SYNTAX;
+        
+    if (marked->next->next->is_term != false)
+        return ERR_SYNTAX;
+
+    // marked => E
+
+    if (marked->next->next->next != NULL)
+        return ERR_SYNTAX;
+
+    destroy_stack_item(marked->next); 
+    destroy_stack_item(marked->next); 
+    //TODO apply semantic analyse for rule_5
+    return SUCCESS;
+}
+//   7: E -> E = E
+int apply_rule_7(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => E = E
+    if (marked->is_term != false)
+        return ERR_SYNTAX;
+
+    if (marked->next == NULL)
+        return ERR_SYNTAX;
+
+    if (marked->next->token->type != ASSIG)
+        return ERR_SYNTAX;
+
+    // marked => E E
+
+    if (marked->next->next == NULL)
+        return ERR_SYNTAX;
+        
+    if (marked->next->next->is_term != false)
+        return ERR_SYNTAX;
+
+    // marked => E
+
+    if (marked->next->next->next != NULL)
+        return ERR_SYNTAX;
+
+    destroy_stack_item(marked->next); 
+    destroy_stack_item(marked->next); 
+    //TODO apply semantic analyse for rule_5
+    return SUCCESS;
+}
+//     8: E -> f ([E^n])
+int apply_rule_8(table_item_t *hash_tb, stack_item_t *marked)
+{
+    // marked => f ( [E^n] )
+    
+    if (marked->token->type != FUN)
+        return ERR_SYNTAX;
+
+    if (marked->next != NULL)
+    {
+        if (marked->next->token->type == LEFT_B)
+        {
+            destroy_stack_item(marked->next); 
+            // marked => f E, ... ,E )
+
+            if (marked->next == NULL)
+                return ERR_SYNTAX;
+
+            int cnt = 1;
+            // marked => f E,E, ... ,E )
+
+            while (marked->next->next != NULL)
+            {
+                if (cnt % 2 == 1)   // E
+                {
+                    if (marked->next->is_term != false)
+                        return ERR_SYNTAX;
+                }
+                else                // ,
+                {
+                    if (marked->next->token->type != DELIM)
+                        return ERR_SYNTAX;
+                }
+                destroy_stack_item(marked->next); 
+
+                if (marked->next->next != NULL)
+                    cnt++;
+            }
+
+            if (cnt % 2 != 1) // E
+                return ERR_SYNTAX;
+
+            if (marked->next->token->type != RIGHT_B)
+                return ERR_SYNTAX;
+            
+            destroy_stack_item(marked->next); 
+        }
+        else
+        {
+            int cnt = 1;
+            while (marked->next != NULL)
+            {
+                if (cnt % 2 == 1)   // E
+                {
+                    if (marked->next->is_term != false)
+                        return ERR_SYNTAX;
+                }
+                else                // ,
+                {
+                    if (marked->next->token->type != DELIM)
+                        return ERR_SYNTAX;
+                }
+                destroy_stack_item(marked->next); 
+
+                if (marked->next != NULL)
+                    cnt++;
+            }
+
+            if (cnt % 2 != 1) // E
+                return ERR_SYNTAX;
+        }
+    }
+
+    //TODO apply semantic analyse for rule_5
+    return SUCCESS;
+}
 
 char *get_real_type(int type)
 {
@@ -104,7 +355,7 @@ char *get_syntax_type(int type)
 
 }
 
-stack_item_t* create_stack_item(token_t *token)
+stack_item_t* create_stack_item(table_item_t *hash_tb, token_t *token)
 {
     stack_item_t* new = malloc(sizeof(stack_item_t));
     token_t* copy_of_token = malloc(sizeof(token_t));
@@ -126,7 +377,7 @@ stack_item_t* create_stack_item(token_t *token)
 
     if (token->type == VAR)
     {
-        data_t *sym = search(token->attribute);
+        data_t *sym = search(hash_tb, token->attribute);
         if (sym != NULL)
         {
             if (sym->data_type == FUN)
@@ -154,17 +405,15 @@ void print_prec_table(int top, int input_sym, char *prec_tab)
         prec_tab);
 }
 
-bool parse_expression()
+int parse_expression(table_item_t *hash_tb)
 {
     char *prec_tab;
-    stack_item_t *input_sym = create_stack_item(get_token());
-    fprintf(stderr,"%d\n", input_sym->token->type);
-    stack_t *stack = init_stack();
+    stack_item_t *input_sym = create_stack_item(hash_tb, get_token());
+    stack_t *stack = init_stack(hash_tb);
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
     int top = map_index(stack->top_term->token->type);
     int input = map_index(input_sym->token->type);
-    fprintf(stderr,"%d\n", input);
 
     while (input != PT_END || top != PT_END)
     {
@@ -175,23 +424,24 @@ bool parse_expression()
         {
             stack_push(stack, input_sym);
             print_stack(stack);
-            input_sym = create_stack_item(get_token());
+            input_sym = create_stack_item(hash_tb, get_token());
         }
         else if (strcmp(prec_tab, "<") == 0)
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
             print_stack(stack);
-            input_sym = create_stack_item(get_token());
+            input_sym = create_stack_item(hash_tb, get_token());
         }
         else if (strcmp(prec_tab, ">") == 0)
         {
-            if (!find_rule(stack))
-                return false; //error
+            int result = find_rule(hash_tb, stack);
+            if (result != SUCCESS)
+                return result; //error
             print_stack(stack);
         }
         else
-            return false; //ERROR
+            return ERR_SYNTAX; //ERROR
 
         set_top_term(stack);
         top = map_index(stack->top_term->token->type);
@@ -203,7 +453,7 @@ bool parse_expression()
     free(input_sym);
     destroy_stack(stack);
 
-    return true; //success 
+    return SUCCESS; //success 
 }
 
 int map_index(int idx)
@@ -258,14 +508,14 @@ char* prec_table(int top, int token)
     //   not   -    +    /    ==   =    id   (    )    $    ,    f   
         {" " ," ", " ", " ", "<", "<", "<", "<", ">", ">", ">", "<"},// not
         {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// -
-        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// +
+        {">" ,"<", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// +
         {">" ,">", ">", ">", ">", ">", "<", "<", ">", ">", ">", "<"},// /
         {">" ,"<", "<", "<", "<", "<", "<", "<", ">", ">", ">", "<"},// ==
         {">" ,"<", "<", "<", "<", ">", "<", "<", ">", ">", ">", "<"},// <
         {">" ,">", ">", ">", ">", ">", " ", " ", ">", ">", ">", " "},// id 
         {"<" ,"<", "<", "<", "<", "<", "<", "<", "=", " ", "=", "<"},// (
         {">" ,">", ">", ">", ">", ">", ">", " ", ">", ">", ">", " "},// )
-        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " ", " ", " "},// $
+        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " ", " ", "<"},// $
         {"<" ,"<", "<", "<", " ", "<", "<", "<", "=", ">", "=", "<"},// ,
         {"<" ,"<", "<", "<", " ", "<", "<", "=", " ", ">", "=", " "} // f
     };
@@ -276,105 +526,43 @@ char* prec_table(int top, int token)
         return " ";
 }
 
-/*
-bool handle_one(stack_item_t *marked)
-{
-    //define variable
-    if (marked->type == INTEGER)
-    {
-        printf("PUSHS %s\n", marked->val);
-        apply_rule(INTEGER, marked);
-    }
-    else if (marked->type == FLOAT)
-    {
-        printf("PUSHS %s\n", marked->val);
-        apply_rule(FLOAT, marked);
-    }
-    else if (marked->type == STRING) 
-    {
-        printf("PUSHS VAR %s\n", marked->val);
-        apply_rule(STRING, marked);
-    }
-    else if (marked->type == NIL) 
-    {
-        printf("NIL VAR\n");
-        apply_rule(NIL, marked);
-    }
-    else
-        return false;
-
-    return true;
-}
-
-bool handle_two(stack_item_t *marked)
-{
-    stack_item_t *first = marked;
-    stack_item_t *second = marked->next;
-    if (first->type == NOT && !second->is_term) //comparsion negation
-    {
-        printf("NOT %s\n", second->val);
-        apply_rule(NOT, marked); //TODO bool?
-    }
-    else if (first->type == SUB && !second->is_term) //define negative variable TODO what if - string???
-    {
-        printf("VAR %s = - %s\n", second->val, second->val);
-        apply_rule(second->type, marked); //TODO bool?
-    }
-    else return false;
-
-    return true;
-}
-
-bool handle_three(stack_item_t *marked)
-{
-    stack_item_t *first = marked;
-    stack_item_t *second = marked->next;
-    stack_item_t *third = marked->next->next;
-
-    if (!first->is_term && !third->is_term)
-    {
-        if (second->type == SUB || second->type == ADD
-            || second->type == MUL || second->type == DIV)
-        {
-            printf("ARIT %s %s = %s, %s\n", get_type(second->type), first->val, first->val, third->val);
-            apply_rule(first->type, marked);//vysledok arit op INTEGER or FLOAT
-        }
-        else if (second->type == LESS || second->type == GREATER 
-            || second->type == NOT_EQUAL || second->type == EQUAL
-            || second->type == LESS_EQ || second->type == GREATER_EQ)
-        {
-            printf("CMP %d = %s, %s\n", second->type, first->val, third->val);
-            apply_rule(second->type, marked);// COMPARE
-        }
-        else 
-            return false;
-    }
-    else if (first->type == LEFT_B && !second->is_term && third->type == RIGHT_B)
-        apply_rule(second->type, marked);// do nothing just remove brackets
-    else
-        return false;
-
-    return true;
-}
-*/
-bool find_rule(stack_t *stack)
+int find_rule(table_item_t *hash_tb, stack_t *stack)
 {
     stack_item_t *marked_part = get_marked_part(stack);
-    stack->top = marked_part->next;
 
-    apply_rule(marked_part->next);
-
-    /*
-    if (size == 1)
-        return handle_one(marked_part->next);
-    else if (size == 2)
-        return handle_two(marked_part->next);
-    else if (size == 3)
-        return handle_three(marked_part->next);
-    else
+    if (marked_part == NULL)
         return false;
-        */
-    return true;
+    if (marked_part->next == NULL)
+        return false;
+
+    stack_item_t *mark = marked_part->next;
+    
+    int rule_exist = ERR_SYNTAX;
+    int res;
+
+    if ((res = apply_rule_1(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_2(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_3(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_5(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_6(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_7(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+    if ((res = apply_rule_8(hash_tb, mark)) != ERR_SYNTAX)
+        rule_exist = res;
+
+    if (rule_exist != ERR_SYNTAX)
+    {
+        stack->top = marked_part->next;
+        stack->top->is_term = false;
+        stack->top->prev->mark -= 1;
+    }
+    
+    return rule_exist;
 }
 
 void print_stack(stack_t *stack)
@@ -437,11 +625,11 @@ void apply_rule(stack_item_t *marked_part)
     }
 }
 
-stack_t* init_stack()
+stack_t* init_stack(table_item_t *hash_tb)
 {
     token_t t = {.type=EOL, .attribute=""};
     stack_t* new = (stack_t*)malloc(sizeof(stack_t));
-    stack_item_t *first = create_stack_item(&t);
+    stack_item_t *first = create_stack_item(hash_tb, &t);
     if (new == NULL || first == NULL)
     {
         free(new);
@@ -463,7 +651,7 @@ stack_t* init_stack()
 
 void destroy_stack(stack_t *stack)
 {
-    stack_item_t *i = stack->bot;
+    stack_item_t *i = stack->top;
     while (i != NULL)
     {
         stack_item_t *deleted = i;
@@ -478,7 +666,7 @@ void destroy_stack(stack_t *stack)
             free(deleted->token->attribute);
             free(deleted->token);
         }
-        i = i->next;
+        i = i->prev;
         free(deleted);
     }
 

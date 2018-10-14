@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include "scanner.h"
+#include "symtable.h"
 
 enum prec_tab_idx_e {
     PT_NOT = 0,
@@ -49,12 +50,20 @@ typedef struct stack_s {
     stack_item_t *top; ///< Top of the stack.
 } stack_t;
 
+void destroy_stack_item(stack_item_t *item);
+int apply_rule_1(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_2(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_3(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_5(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_6(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_7(table_item_t *hash_tb, stack_item_t *marked);
+int apply_rule_8(table_item_t *hash_tb, stack_item_t *marked);
 /**
  * @brief  Initialize stack, create first item necessary for Precedance Table
  * algorithm.
  * @return Initialized ptr to stack.
  */
-stack_t* init_stack();
+stack_t* init_stack(table_item_t *hash_tb);
 /**
  * @brief Destroy stack, free all alocated memory.
  * @param stack Destroyed stack.
@@ -106,7 +115,7 @@ void print_stack(stack_t *stack);
  * this token to this parser.
  * @return True if parsed arithmetic or logic expression is correct, else false.
  */
-bool parse_expression();
+int parse_expression(table_item_t *hash_tb);
 
 /**
  * @brief Precedence Table of arithmetic and logic expression parser.
@@ -125,13 +134,10 @@ char* prec_table(int top, int token);
  * be transformed by fitting rule.
  * @return True if found fitting rule else false.
  */
-bool find_rule(stack_t *stack);
+int find_rule(table_item_t *hash_tb, stack_t *stack);
 int map_index(int idx);
-bool handle_one(stack_item_t *marked);
-bool handle_two(stack_item_t *marked);
-bool handle_three(stack_item_t *marked);
     
-stack_item_t* create_stack_item(token_t *token);
+stack_item_t* create_stack_item(table_item_t *hash_tb, token_t *token);
 
 /**
  * @brief Debug convert enum type data_type_e to string representation.
