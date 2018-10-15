@@ -2,6 +2,7 @@ CC = gcc
 CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = tests_expressions_parser.o \
 	  expressions_parser.o \
+	  symtable.o \
 	  error_handle.o
 EXECUTABLE = tests_expressions_parser
 

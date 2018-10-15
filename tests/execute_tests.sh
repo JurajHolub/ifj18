@@ -2,6 +2,7 @@
 cp ../expressions_parser.c .
 cp ../expressions_parser.h .
 cp ../symtable.h .
+cp ../symtable.c .
 cp ../scanner.h .
 cp ../error_handle.c .
 cp ../error_handle.h .
@@ -10,6 +11,7 @@ rm -rf *.o
 rm expressions_parser.c
 rm expressions_parser.h
 rm symtable.h
+rm symtable.c
 rm scanner.h
 rm error_handle.c
 rm error_handle.h
