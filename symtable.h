@@ -8,6 +8,8 @@
 #ifndef _SYM_TABLE_H_IFJ_18_
 #define _SYM_TABLE_H_IFJ_18_
 
+#include "scanner.h"
+
 #define HASH_SIZE 53
 
 /******************************************************************************
@@ -68,6 +70,14 @@ data_t* search(table_item_t *table, char *key);
  * new item of symbol table.
  */
 void insert(table_item_t *table, data_t *data);
+
+/**
+ * @brief Initialize data from input parameter to temporary variable with
+ * unicate id for hash table.
+ * @param data Data witch will be initailized.
+ * @param type Type of temporary symbol initialized in data.
+ */
+char* insert_tmp(table_item_t *table, token_t *token);
 
 /******************************************************************************
 ***************************** INSIDE LOGIC ************************************

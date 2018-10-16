@@ -96,6 +96,37 @@ void insert(table_item_t *table, data_t *data)
         table[idx].head = list_insert(table[idx].head, data);
 }
 
+char* insert_tmp(table_item_t *table, token_t *token)
+{
+    static int tmp_count = 0; // one counter for all tmp variables => not colisions
+    
+    char *id = malloc(sizeof(char)*16);
+    if (id == NULL)
+    {
+        mem_error();
+        return NULL;
+    }
+
+    sprintf(id, "$tmp_%010d", tmp_count);
+    tmp_count++;
+
+    data_t data;
+    data.data_type = token->type;
+    data.id = id;
+    data.value = token->attribute;
+    data.fun_type = VAR;
+    data.param_cnt = 0;
+    data.param_id = NULL;
+
+    insert(table, &data);
+
+    data_t * ret = search(table, id);
+
+    free(id);
+
+    return ret->id;
+}
+
 data_t* search(table_item_t *table, char *key)
 {
     unsigned long hash = hash_fun(key);
