@@ -77,7 +77,7 @@ void insert(table_item_t *table, data_t *data);
  * @param data Data witch will be initailized.
  * @param type Type of temporary symbol initialized in data.
  */
-char* insert_tmp(table_item_t *table, token_t *token);
+char* insert_tmp(table_item_t *table, int type, char *value);
 
 /******************************************************************************
 ***************************** INSIDE LOGIC ************************************

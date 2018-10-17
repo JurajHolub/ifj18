@@ -87,6 +87,9 @@ unsigned long hash_fun(char *key)
 
 void insert(table_item_t *table, data_t *data)
 {
+    if (table == NULL)
+        return;
+
     unsigned long hash = hash_fun(data->id);
     int idx = hash % HASH_SIZE;
 
@@ -96,7 +99,7 @@ void insert(table_item_t *table, data_t *data)
         table[idx].head = list_insert(table[idx].head, data);
 }
 
-char* insert_tmp(table_item_t *table, token_t *token)
+char* insert_tmp(table_item_t *table, int type, char *value)
 {
     static int tmp_count = 0; // one counter for all tmp variables => not colisions
     
@@ -111,9 +114,9 @@ char* insert_tmp(table_item_t *table, token_t *token)
     tmp_count++;
 
     data_t data;
-    data.data_type = token->type;
+    data.data_type = type;
     data.id = id;
-    data.value = token->attribute;
+    data.value = value;
     data.fun_type = VAR;
     data.param_cnt = 0;
     data.param_id = NULL;
@@ -129,6 +132,9 @@ char* insert_tmp(table_item_t *table, token_t *token)
 
 data_t* search(table_item_t *table, char *key)
 {
+    if (table == NULL)
+        return NULL;
+
     unsigned long hash = hash_fun(key);
     int idx = hash % HASH_SIZE;
 
