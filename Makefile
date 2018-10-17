@@ -4,7 +4,9 @@ OBJ = main.o \
 	  expressions_parser.o \
 	  scanner.o \
 	  symtable.o \
-	  error_handle.o
+	  error_handle.o \
+	  semantic_parser.o \
+	  stack.o
 EXECUTABLE = main
 
 #vpath %.c src
