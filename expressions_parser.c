@@ -98,36 +98,11 @@ int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    //destroy_stack_item(marked); 
-    //destroy_stack_item(marked->next); 
-    //TODO apply semantic analyse for rule_2
     return SUCCESS;
 }
-// 3: E -> - E TODO this is not correct
-int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
-{
-    // marked => - E
-    syntax_t *symb = marked->data;
 
-    if (symb->token->type != SUB)
-        return ERR_SYNTAX;
-
-    if (marked->next == NULL)
-        return ERR_SYNTAX;
-
-    if (symb->is_term != false)
-        return ERR_SYNTAX;
-    // marked => E
-
-    if (marked->next->next != NULL)
-        return ERR_SYNTAX;
-
-    //destroy_stack_item(marked); 
-    //TODO apply semantic analyse for rule_3
-    return SUCCESS;
-}
 //   5: E -> E [-,+,/,*] E 
-int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -160,14 +135,10 @@ int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    int res = parse_arit_op(hash_tb, sem_stack, symb2->token);
-    //destroy_stack_item(marked); 
-    //destroy_stack_item(marked->next);
-    //TODO apply semantic analyse for rule_5
-    return res;
+    return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
 }
 //     6: E -> E [==, !=, <, >, <=, >=] E
-int apply_rule_6(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -201,13 +172,10 @@ int apply_rule_6(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    //destroy_stack_item(marked->next); 
-    //destroy_stack_item(marked->next); 
-    //TODO apply semantic analyse for rule_5
-    return SUCCESS;
+    return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
 }
 //   7: E -> id = E
-int apply_rule_7(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -399,49 +367,9 @@ char *get_syntax_type(int type)
 
 }
 
-//stack_item_t* create_stack_item(table_item_t *hash_tb, token_t *token)
-//{
-//    stack_item_t* new = malloc(sizeof(stack_item_t));
-//    token_t* copy_of_token = malloc(sizeof(token_t));
-//    if (new == NULL || copy_of_token == NULL)
-//    {
-//        free(new);
-//        free(copy_of_token);
-//        mem_error();
-//        return NULL;
-//    }
-//    copy_of_token->attribute = malloc(sizeof(char) * strlen(token->attribute) + 1);
-//    if (copy_of_token->attribute == NULL)
-//    {
-//        free(new);
-//        free(copy_of_token);
-//        mem_error();
-//        return NULL;
-//    }
-//
-//    if (token->type == VAR)
-//    {
-//        data_t *sym = search(hash_tb, token->attribute);
-//        if (sym != NULL)
-//        {
-//            if (sym->data_type == FUN)
-//                token->type = FUN;
-//        }
-//    }
-//
-//
-//    strcpy(copy_of_token->attribute, token->attribute);
-//    copy_of_token->type = token->type;
-//    new->token = copy_of_token;
-//    new->mark = 0;
-//    new->is_term = true;
-//    
-//    return new;
-//}
-
-void print_prec_table(int top, int input_sym, char *prec_tab)
+void print_prec_table(int top, int input_sym, char prec_tab)
 {
-    fprintf(stderr,"table[top=\"%s\",%d; token=\"%s\",%d]=%s\n",
+    fprintf(stderr,"table[top=\"%s\",%d; token=\"%s\",%d]=%c\n",
         get_syntax_type(top),
         map_index(top),
         get_syntax_type(input_sym),
@@ -451,7 +379,7 @@ void print_prec_table(int top, int input_sym, char *prec_tab)
 
 int parse_expression(table_item_t *hash_tb)
 {
-    char *prec_tab;
+    char prec_tab;
     stack_t *sem_stack = init_sem_stack();
     syntax_t *input_sym = alloc_syntax_item(get_token(), hash_tb);
     stack_t *stack = init_syntax_stack();
@@ -466,20 +394,20 @@ int parse_expression(table_item_t *hash_tb)
         prec_tab = prec_table(top, input);
         print_prec_table(top, input, prec_tab);
 
-        if (strcmp(prec_tab, "=") == 0)
+        if (prec_tab == '=')
         {
             stack_push(stack, input_sym);
             print_stack(stack);
             input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
-        else if (strcmp(prec_tab, "<") == 0)
+        else if (prec_tab == '<')
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
             print_stack(stack);
             input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
-        else if (strcmp(prec_tab, ">") == 0)
+        else if (prec_tab == '>')
         {
             int result = find_rule(hash_tb, stack, sem_stack);
             if (result != SUCCESS)
@@ -546,28 +474,28 @@ int map_index(int idx)
     }
 }
 
-char* prec_table(int top, int token)
+char prec_table(int top, int token)
 {
-    char *table[12][12] = {
+    char table[12][12] = {
     //   not   -    +    /    ==   =    id   (    )    $    ,    f   
-        {" " ," ", " ", " ", "<", "<", "<", "<", ">", ">", ">", "<"},// not
-        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// -
-        {">" ,">", ">", "<", ">", ">", "<", "<", ">", ">", ">", "<"},// +
-        {">" ,">", ">", ">", ">", ">", "<", "<", ">", ">", ">", "<"},// /
-        {">" ,"<", "<", "<", "<", "<", "<", "<", ">", ">", ">", "<"},// ==
-        {">" ,"<", "<", "<", "<", ">", "<", "<", ">", ">", ">", "<"},// =
-        {">" ,">", ">", ">", ">", "=", " ", " ", ">", ">", ">", " "},// id 
-        {"<" ,"<", "<", "<", "<", "<", "<", "<", "=", " ", "=", "<"},// (
-        {">" ,">", ">", ">", ">", ">", ">", " ", ">", ">", ">", " "},// )
-        {"<" ,"<", "<", "<", "<", "<", "<", "<", "<", " ", " ", "<"},// $
-        {"<" ,"<", "<", "<", " ", "<", "<", "<", "=", ">", "=", "<"},// ,
-        {"<" ,"<", "<", "<", " ", "<", "<", "=", " ", ">", "=", " "} // f
+        {' ' ,' ', ' ', ' ', '<', '<', '<', '<', '>', '>', '>', '<'},// not
+        {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// -
+        {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// +
+        {'>' ,'>', '>', '>', '>', '>', '<', '<', '>', '>', '>', '<'},// /
+        {'>' ,'<', '<', '<', '<', '<', '<', '<', '>', '>', '>', '<'},// ==
+        {'>' ,'<', '<', '<', '<', '>', '<', '<', '>', '>', '>', '<'},// =
+        {'>' ,'>', '>', '>', '>', '=', ' ', ' ', '>', '>', '>', ' '},// id 
+        {'<' ,'<', '<', '<', '<', '<', '<', '<', '=', ' ', '=', '<'},// (
+        {'>' ,'>', '>', '>', '>', '>', '>', ' ', '>', '>', '>', ' '},// )
+        {'<' ,'<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<'},// $
+        {'<' ,'<', '<', '<', ' ', '<', '<', '<', '=', '>', '=', '<'},// ,
+        {'<' ,'<', '<', '<', ' ', '<', '<', '=', ' ', '>', '=', ' '} // f
     };
 
     if (top != PT_ERR && token != PT_ERR)
         return table[top][token];
     else
-        return " ";
+        return ' ';
 }
 
 int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack)
@@ -586,14 +514,10 @@ int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack)
         rule_exist = res;
     if ((res = apply_rule_3(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
+    if ((res = apply_rule_4(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
+        rule_exist = res;
     if ((res = apply_rule_5(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
-    if ((res = apply_rule_6(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
-        rule_exist = res;
-    if ((res = apply_rule_7(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
-        rule_exist = res;
-    //if ((res = apply_rule_8(hash_tb, mark)) != ERR_SYNTAX)
-    //    rule_exist = res;
 
     if (rule_exist != ERR_SYNTAX)
         free_mark(syntax_stack);
@@ -615,89 +539,3 @@ void print_stack(stack_t *stack)
 
     fprintf(stderr,"\"\n");
 }
-
-//stack_item_t* get_marked_part(stack_t *stack)
-//{
-//    for (stack_item_t *i = stack->top; i != NULL; i = i->prev)
-//        if (i->mark > 0)
-//            return i;
-//
-//    return NULL;
-//}
-//
-//void set_top_term(stack_t *stack)
-//{
-//    for (stack_item_t *i = stack->top; i != NULL; i = i->prev)
-//    {
-//        if (i->is_term)
-//        {
-//            stack->top_term = i;
-//            return;
-//        }
-//    }
-//
-//    stack->top_term = stack->bot;
-//}
-
-//stack_t* init_stack(table_item_t *hash_tb)
-//{
-//    token_t t = {.type=EOL, .attribute=""};
-//    stack_t* new = (stack_t*)malloc(sizeof(stack_t));
-//    stack_item_t *first = create_stack_item(hash_tb, &t);
-//    if (new == NULL || first == NULL)
-//    {
-//        free(new);
-//        mem_error();
-//        return NULL;
-//    }
-//
-//    first->prev = NULL;
-//    first->next = NULL;
-//    first->mark = 0;
-//    first->is_term = true;
-//
-//    new->bot = first;
-//    new->top_term = first;
-//    new->top = first;
-//
-//    return new;
-//}
-//
-//void destroy_stack(stack_t *stack)
-//{
-//    stack_item_t *i = stack->top;
-//    while (i != NULL)
-//    {
-//        stack_item_t *deleted = i;
-//
-//        if (i->next != NULL)
-//            i->next->prev = i->prev;
-//        if (i->prev != NULL)
-//            i->prev->next = i->next;
-//
-//        if (i != stack->bot)
-//        {
-//            free(deleted->token->attribute);
-//            free(deleted->token);
-//        }
-//        i = i->prev;
-//        free(deleted);
-//    }
-//
-//    free(stack);
-//}
-//
-//void mark_stack_term(stack_t *stack)
-//{
-//    stack->top_term->mark += 1;
-//}
-//
-//void stack_push(stack_t *stack, stack_item_t *item)
-//{
-//    item->next = NULL;
-//    stack->top->next = item;
-//    item->prev = stack->top;
-//
-//    stack->top = item;
-//    stack->top_term = item;
-//}
