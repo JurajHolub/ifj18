@@ -28,7 +28,7 @@ void print_sem_stack(stack_t *sem_stack)
 int parse_assig(table_item_t *sym_tb, stack_t* sem_stack, token_t *new_var)
 {
     print_sem_stack(sem_stack);
-    char *assig_var = stack_top(sem_stack);
+    string_t assig_var = stack_top(sem_stack);
     stack_pop(sem_stack);
     data_t *symb = search(sym_tb, assig_var);
 
@@ -48,10 +48,10 @@ int parse_assig(table_item_t *sym_tb, stack_t* sem_stack, token_t *new_var)
 
     insert(sym_tb, &var);
 
-    printf("DEFVAR %s\n", new_var->attribute);
-    printf("POPS %s\n", assig_var);
+    printf("DEFVAR LF@%s\n", new_var->attribute->string);
+    printf("POPS LF@%s\n", assig_var->string);
 
-    free(assig_var);
+    string_free(assig_var);
 
     return SUCCESS;
 }
@@ -88,24 +88,24 @@ int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op)
         cons.id = op->attribute;
         cons.fun_type = VAR;
         cons.param_cnt = 0;
-        cons.param_id = NULL;
+        cons.param_id = string_create(NULL);
         cons.value = op->attribute;
         
         insert(sym_tb, &cons);
     }
 
-    printf("PUSHS %s\n", op->attribute);
-    stack_push(sem_stack, alloc_sem_item(op->attribute));
+    printf("PUSHS LF@%s\n", op->attribute->string);
+    stack_push(sem_stack, string_create(op->attribute->string));
 
     return SUCCESS;
 }
 
 int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
 {
-    char *op1 = stack_top(sem_stack);
+    string_t op1 = stack_top(sem_stack);
     data_t *symb1 = search(sym_tb, op1);
     stack_pop(sem_stack);
-    char *op2 = stack_top(sem_stack);
+    string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
 
@@ -117,8 +117,8 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
 
     if (res == INTEGER && res == FLOAT)
     {
-        char* tmp = insert_tmp(sym_tb, res, NULL);
-        stack_push(sem_stack, alloc_sem_item(tmp));
+        string_t tmp = insert_tmp(sym_tb, res, NULL);
+        stack_push(sem_stack, string_create(tmp->string));
 
         if (arit_op == ADD)
             printf("ADDS\n");
@@ -136,22 +136,22 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
         if (arit_op != ADD)
             return ERR_SYNTAX; // should never happend
 
-        char* tmp1 = insert_tmp(sym_tb, STRING, op1);
-        char* tmp2 = insert_tmp(sym_tb, STRING, op2);
-        char* tmp3 = insert_tmp(sym_tb, STRING, tmp2);
-        stack_push(sem_stack, alloc_sem_item(tmp3));
-        printf("DEFVAR LF@%s\n", tmp1);
-        printf("DEFVAR LF@%s\n", tmp2);
-        printf("POPS LF@%s\n", tmp1);
-        printf("POPS LF@%s\n", tmp2);
-        printf("CONCAT LF@%s LF@%s LF@%s\n", tmp3, tmp1, tmp2);
-        printf("PUSHS LF@%s\n", tmp3);
+        string_t tmp1 = insert_tmp(sym_tb, STRING, op1);
+        string_t tmp2 = insert_tmp(sym_tb, STRING, op2);
+        string_t tmp3 = insert_tmp(sym_tb, STRING, tmp2);
+        stack_push(sem_stack, tmp3);
+        printf("DEFVAR LF@%s\n", tmp1->string);
+        printf("DEFVAR LF@%s\n", tmp2->string);
+        printf("POPS LF@%s\n", tmp1->string);
+        printf("POPS LF@%s\n", tmp2->string);
+        printf("CONCAT LF@%s LF@%s LF@%s\n", tmp3->string, tmp1->string, tmp2->string);
+        printf("PUSHS LF@%s\n", tmp3->string);
     }
     else
         return ERR_SEM_CPBLT;
 
-    free(op1);
-    free(op2);
+    string_free(op1);
+    string_free(op2);
 
     return SUCCESS;
 }
@@ -176,12 +176,12 @@ int convert_type(stack_t* sem_stack, table_item_t *sym_tb, data_t* symb1, data_t
     }
     else if (type1 == FLOAT && type2 == INTEGER)
     {
-        char* tmp = insert_tmp(sym_tb, INTEGER, NULL);
-        stack_push(sem_stack, alloc_sem_item(tmp));
-        printf("DEFVAR %s\n", tmp);
-        printf("POPS %s\n", tmp);
-        printf("INT2FLOAT %s %s\n", tmp, tmp);
-        printf("PUSHS %s\n", tmp);
+        string_t tmp = insert_tmp(sym_tb, FLOAT, NULL);
+        stack_push(sem_stack, tmp);
+        printf("DEFVAR %s\n", tmp->string);
+        printf("POPS %s\n", tmp->string);
+        printf("INT2FLOAT %s %s\n", tmp->string, tmp->string);
+        printf("PUSHS %s\n", tmp->string);
         
         return FLOAT;
     }
@@ -193,10 +193,10 @@ int convert_type(stack_t* sem_stack, table_item_t *sym_tb, data_t* symb1, data_t
 
 int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
 {
-    char *op1 = stack_top(sem_stack);
+    string_t op1 = stack_top(sem_stack);
     data_t *symb1 = search(sym_tb, op1);
     stack_pop(sem_stack);
-    char *op2 = stack_top(sem_stack);
+    string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
 
@@ -219,11 +219,18 @@ int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
         res = type1;
     }
     else // possible type conversion
-    {
+    {   //type conversion and then float copmaration
         if (type1 == INTEGER && type2 == FLOAT)
-            ;// type conversion and then float copmaration
+        {
+            string_t tmp = insert_tmp(sym_tb, FLOAT, NULL);
+            stack_push(sem_stack, tmp);
+            printf("DEFVAR %s\n", tmp->string);
+            printf("POPS %s\n", tmp->string);
+            printf("INT2FLOAT %s %s\n", tmp->string, tmp->string);
+            printf("PUSHS %s\n", tmp->string);
+        } // type conversion and after that float comparation
         else if (type1 == FLOAT && type2 == INTEGER)
-            ;// type conversion and after that float comparation
+            printf("INT2FLOATS\n");
         else // not possible type conversion
         {
             if (logic_op != EQUAL || logic_op != NOT_EQUAL)//not possible compar
@@ -246,26 +253,26 @@ int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
         printf("GTS\n");
     else if (logic_op == LESS_EQ || logic_op == GREATER_EQ)
     {
-        char* tmp1 = insert_tmp(sym_tb, res, NULL);
-        char* tmp2 = insert_tmp(sym_tb, res, NULL);
-        char* tmp3 = insert_tmp(sym_tb, res, NULL);
-        printf("DEFVAR LF@%s\n", tmp1);
-        printf("DEFVAR LF@%s\n", tmp2);
-        printf("DEFVAR LF@%s\n", tmp3);
-        printf("POPS LF@%s\n", tmp1);
-        printf("POPS LF@%s\n", tmp2);
+        string_t tmp1 = insert_tmp(sym_tb, res, NULL);
+        string_t tmp2 = insert_tmp(sym_tb, res, NULL);
+        string_t tmp3 = insert_tmp(sym_tb, res, NULL);
+        printf("DEFVAR LF@%s\n", tmp1->string);
+        printf("DEFVAR LF@%s\n", tmp2->string);
+        printf("DEFVAR LF@%s\n", tmp3->string);
+        printf("POPS LF@%s\n", tmp1->string);
+        printf("POPS LF@%s\n", tmp2->string);
         if (logic_op == LESS_EQ)
-            printf("LT LF@%s LF@%s LF@%s\n", tmp3, tmp2, tmp1);
+            printf("LT LF@%s LF@%s LF@%s\n", tmp3->string, tmp2->string, tmp1->string);
         else
-            printf("GT LF@%s LF@%s LF@%s\n", tmp3, tmp2, tmp1);
-        printf("POPS LF@%s\n", tmp3);
-        printf("EQ LF@%s LF@%s LF@%s\n", tmp3, tmp2, tmp1);
-        printf("PUSHS LF@%s\n", tmp3);
+            printf("GT LF@%s LF@%s LF@%s\n", tmp3->string, tmp2->string, tmp1->string);
+        printf("PUSHS LF@%s\n", tmp3->string);
+        printf("EQ LF@%s LF@%s LF@%s\n", tmp3->string, tmp2->string, tmp1->string);
+        printf("PUSHS LF@%s\n", tmp3->string);
         printf("ORS\n");
     }
 
-    free(op1);
-    free(op2);
+    string_free(op1);
+    string_free(op2);
 
     return SUCCESS;
 }

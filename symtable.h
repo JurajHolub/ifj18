@@ -9,6 +9,7 @@
 #define _SYM_TABLE_H_IFJ_18_
 
 #include "scanner.h"
+#include "dynamic_string.h"
 
 #define HASH_SIZE 53
 
@@ -22,15 +23,15 @@
  */
 typedef struct data_s {
     int data_type;  ///< Data type of symbol. Always value of enum type "data_type_e".
-    char *id;       ///< Name of identificator for variable.
-    char *value;    ///< Value of variable, it is assigned when variable was defined.
+    string_t id;       ///< Name of identificator for variable.
+    string_t value;    ///< Value of variable, it is assigned when variable was defined.
     /** 
      * Return data type of function if "data_type" is "FUN". Always value of
      * enum type "data_type_e".
      */
     int fun_type;
     int param_cnt;  ///< Number of function parameters.
-    char *param_id; ///< Name of function parameters identificators, delimered by space.
+    string_t param_id; ///< Name of function parameters identificators, delimered by space.
 } data_t;
 
 /**
@@ -64,7 +65,7 @@ void destroy_hash_table(table_item_t* hash_table);
  * @brief By hash function search and return item in symbol table witch fit to
  * search key.
  */
-data_t* search(table_item_t *table, char *key);
+data_t* search(table_item_t *table, string_t key);
 /**
  * @brief By hash function found ideal place in hash table and insert there
  * new item of symbol table.
@@ -77,7 +78,7 @@ void insert(table_item_t *table, data_t *data);
  * @param data Data witch will be initailized.
  * @param type Type of temporary symbol initialized in data.
  */
-char* insert_tmp(table_item_t *table, int type, char *value);
+string_t insert_tmp(table_item_t *table, int type, string_t value);
 
 /******************************************************************************
 ***************************** INSIDE LOGIC ************************************
@@ -91,14 +92,14 @@ char* insert_tmp(table_item_t *table, int type, char *value);
  * symbol.
  * @return Index to hash table array.
  */
-unsigned long hash_fun(char *key);
+unsigned long hash_fun(string_t key);
 
-data_t* list_search(list_t *list, char *key);
+data_t* list_search(list_t *list, string_t key);
 list_t* list_insert_first(data_t *data);
 list_t* list_insert(list_t *list, data_t *data); 
 void print_table(table_item_t* table);
 data_t* data_copy(data_t *src);
-char* cpy_string(char *src);
+//char* cpy_string(char *src);
 void list_destroy_first(list_t **list);
 void data_destroy(data_t *data);
 

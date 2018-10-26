@@ -62,7 +62,6 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next != NULL)
         return ERR_SYNTAX;
 
-    //TODO apply semantic analyse for rule_1
     return parse_operand(hash_tb, sem_stack, symb->token);
 }
 // 2: E -> ( E )
@@ -208,9 +207,6 @@ int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
         return ERR_SYNTAX;
 
     int res = parse_assig(hash_tb, sem_stack, symb3->token);
-    //destroy_stack_item(marked); 
-    //destroy_stack_item(marked->next); 
-    //TODO apply semantic analyse for rule_5
     return res;
 }
 /*

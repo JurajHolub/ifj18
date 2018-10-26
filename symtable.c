@@ -20,7 +20,7 @@ void print_table(table_item_t* table)
         printf("table[%d]=", i);
         for (list_t *j =table[i].head; j!=NULL; j = j->next)
         {
-            printf("%s, ", j->data->id);
+            printf("%s, ", j->data->id->string);
         }
         printf("\n");
     }
@@ -75,12 +75,12 @@ void data_destroy(data_t *data)
     free(data);
 }
 
-unsigned long hash_fun(char *key)
+unsigned long hash_fun(string_t key)
 {
     unsigned long hash = 5381;
     
-    for (int i = 0; key[i] != '\0'; i++)
-        hash = ((hash << 5) + hash) + key[i];
+    for (int i = 0; key->string[i] != '\0'; i++)
+        hash = ((hash << 5) + hash) + key->string[i];
 
     return hash;
 }
@@ -89,6 +89,8 @@ void insert(table_item_t *table, data_t *data)
 {
     if (table == NULL)
         return;
+
+    //printf("insert %s\n", data->id);
 
     unsigned long hash = hash_fun(data->id);
     int idx = hash % HASH_SIZE;
@@ -99,38 +101,35 @@ void insert(table_item_t *table, data_t *data)
         table[idx].head = list_insert(table[idx].head, data);
 }
 
-char* insert_tmp(table_item_t *table, int type, char *value)
+string_t insert_tmp(table_item_t *table, int type, string_t value)
 {
     static int tmp_count = 0; // one counter for all tmp variables => not colisions
     
-    char *id = malloc(sizeof(char)*16);
-    if (id == NULL)
-    {
-        mem_error();
-        return NULL;
-    }
-
+    char id[16];
     sprintf(id, "$tmp_%010d", tmp_count);
     tmp_count++;
 
     data_t data;
     data.data_type = type;
-    data.id = id;
-    data.value = value;
+    data.id = string_create(id);
+    if (value == NULL)
+        data.value = string_create(NULL);
+    else
+        data.value = value;
     data.fun_type = VAR;
     data.param_cnt = 0;
-    data.param_id = NULL;
+    data.param_id = string_create(NULL);
 
     insert(table, &data);
 
-    data_t * ret = search(table, id);
+    data_t * ret = search(table, data.id);
 
-    free(id);
+    string_free(data.id);
 
     return ret->id;
 }
 
-data_t* search(table_item_t *table, char *key)
+data_t* search(table_item_t *table, string_t key)
 {
     if (table == NULL)
         return NULL;
@@ -145,10 +144,10 @@ data_t* search(table_item_t *table, char *key)
     return data;
 }
 
-data_t* list_search(list_t *list, char *key)
+data_t* list_search(list_t *list, string_t key)
 {
     for (list_t *i = list; i != NULL; i = i->next)
-        if (strcmp(i->data->id, key) == 0)
+        if (string_is_equal(i->data->id, key))
             return i->data;
 
     return NULL;
@@ -170,6 +169,8 @@ list_t* list_insert_first(data_t *data)
 
 list_t* list_insert(list_t *list, data_t *data) 
 {
+   // printf("list_insert %s\n", data->id);
+
     list_t *new = malloc(sizeof(list_t));
     if (new == NULL)
     {
@@ -182,12 +183,15 @@ list_t* list_insert(list_t *list, data_t *data)
         new->next = list;
         return new;
     }
-}        
+}
 
+/*
 char* cpy_string(char *src)
 {
     if (src == NULL)
         return NULL;
+
+    //printf("spy_string %s\n", src);
 
     char* dst = malloc(sizeof(char)*strlen(src));
     if (dst == NULL)
@@ -201,9 +205,12 @@ char* cpy_string(char *src)
 
     return dst;
 }
+*/
 
 data_t* data_copy(data_t *src)
 {
+   // printf("data_cpy %s\n", src->id);
+
     data_t* dst = malloc(sizeof(data_t));
     if (dst == NULL)
     {
@@ -211,11 +218,11 @@ data_t* data_copy(data_t *src)
     }
 
     dst->data_type = src->data_type;
-    dst->id = cpy_string(src->id);
-    dst->value =  cpy_string(src->value);
+    dst->id = string_create(src->id->string);
+    dst->value = string_create(src->value->string);
     dst->fun_type = src->fun_type;
     dst->param_cnt = src->param_cnt;
-    dst->param_id = cpy_string(src->param_id);
+    dst->param_id = string_create(src->param_id->string);
 
     return dst;
 }

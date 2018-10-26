@@ -1,6 +1,8 @@
 #ifndef _SCANER_H_IFJ_18_
 #define _SCANER_H_IFJ_18_
 
+#include "dynamic_string.h"
+
 /**
  * @file scanner.h
  * @brief Declaration of scanner interface for parser.
@@ -57,7 +59,7 @@ typedef struct token_s {
      * String representation of parsed value if type is integer, float or string.
      * Name of variable if type is VAR (variable).
      */
-    char *attribute; 
+    string_t attribute; 
 } token_t;
 
 /**

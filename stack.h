@@ -19,7 +19,7 @@ typedef struct syntax_s {
 } syntax_t;
 
 typedef struct semantic_s {
-    char *value;
+    string_t value;
 } semantic_t;
     
 typedef struct stack_item_s {
@@ -55,7 +55,6 @@ stack_t* init_syntax_stack();
 /****************************** SEMANTIC STACK *******************************/
 
 stack_t* init_sem_stack();
-char* alloc_sem_item(char *symbol);
 void free_sem_stack(stack_t *stack);
 
 #endif // _STACK_H_IFJ_18_

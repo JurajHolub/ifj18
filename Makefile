@@ -6,7 +6,8 @@ OBJ = main.o \
 	  symtable.o \
 	  error_handle.o \
 	  semantic_parser.o \
-	  stack.o
+	  stack.o \
+	  dynamic_string.o
 EXECUTABLE = main
 
 #vpath %.c src

@@ -149,25 +149,21 @@ void free_syntax_stack(stack_t *stack)
 syntax_t* alloc_syntax_item(token_t *token, table_item_t *hash_tb)
 {
     token_t* copy_of_token = malloc(sizeof(token_t));
-    char* attribute = malloc(sizeof(char) * strlen(token->attribute) + 1);
     syntax_t *new_syntax = malloc(sizeof(syntax_t));
-    if (copy_of_token == NULL || attribute == NULL || new_syntax == NULL)
+    if (copy_of_token == NULL || new_syntax == NULL)
     {
         free(copy_of_token);
-        free(attribute);
         free(new_syntax);
         mem_error();
         return NULL;
     }
-    copy_of_token->attribute = attribute;
+    copy_of_token->attribute = string_create(token->attribute->string);
 
     data_t *sym = search(hash_tb, token->attribute);
     if (sym != NULL)
         copy_of_token->type = sym->data_type;
     else
         copy_of_token->type = token->type;
-
-    strcpy(copy_of_token->attribute, token->attribute);
 
     new_syntax->token = copy_of_token;
     new_syntax->mark = 0;
@@ -179,14 +175,17 @@ syntax_t* alloc_syntax_item(token_t *token, table_item_t *hash_tb)
 
 void free_syntax_item(syntax_t *item)
 {
-    free(item->token->attribute);
+    string_free(item->token->attribute);
     free(item->token);
     free(item);
 }
 
 stack_t* init_syntax_stack()
 {
-    token_t t = {.type=EOL, .attribute=""};
+    token_t t;
+    t.type=EOL;
+    t.attribute= string_create(NULL);
+
     stack_t* new = malloc(sizeof(stack_t));
     if (new == NULL)
     {
@@ -217,21 +216,6 @@ stack_t* init_sem_stack()
     stack_init(new);
 
     return new;
-}
-
-char* alloc_sem_item(char *symbol)
-{
-    char* copy_of_symbol = malloc(sizeof(char) * strlen(symbol) + 1);
-    if (copy_of_symbol == NULL)
-    {
-        free(copy_of_symbol);
-        mem_error();
-        return NULL;
-    }
-
-    strcpy(copy_of_symbol, symbol);
-
-    return copy_of_symbol;
 }
 
 void free_sem_stack(stack_t *stack)
