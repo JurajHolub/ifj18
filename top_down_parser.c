@@ -5,12 +5,13 @@
  * @brief Implementation of top-down parser
  */
 
+#include "dynamic_string.h"
 #include "top_down_parser.h"
 
 //symbol table used for definitions and semantic analysis in main program body
 table_item_t *global_symtable;
 
-void create_data(data_t *data, int data_type, char *id, char *value)
+/*void create_data(data_t *data, int data_type, char *id, char *value)
 {
     char *alloc_id = NULL,
          *alloc_value = NULL;
@@ -38,7 +39,7 @@ void create_data(data_t *data, int data_type, char *id, char *value)
     data->value = alloc_value;
     data->param_cnt = 0;
     data->param_id = NULL;
-}
+}*/
 
 
 void syntax_error(int token_type)
@@ -47,14 +48,17 @@ void syntax_error(int token_type)
     static char *string_tokens[] = {"NOT", "SUB", "ADD", "MUL", "DIV", "NOT_EQUAL", "LESS", "INTEGER", "STRING", "NIL", "LEFT_B", "RIGHT_B", "EOL", "EQUAL", "GREATER", "LESS_EQ", "GREATER_EQ", "FLOAT", "DEF", "DO", "ELSE", "END", "IF", "THEN", "WHILE", "ASSIG", "FUN", "DELIM", "VAR"};
     if (token_type == EOF)
     {
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected end of file\n");
     }
     else if (token_type == EOL)
     {
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected end of line\n");
     }
     else
     {
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected token: %s\n", string_tokens[token_type]);
     }
 }
@@ -63,7 +67,9 @@ int parse(void)
 {
     global_symtable = get_hash_table();
     //TODO free resources
-    return program_list() ? 2 : 0;
+    int ret = program_list() ? 0 : 2;
+    destroy_hash_table(global_symtable);
+    return ret;
 }
 
 bool program_list(void) {
@@ -118,14 +124,19 @@ bool function_def(void) {
                 }
 
                 //inserting data from token to symbol table entry
-                create_data(symtable_data, tmp->type, tmp->attribute, NULL);
+                symtable_data->data_type = FUN;
+                symtable_data->id = string_create(NULL);
+                string_append(symtable_data->id, tmp->attribute); //TODO ako je alokovany a mazany token
+                symtable_data->value = NULL; //TODO je to dobre
+                symtable_data->param_cnt = 0;
+                symtable_data->param_id = string_create(NULL);
+                //create_data(symtable_data, tmp->type, tmp->attribute, NULL);
 
                 //inserting symbol table entry to symbol table
                 insert(global_symtable, symtable_data);
 
                 //creating local symtable for function body definitions and semantic analysis
                 table_item_t *function_symtable = get_hash_table();
-
 
                 return params(function_symtable, symtable_data);
             }
@@ -149,7 +160,9 @@ bool params(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            return function_body(local_symtable);
+            bool ret = function_body(local_symtable);
+            destroy_hash_table(local_symtable);
+            return ret;
         }
     }
 
@@ -175,7 +188,9 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            return function_body(local_symtable);
+            bool ret = function_body(local_symtable);
+            destroy_hash_table(local_symtable);
+            return ret;
         }
     }
 
@@ -195,9 +210,13 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
     return false;
 }
 
-bool param(data_t *symtable_data, char *param)
-{
-    //auxiliary variables to work with dynamic array
+bool param(data_t *symtable_data, string_t param) {
+
+    char *string_blankspace = " ";
+    string_append_ch(param, string_blankspace); //TODO blank space je aj za poslednym argumentom, vieme s tym pracovat
+    string_append(symtable_data->param_id, param);
+    symtable_data->param_cnt++;
+    /*//auxiliary variables to work with dynamic array
     int param_length = strlen(param),   //inserted string length
         param_list_length;              //allocated memory length
 
@@ -232,6 +251,7 @@ bool param(data_t *symtable_data, char *param)
 
     free(symtable_data->param_id);
     symtable_data->param_id = tmp_param_list;
+     */
     return true;  //TODO musi to tu byt
 }
 
@@ -287,7 +307,7 @@ bool statement(table_item_t *symtable)
         token_t *next_token = get_token();
 
         //rule <statement> -> <function_call>
-        if (token->type == VAR)
+        if (next_token->type == VAR)
         {
             ret_token(next_token);
             ret_token(token);
@@ -299,7 +319,7 @@ bool statement(table_item_t *symtable)
         {
             ret_token(next_token);  //TODO ???
             ret_token(token);
-            return (bool)parse_expression(symtable); //TODO co to vracia
+            return parse_expression2(symtable) == 0;
         }
     }
     //TODO tento else if
@@ -327,7 +347,7 @@ bool if_statement(table_item_t *symtable)
     //rule <if_statement> -> if <expression> then EOL <if_body>
     if (token->type == IF)
     {
-        if (parse_expression(symtable) == 0) //TODO co to vracia
+        if (parse_expression1(symtable) == 0)
         {
             token = get_token();
             if (token->type == THEN)
@@ -408,7 +428,7 @@ bool while_statement(table_item_t *symtable)
     //rule <while_statement> -> while <expression> do EOL <while_body>
     if (token->type == WHILE)
     {
-        if (parse_expression(symtable)) //TODO co to vracia
+        if (parse_expression1(symtable) == 0)
         {
             token = get_token();
             if (token->type == DO)
