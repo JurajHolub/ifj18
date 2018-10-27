@@ -5,7 +5,7 @@
  */
 
 #include "test.h"
-//#include "top_down_parser.h"
+#include "top_down_parser.h"
 #include "dynamic_string.h"
 
 /**
@@ -53,9 +53,8 @@ void clean(void) {
 }
 
 int main() {
-    //parse();
     freopen("test1","r",stdin);
-    test_of_test2();
+    parse();
     clean();
     return 0;
 }
@@ -67,13 +66,21 @@ token_t *get_token(void) {
     //saved in global array
     if (returned_token > 0)
     {
-        //we change the tokens positions, because token on position 1 is last token the function got
-        //on position 0 is the token stored in case, that scanner returns 2 tokens
+        //every time there is a returned token, the last returned token is on position 1 in tokens array
         token_t *tmp = tokens[1];
-        tokens[1] = tokens[0];
-        tokens[0] = tmp;
+
+        //if we have 2 tokens returned we have to rotate the array to get token, that will be now returned to position 0,
+        //where is saved in case, that will be returned
+
+        if (returned_token == 2)
+        {
+            tokens[1] = tokens[0];
+            tokens[0] = tmp;
+        }
+
         //decrement number of returned_tokens, because last returned token will be used now
         returned_token--;
+
         //last returned token will be given to parser
         return tmp;
     }
@@ -98,19 +105,70 @@ token_t *get_token(void) {
     }
     //data will be achieved and inserted in token
     read_token(tokens[1]);
-    if (tokens[1]->type == 99)
+    if (tokens[1]->type == 99) //read_token error
     {
         clean();
         exit(69);
     }
+
+
+
+
+    //--///////////////////////////////////////////////////////////////////////////////////////////
+    //--/////////////////////////////////////TESTING OUTPUT///////////////////////////////////////
+    setbuf(stdout, 0);
+    printf("--------------------\n");
+    if (tokens[0] != NULL)
+    {
+        setbuf(stdout, 0);
+        printf("Lexeme: %s\n", lexemes[tokens[0]->type]);
+        if (tokens[0]->attribute != NULL)
+        {
+            setbuf(stdout, 0);
+            printf("Lexeme attribute: %s\n", tokens[0]->attribute->string);
+        }
+    }
+    else
+    {
+        setbuf(stdout, 0);
+        printf("Lexeme: NULL\n");
+        setbuf(stdout, 0);
+        printf("Lexeme attribute: NULL\n");
+    }
+    setbuf(stdout, 0);
+    printf("--------------------\n");
+    setbuf(stdout, 0);
+    printf("Lexeme: %s\n", lexemes[tokens[1]->type]);
+    if (tokens[1]->attribute != NULL)
+    {
+        setbuf(stdout, 0);
+        printf("Lexeme attribute: %s\n", tokens[1]->attribute->string);
+    }
+    setbuf(stdout, 0);
+    printf("--------------------\n\n");
+    //--///////////////////////////////////////////////////////////////////////////////////////////
+    //--/////////////////////////////////////TESTING OUTPUT END////////////////////////////////////
+
+
     return tokens[1];
 }
 
 void ret_token(token_t *token) {
     //dummy check if no invalid token is returned
     assert(token != NULL);
+    //if we 1 token was retrned before, we have to rotate the array to get returned token to last token position,
+    //position 1
+    if (returned_token == 1)
+    {
+        token_t *tmp = tokens[1];
+        tokens[1] = tokens[0];
+        tokens[0] = tmp;
+    }
+
     //counter of returned tokens incrementation
     returned_token++;
+
+    assert(tokens[1] == token);
 }
 
 void read_token(token_t *token) {
@@ -151,6 +209,7 @@ void read_token(token_t *token) {
         //unknown lexeme
     else
     {
+        setbuf(stdout, 0);
         printf("Unknown lexeme");
         token->type = 99;
     }
