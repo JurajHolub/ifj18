@@ -11,20 +11,6 @@
 #include "error_handle.h"
 #include "expressions_parser.h"
 
-void print_sem_stack(stack_t *sem_stack)
-{
-    fprintf(stderr,"\"");
-    stack_item_t *bot = sem_stack->bot;
-    while (bot != NULL)
-    {
-        char *symbol = bot->data;
-        fprintf(stderr,"%s, ", symbol);
-        bot = bot->next;
-    }
-
-    fprintf(stderr,"\"\n");
-}
-
 int parse_assig(table_item_t *sym_tb, stack_t* sem_stack, token_t *new_var)
 {
     print_sem_stack(sem_stack);
@@ -92,10 +78,14 @@ int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op)
         cons.value = op->attribute;
         
         insert(sym_tb, &cons);
+        string_free(cons.param_id);
     }
 
     printf("PUSHS LF@%s\n", op->attribute->string);
-    stack_push(sem_stack, string_create(op->attribute->string));
+
+    string_t tmp_str = string_create(op->attribute->string);
+    
+    stack_push(sem_stack, tmp_str);
 
     return SUCCESS;
 }
@@ -111,7 +101,12 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
 
 
     if (symb1 == NULL || symb2 == NULL) // not declared variable
+    {
+        string_free(op1);
+        string_free(op2);
+
         return ERR_SEM_DEF;
+    }
 
     int res = convert_type(sem_stack, sym_tb, symb1, symb2);
 
@@ -129,12 +124,22 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
         else if (arit_op == MUL)
             printf("MULS\n");
         else 
+        {
+            string_free(op1);
+            string_free(op2);
+
             return ERR_SYNTAX; // should never happend
+        }
     }
     else if (res == STRING)
     {
         if (arit_op != ADD)
+        {
+            string_free(op1);
+            string_free(op2);
+
             return ERR_SYNTAX; // should never happend
+        }
 
         string_t tmp1 = insert_tmp(sym_tb, STRING, op1);
         string_t tmp2 = insert_tmp(sym_tb, STRING, op2);
@@ -148,7 +153,12 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
         printf("PUSHS LF@%s\n", tmp3->string);
     }
     else
+    {
+        string_free(op1);
+        string_free(op2);
+
         return ERR_SEM_CPBLT;
+    }
 
     string_free(op1);
     string_free(op2);
@@ -199,6 +209,8 @@ int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
     string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
+    string_free(op1);
+    string_free(op2);
 
     if (symb1 == NULL || symb2 == NULL) // not declared variable
         return ERR_SEM_DEF;
@@ -270,9 +282,6 @@ int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
         printf("PUSHS LF@%s\n", tmp3->string);
         printf("ORS\n");
     }
-
-    string_free(op1);
-    string_free(op2);
 
     return SUCCESS;
 }

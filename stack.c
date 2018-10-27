@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "error_handle.h"
 #include <string.h>
+#include "expressions_parser.h"
 
 /************************ GENERAL OPERATION WITH STACK ***********************/
 
@@ -134,13 +135,13 @@ void mark_stack_term(stack_t *stack)
 
 void free_syntax_stack(stack_t *stack)
 {
-    stack_item_t *i;
+    syntax_t *i;
 
-    while (stack_empty(stack))
+    while (!stack_empty(stack))
     {
         i = stack_top(stack);
-        free_syntax_item(i->data);
         stack_pop(stack);
+        free_syntax_item(i);
     }
 
     free(stack);
@@ -198,10 +199,41 @@ stack_t* init_syntax_stack()
     syntax_t *syntax = alloc_syntax_item(&t, NULL);
     stack_push(new, syntax);
 
+    string_free(t.attribute);
+
     return new;
 }
 
+void print_stack(stack_t *stack)
+{
+    stack_item_t *bot = stack->bot;
+    while (bot != NULL)
+    {
+        syntax_t *act = bot->data;
+        fprintf(stderr,"%s", get_real_type(act->token->type));
+        for (int i = 0; i < act->mark; i++)
+            fprintf(stderr,"%c", '<');
+        bot = bot->next;
+    }
+
+    fprintf(stderr,"\"\n");
+}
+
 /****************************** SEMANTIC STACK *******************************/
+
+void print_sem_stack(stack_t *sem_stack)
+{
+    fprintf(stderr,"\"");
+    stack_item_t *bot = sem_stack->bot;
+    while (bot != NULL)
+    {
+        char *symbol = bot->data;
+        fprintf(stderr,"%s, ", symbol);
+        bot = bot->next;
+    }
+
+    fprintf(stderr,"\"\n");
+}
 
 stack_t* init_sem_stack()
 {
@@ -222,11 +254,11 @@ void free_sem_stack(stack_t *stack)
 {
     stack_item_t *i;
 
-    while (stack_empty(stack))
+    while (!stack_empty(stack))
     {
         i = stack_top(stack);
-        free(i->data);
         stack_pop(stack);
+        string_free(i->data);
     }
 
     free(stack);

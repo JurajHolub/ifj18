@@ -1,0 +1,47 @@
+<program>           -> <program-list>
+<program-list>      -> <stat-list> <program-list>
+<program-list>      -> EOF                          #END OF FILE
+<stat-list>         -> <stat> EOL <stat-list>
+<stat-list>         -> <stat>
+<stat>              -> <expr>
+<stat>              -> <if-cond>
+<stat>              -> <loop>
+<stat>              -> <lib-fun>
+<stat>              -> <def-fun>
+<stat>              -> <call-fun>
+<if-cond>           -> if <expr> then EOL <stat-list> EOL else EOL <stat-list> EOL end
+<if-cond>           -> if <expr> then EOL else EOL <stat-list> EOL end
+<if-cond>           -> if <expr> then EOL <stat->list> EOL else EOL end
+<if-cond>           -> if <expr> then EOL else EOL end
+<loop>              -> while <expr> do EOL <stat-list> EOL end
+<loop>              -> while <expr> do EOL end
+<def-fun>           -> def id ( <param-list> ) EOL <stat-list> EOL end
+<def-fun>           -> def id ( <param-list> ) EOL end
+<def-fun>           -> def id ( ) EOL <stat-list> EOL end
+<def-fun>           -> def id ( ) EOL end
+<param-list>        -> <param> , <param-list>
+<param-list>        -> <param>
+<param>             -> id
+<call-fun>          -> id ( <call-param-list> )
+<call-fun>          -> id ()
+<call-fun>          -> id <call-param-list>
+<lib-fun>           -> inputs "(" ")"
+<lib-fun>           -> inputi "(" ")"
+<lib-fun>           -> inputf "(" ")"
+<lib-fun>           -> print "(" ")"
+<lib-fun>           -> lenght id
+<lib-fun>           -> substr id, id, id
+<lib-fun>           -> ord id, id
+<lib-fun>           -> chr id
+<call-param-list>   -> <call-param> , <call-param-list>
+<call-param-list>   -> <call-param>
+<call-param>        -> <expr>
+<call-param>        -> <literal>
+<call-param>        -> id
+<literal>           -> int
+<literal>           -> float
+<literal>           -> " string "
+<literal>           -> nil
+
+
+<expr>      -> ARITH / LOGIC PARSER (MAGIC)

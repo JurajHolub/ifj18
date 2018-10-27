@@ -388,19 +388,19 @@ int parse_expression(table_item_t *hash_tb)
     while (input != PT_END || top != PT_END)
     {
         prec_tab = prec_table(top, input);
-        print_prec_table(top, input, prec_tab);
+        //print_prec_table(top, input, prec_tab);
 
         if (prec_tab == '=')
         {
             stack_push(stack, input_sym);
-            print_stack(stack);
+            //print_stack(stack);
             input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
         else if (prec_tab == '<')
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
-            print_stack(stack);
+            //print_stack(stack);
             input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
         else if (prec_tab == '>')
@@ -408,7 +408,7 @@ int parse_expression(table_item_t *hash_tb)
             int result = find_rule(hash_tb, stack, sem_stack);
             if (result != SUCCESS)
                 return result; //error
-            print_stack(stack);
+            //print_stack(stack);
         }
         else
             return ERR_SYNTAX; //ERROR
@@ -420,6 +420,7 @@ int parse_expression(table_item_t *hash_tb)
 
     free_syntax_item(input_sym);
     free_syntax_stack(stack);
+    free_sem_stack(sem_stack);
 
     return SUCCESS; //success 
 }
@@ -519,19 +520,4 @@ int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack)
         free_mark(syntax_stack);
     
     return rule_exist;
-}
-
-void print_stack(stack_t *stack)
-{
-    stack_item_t *bot = stack->bot;
-    while (bot != NULL)
-    {
-        syntax_t *act = bot->data;
-        fprintf(stderr,"%s", get_real_type(act->token->type));
-        for (int i = 0; i < act->mark; i++)
-            fprintf(stderr,"%c", '<');
-        bot = bot->next;
-    }
-
-    fprintf(stderr,"\"\n");
 }

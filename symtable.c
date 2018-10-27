@@ -66,11 +66,11 @@ void list_destroy_first(list_t **list)
 void data_destroy(data_t *data)
 {
     if (data->id != NULL)
-        free(data->id);
+        string_free(data->id);
     if (data->value != NULL)
-        free(data->value);
+        string_free(data->value);
     if (data->param_id != NULL)
-        free(data->param_id);
+        string_free(data->param_id);
     
     free(data);
 }
@@ -112,10 +112,7 @@ string_t insert_tmp(table_item_t *table, int type, string_t value)
     data_t data;
     data.data_type = type;
     data.id = string_create(id);
-    if (value == NULL)
-        data.value = string_create(NULL);
-    else
-        data.value = value;
+    data.value = string_create(NULL);
     data.fun_type = VAR;
     data.param_cnt = 0;
     data.param_id = string_create(NULL);
@@ -124,6 +121,8 @@ string_t insert_tmp(table_item_t *table, int type, string_t value)
 
     data_t * ret = search(table, data.id);
 
+    string_free(data.param_id);
+    string_free(data.value);
     string_free(data.id);
 
     return ret->id;

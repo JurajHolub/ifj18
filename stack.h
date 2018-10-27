@@ -51,10 +51,12 @@ syntax_t* alloc_syntax_item(token_t *token, table_item_t *hash_tb);
 void free_syntax_stack(stack_t *stack);
 void free_syntax_item(syntax_t *item);
 stack_t* init_syntax_stack();
+void print_stack(stack_t *stack);
 
 /****************************** SEMANTIC STACK *******************************/
 
 stack_t* init_sem_stack();
 void free_sem_stack(stack_t *stack);
+void print_sem_stack(stack_t *sem_stack);
 
 #endif // _STACK_H_IFJ_18_
