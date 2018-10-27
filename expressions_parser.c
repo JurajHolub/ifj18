@@ -34,21 +34,6 @@ Rule = {
 Start = {$}
 ******************************************************************************/
 
-//void destroy_stack_item(stack_item_t *item)
-//{
-//    stack_item_t *deleted = item;
-//
-//    if (item->next != NULL)
-//        item->next->prev = item->prev;
-//    if (item->prev != NULL)
-//        item->prev->next = item->next;
-//
-//    free(deleted->token->attribute);
-//    free(deleted->token);
-//    item = item->next;
-//    free(deleted);
-//}
-
 // 1: E -> id
 int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
@@ -62,7 +47,8 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_operand(hash_tb, sem_stack, symb->token);
+    //return parse_operand(hash_tb, sem_stack, symb->token);
+    return SUCCESS;
 }
 // 2: E -> ( E )
 int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -134,7 +120,8 @@ int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
+    //return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
+    return SUCCESS;
 }
 //     6: E -> E [==, !=, <, >, <=, >=] E
 int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -171,7 +158,8 @@ int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
+    //return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
+    return SUCCESS;
 }
 //   7: E -> id = E
 int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -206,8 +194,8 @@ int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    int res = parse_assig(hash_tb, sem_stack, symb3->token);
-    return res;
+    //return parse_assig(hash_tb, sem_stack, symb3->token);
+    return SUCCESS;
 }
 /*
 //     8: E -> f ([E^n])

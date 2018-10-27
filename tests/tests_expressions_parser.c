@@ -3,14 +3,20 @@
 #include "expressions_parser.h"
 #include "symtable.h"
 #include "error_handle.h"
+#include "dynamic_string.h"
 
 #define TEST_CNT 72
 
 int test_cnt = 0;
 int token_cnt = -1;
 int sym_cnt = -1;
+token_t t;
 
 int expected[TEST_CNT] = {
+
+
+
+
     SUCCESS,
     SUCCESS,
     SUCCESS,
@@ -739,7 +745,13 @@ data_t datas[TEST_CNT][50] = {
     },
 };
 */
-token_t tokens[TEST_CNT][50] = {
+
+struct tmp_t {
+    char* attribute;
+    int type;
+};
+
+struct tmp_t tokens[TEST_CNT][50] = {
 // id+id-id+id-id
     {
         {.type = VAR, .attribute = "id"},//id
@@ -756,7 +768,7 @@ token_t tokens[TEST_CNT][50] = {
 // id*id/id/id
     {
         {.type = VAR, .attribute = "id"},//id
-        {.type = MUL, .attribute = ""},//*
+        {.type = MUL, .attribute = ""},// *
         {.type = VAR, .attribute = "id"},//id
         {.type = DIV, .attribute = ""},// /
         {.type = VAR, .attribute = "id"},//id
@@ -1731,8 +1743,13 @@ token_t tokens[TEST_CNT][50] = {
 
 token_t* get_token()
 {
+
+    if (token_cnt != -1)
+        string_free(t.attribute);
     token_cnt++;
-    return &tokens[test_cnt][token_cnt];
+    t.type = tokens[test_cnt][token_cnt].type;
+    t.attribute = string_create(tokens[test_cnt][token_cnt].attribute);
+    return &t;
 }
 
 int main()
@@ -1740,15 +1757,19 @@ int main()
     table_item_t *hash_tb = get_hash_table();
     data_t d;
     d.data_type = VAR;
-    d.id = "id";
-    d.value = NULL;
+    d.id = string_create("id");
+    d.value = string_create(NULL);
     d.fun_type = VAR;
     d.param_cnt = 0;
-    d.param_id = NULL;
+    d.param_id = string_create(NULL);
     insert(hash_tb, &d);
     d.data_type = FUN;
-    d.id = "foo";
+    string_free(d.id);
+    d.id = string_create("foo");
     insert(hash_tb, &d);
+    string_free(d.id);
+    string_free(d.value);
+    string_free(d.param_id);
 
     for (test_cnt =0; test_cnt < TEST_CNT; test_cnt++)
     {

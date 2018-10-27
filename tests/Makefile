@@ -3,7 +3,10 @@ CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = tests_expressions_parser.o \
 	  expressions_parser.o \
 	  symtable.o \
-	  error_handle.o
+	  error_handle.o \
+	  semantic_parser.o \
+	  stack.o \
+	  dynamic_string.o
 EXECUTABLE = tests_expressions_parser
 
 #vpath %.c ../
