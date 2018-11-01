@@ -364,8 +364,9 @@ void print_prec_table(int top, int input_sym, char prec_tab)
 int parse_expression(table_item_t *hash_tb)
 {
     char prec_tab;
+    token_t *token = get_token();
     stack_t *sem_stack = init_sem_stack();
-    syntax_t *input_sym = alloc_syntax_item(get_token(), hash_tb);
+    syntax_t *input_sym = alloc_syntax_item(token, hash_tb);
     stack_t *stack = init_syntax_stack();
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
@@ -382,14 +383,16 @@ int parse_expression(table_item_t *hash_tb)
         {
             stack_push(stack, input_sym);
             //print_stack(stack);
-            input_sym = alloc_syntax_item(get_token(), hash_tb);
+            token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '<')
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
             //print_stack(stack);
-            input_sym = alloc_syntax_item(get_token(), hash_tb);
+            token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '>')
         {
@@ -409,6 +412,8 @@ int parse_expression(table_item_t *hash_tb)
     free_syntax_item(input_sym);
     free_syntax_stack(stack);
     free_sem_stack(sem_stack);
+
+    ret_token(token);
 
     return SUCCESS; //success 
 }
