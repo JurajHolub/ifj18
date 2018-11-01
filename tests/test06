@@ -1,0 +1,33 @@
+EOF
+
+id
+var
++
+-
+id
+var
+EOF
+
+id+-id
+
+
+
+
+
+id+id/
+
+((id+id)
+
+id == id
+
+id+id != id/id
+
+(id > id) == id 
+
+id == - id
+
+id == + id
+
+id - == id
+
+id < == id

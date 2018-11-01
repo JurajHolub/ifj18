@@ -1,0 +1,8 @@
+id
+tmp1
++
+id
+tmp2
+EOF
+
+tmp1 + tmp2

@@ -52,8 +52,15 @@ void clean(void) {
     }
 }
 
-int main() {
-    freopen("test1","r",stdin);
+int main(int argc, char **argv) {
+
+    if (argc != 2)
+    {
+        printf("Set input test file.\n");
+        return 1;
+    }
+
+    freopen(argv[1],"r",stdin);
     parse();
     clean();
     return 0;
