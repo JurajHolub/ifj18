@@ -16,9 +16,14 @@ void MOVE(data_t *var, data_t *symb)
     printf("\n");
 }
 
+void ADDS()
+{
+    printf("ADDS\n");
+}
+
 void VAR(data_t *var)
 {
-    if (symb->id[0] >= '0' && symb->id[0] <= '9') // it is constant
+    if (symb->is_const) // it is constant
     {
         switch (symb->data_type)
         {   //we use atio,atof because we are sure there is valid value

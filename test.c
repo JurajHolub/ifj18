@@ -202,7 +202,7 @@ void read_token(token_t *token) {
             //other not
         else
         {
-            token->attribute = NULL;
+            token->attribute = string_create(NULL);
         }
     }
 
