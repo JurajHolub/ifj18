@@ -115,30 +115,34 @@ bool function_def(void) {
             if ((token = get_token())->type == LEFT_B)
             {
                 //creating symbol table entry
-                data_t *symtable_data = (data_t *) malloc(sizeof(data_t));
-                if (symtable_data == NULL)
-                {
-                    fprintf(stderr, "Compiler runtime error: unable to allocate memory");
-                    //TODO free resources
-                    exit(99);
-                }
+                data_t symtable_data;
 
                 //inserting data from token to symbol table entry
-                symtable_data->data_type = FUN;
-                symtable_data->id = string_create(NULL);
-                string_append(symtable_data->id, tmp->attribute); //TODO ako je alokovany a mazany token
-                symtable_data->value = NULL; //TODO je to dobre
-                symtable_data->param_cnt = 0;
-                symtable_data->param_id = string_create(NULL);
+                symtable_data.data_type = FUN;
+                symtable_data.id = string_create(NULL);
+                string_append(symtable_data.id, tmp->attribute); //TODO ako je alokovany a mazany token
+                symtable_data.value = string_create(NULL); //TODO je to dobre
+                symtable_data.param_cnt = 0;
+                symtable_data.param_id = string_create(NULL);
                 //create_data(symtable_data, tmp->type, tmp->attribute, NULL);
 
                 //inserting symbol table entry to symbol table
-                insert(global_symtable, symtable_data);
+                insert(global_symtable, &symtable_data);
+
+                //clear memory
+
+                string_free(symtable_data.id);
+                string_free(symtable_data.value);
+                string_free(symtable_data.param_id);
+
+                //getting data entry for function from symbol table
+
+                data_t *symtable_data_ptr = search(global_symtable, tmp->attribute);
 
                 //creating local symtable for function body definitions and semantic analysis
                 table_item_t *function_symtable = get_hash_table();
 
-                return params(function_symtable, symtable_data);
+                return params(function_symtable, symtable_data_ptr);
             }
         }
     }
@@ -319,7 +323,7 @@ bool statement(table_item_t *symtable)
         {
             ret_token(next_token);  //TODO ???
             ret_token(token);
-            return parse_expression2(symtable) == 0;
+            return parse_expression(symtable) == 0;
         }
     }
     //TODO tento else if
@@ -347,7 +351,7 @@ bool if_statement(table_item_t *symtable)
     //rule <if_statement> -> if <expression> then EOL <if_body>
     if (token->type == IF)
     {
-        if (parse_expression1(symtable) == 0)
+        if (parse_expression(symtable) == 0)
         {
             token = get_token();
             if (token->type == THEN)
@@ -428,7 +432,7 @@ bool while_statement(table_item_t *symtable)
     //rule <while_statement> -> while <expression> do EOL <while_body>
     if (token->type == WHILE)
     {
-        if (parse_expression1(symtable) == 0)
+        if (parse_expression(symtable) == 0)
         {
             token = get_token();
             if (token->type == DO)

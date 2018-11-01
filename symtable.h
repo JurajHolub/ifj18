@@ -8,7 +8,7 @@
 #ifndef _SYM_TABLE_H_IFJ_18_
 #define _SYM_TABLE_H_IFJ_18_
 
-#include "scanner.h"
+#include "test.h"
 #include "dynamic_string.h"
 
 #define HASH_SIZE 53
