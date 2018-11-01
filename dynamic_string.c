@@ -102,17 +102,22 @@ void string_append(string_t str, string_t append)
     {
         int size = (append->strlen / STRING_BLOCK + 1) * STRING_BLOCK + str->alloclen;
         str->string = realloc(str->string, size);
+        str->alloclen = size;
+        
         if (str->string == NULL)
         {
             mem_error();
             return;
         }
+
         strcat(str->string, append->string);
     }
     else //enough space
     {
         strcat(str->string, append->string);
     }
+
+    str->strlen += append->strlen;
 }
 
 void string_append_ch(string_t str, char *append)
@@ -120,6 +125,7 @@ void string_append_ch(string_t str, char *append)
     if (strlen(append)+str->strlen < str->alloclen)
     {
         strcat(str->string, append);
+        str->strlen += strlen(append);
     }
     else
     {
