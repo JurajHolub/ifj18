@@ -364,17 +364,14 @@ void print_prec_table(int top, int input_sym, char prec_tab)
 int parse_expression(table_item_t *hash_tb)
 {
     char prec_tab;
-    token_t *token = get_token();
     stack_t *sem_stack = init_sem_stack();
-    syntax_t *input_sym = alloc_syntax_item(token, hash_tb);
+    syntax_t *input_sym = alloc_syntax_item(get_token(), hash_tb);
     stack_t *stack = init_syntax_stack();
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
     syntax_t* top_term = get_top_term(stack)->data;
     int top = map_index(top_term->token->type);
     int input = map_index(input_sym->token->type);
-
-    int result = SUCCESS;
 
     while (input != PT_END || top != PT_END)
     {
@@ -385,29 +382,24 @@ int parse_expression(table_item_t *hash_tb)
         {
             stack_push(stack, input_sym);
             //print_stack(stack);
-            token = get_token();
-            input_sym = alloc_syntax_item(token, hash_tb);
+            input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
         else if (prec_tab == '<')
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
             //print_stack(stack);
-            token = get_token();
-            input_sym = alloc_syntax_item(token, hash_tb);
+            input_sym = alloc_syntax_item(get_token(), hash_tb);
         }
         else if (prec_tab == '>')
         {
-            result = find_rule(hash_tb, stack, sem_stack);
+            int result = find_rule(hash_tb, stack, sem_stack);
             if (result != SUCCESS)
-                break; //error
+                return result; //error
             //print_stack(stack);
         }
         else
-        {
-            result = ERR_SYNTAX;
-            break; //ERROR
-        }
+            return ERR_SYNTAX; //ERROR
 
         top_term = get_top_term(stack)->data;
         top = map_index(top_term->token->type);
@@ -418,9 +410,7 @@ int parse_expression(table_item_t *hash_tb)
     free_syntax_stack(stack);
     free_sem_stack(sem_stack);
 
-    ret_token(token);
-
-    return result; //success 
+    return SUCCESS; //success 
 }
 
 int map_index(int idx)
