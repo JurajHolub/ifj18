@@ -78,7 +78,7 @@ bool program_list(void) {
     //rule <program_list> -> EOF
     if (token->type == EOF) //TODO
     {
-        return true;
+       return true;
     }
 
     //rule <program_list> -> <function_def> <program_list>
@@ -323,7 +323,9 @@ bool statement(table_item_t *symtable)
         {
             ret_token(next_token);  //TODO ???
             ret_token(token);
-            return parse_expression(symtable) == 0;
+            bool expression_good = parse_expression(symtable) == 0;
+            token = get_token();
+            return expression_good && (token->type == EOL);
         }
     }
     //TODO tento else if
