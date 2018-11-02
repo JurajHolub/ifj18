@@ -111,8 +111,7 @@ bool function_body(table_item_t *local_symtable);
  *
  * <statement> -> <if_statement>
  * <statement> -> <while_statement>
- * <statement> -> <function_call>
- * <statement> -> <expression>
+ * <statement> -> <assignment> EOL
  *
  * @param symtable symbol table used by definitions in statement
  * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
@@ -187,6 +186,25 @@ bool while_statement(table_item_t *symtable);
  */
 bool while_body(table_item_t *symtable);
 
+/**
+ * @brief Nonterminal symbol assignment checks syntax, of assignment statement. In assignment can be term without
+ * assignment to L-value. We use extended evaluation of this grammar rule, using semantic action finding id data type
+ * in symbol table.
+ * If new value is created, we will ad this to symbol table
+ *
+ * <assignment> -> ID = <function_call>
+ *        --if after first ID in line is = and then ID saved in symbol table as data_type function
+ * <assignment> -> ID = <expression>
+ *        --if after first ID in line is = and the first rule is not called
+ * <assignment> -> <function_call>
+ *        --if after first ID in line is no = and ID is in symbol table saved as function
+ * <assignment> -> <expression>
+ *        --in other cases
+ *
+ * @param symtable symbol table used by definitions in statement
+ * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ */
+bool assignment(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol function_call and it's syntactic rules simulation
