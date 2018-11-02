@@ -60,10 +60,20 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    freopen(argv[1],"r",stdin);
-    parse();
+    FILE *check = freopen(argv[1],"r",stdin);
+    if (check == NULL)
+    {
+        fprintf(stderr, "Can not open file: %s\n", argv[1]);
+        return -1;
+    }
+    int result = parse();
     clean();
-    return 0;
+
+    if (result)
+    {
+        fprintf(stderr, "Analysis failed!!!\n");
+    }
+    return result;
 }
 
 token_t *get_token(void) {
@@ -123,35 +133,45 @@ token_t *get_token(void) {
 
     //--///////////////////////////////////////////////////////////////////////////////////////////
     //--/////////////////////////////////////TESTING OUTPUT///////////////////////////////////////
+
     setbuf(stdout, 0);
+    setbuf(stderr, 0);
     printf("--------------------\n");
     if (tokens[0] != NULL)
     {
         setbuf(stdout, 0);
+        setbuf(stderr, 0);
         printf("Lexeme: %s\n", lexemes[tokens[0]->type]);
         if (tokens[0]->attribute != NULL)
         {
             setbuf(stdout, 0);
+            setbuf(stderr, 0);
             printf("Lexeme attribute: %s\n", tokens[0]->attribute->string);
         }
     }
     else
     {
         setbuf(stdout, 0);
+        setbuf(stderr, 0);
         printf("Lexeme: NULL\n");
         setbuf(stdout, 0);
+        setbuf(stderr, 0);
         printf("Lexeme attribute: NULL\n");
     }
+    setbuf(stderr, 0);
     setbuf(stdout, 0);
     printf("--------------------\n");
+    setbuf(stderr, 0);
     setbuf(stdout, 0);
     printf("Lexeme: %s\n", lexemes[tokens[1]->type]);
     if (tokens[1]->attribute != NULL)
     {
         setbuf(stdout, 0);
+        setbuf(stderr, 0);
         printf("Lexeme attribute: %s\n", tokens[1]->attribute->string);
     }
     setbuf(stdout, 0);
+    setbuf(stderr, 0);
     printf("--------------------\n\n");
     //--///////////////////////////////////////////////////////////////////////////////////////////
     //--/////////////////////////////////////TESTING OUTPUT END////////////////////////////////////
@@ -217,6 +237,7 @@ void read_token(token_t *token) {
     else
     {
         setbuf(stdout, 0);
+        setbuf(stderr, 0);
         printf("Unknown lexeme");
         token->type = 99;
     }
