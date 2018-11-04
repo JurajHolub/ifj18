@@ -9,6 +9,7 @@ var3
 /
 id
 var4
+eol
 EOF
 
 var1 - var2 * var 3 / var4

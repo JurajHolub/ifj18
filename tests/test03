@@ -15,6 +15,7 @@ var
 /
 id
 var
+eol
 EOF
 
 id+id/id*id+id/id
