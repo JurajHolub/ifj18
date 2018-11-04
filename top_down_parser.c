@@ -62,15 +62,10 @@ bool program_list(void) {
     }
 
     //rule <program_list> -> <statement> <program_list>
-    else if (token->type == IF || token->type == WHILE || token->type == VAR)  //TODO VAR == ID????
+    else
     {
         ret_token(token);
         return statement(global_symtable) && program_list();
-    }
-    else
-    {
-        syntax_error(token->type);
-        return false;
     }
 }
 
@@ -249,7 +244,7 @@ bool statement(table_item_t *symtable)
     }
 
     //rule <statement> -> <assignment> EOL
-    else if(token->type == VAR)
+    else
     {
         ret_token(token);
         //TODO
