@@ -1,0 +1,13 @@
+while
+id
+var1
+==
+id
+var2
+do
+eol
+end
+EOF
+
+while id == id then
+end

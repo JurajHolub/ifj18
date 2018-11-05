@@ -54,7 +54,7 @@ void clean(void) {
 
 int main(int argc, char **argv) {
 
-    if (argc != 2)
+    if (argc < 2)
     {
         printf("Set input test file.\n");
         return 1;

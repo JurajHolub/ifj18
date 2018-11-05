@@ -196,6 +196,7 @@ bool param(data_t *symtable_data, string_t param)
     }
     string_append(symtable_data->param_id, param);
     symtable_data->param_cnt++;
+
     return true;
 }
 
