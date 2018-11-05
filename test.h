@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "dynamic_string.h"
 
 /**
  * @brief Data type converting supported lexemes to integer, to simplify program
@@ -60,21 +61,15 @@ enum data_type_e {
  * for more information see scanner documentation
  */
 typedef struct token_s {
-    int type;   ///< Type of parsed symbol. Always value of enum type "data_type_e".
-    /**
-     * Value of parsed symbol.
-     * NULL if type is one of *,/,-,+,(,) ...
-     * String representation of parsed value if type is integer, float or string.
-     * Name of variable if type is VAR (variable).
-     */
-    char *attribute;
+    int type;
+    string_t attribute;
 } token_t;
 
 /**
  * @brief Simulation of function get_token() (see scanner documentation)
  *
  * function get lexemes from stdin already elaborated
- *  @return Scanned token.
+ * @return Scanned token.
  */
 token_t* get_token();
 
@@ -92,10 +87,10 @@ void ret_token(token_t *token);
 void read_token(token_t *token);
 
 /**
- * @brief get, check and return lexeme attribute with max. length 10 characters
- * @return return pointer to allocated memory with attribute string
+ * @brief get and save lexeme attribute for token
+ * @return return string with attribute
  */
-char *get_attribute(void);
+string_t get_attribute(void);
 
 
 #endif //IFJ18_TEST_H

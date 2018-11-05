@@ -10,7 +10,7 @@
 #define _EXPRESSIONS_PARSER_H_IFJ_18_
 
 #include <stdbool.h>
-#include "scanner.h"
+#include "test.h"
 #include "symtable.h"
 #include "stack.h"
 
@@ -20,13 +20,10 @@ enum prec_tab_idx_e {
     PT_ADD,
     PT_MUL,
     PT_EQ,
-    PT_ASSIG,
     PT_ID,
     PT_LEFT_B,
     PT_RIGHT_B,
     PT_END, 
-    PT_DELIM, 
-    PT_FUN, 
     PT_ERR
 };
 

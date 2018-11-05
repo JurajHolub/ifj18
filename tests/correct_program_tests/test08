@@ -1,0 +1,14 @@
+id
+var1
++
+id
+var2
+!=
+id
+var1
+/
+id
+var2
+EOF
+
+id+id != id/id

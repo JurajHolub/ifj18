@@ -8,7 +8,7 @@
 #ifndef _STACK_H_IFJ_18_
 #define _STACK_H_IFJ_18_
 
-#include "scanner.h"
+#include "test.h"
 #include "symtable.h"
 #include <stdbool.h>
 

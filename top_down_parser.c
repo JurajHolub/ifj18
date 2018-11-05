@@ -5,56 +5,33 @@
  * @brief Implementation of top-down parser
  */
 
+#include "dynamic_string.h"
 #include "top_down_parser.h"
+#include "error_handle.h"
 
 //symbol table used for definitions and semantic analysis in main program body
 table_item_t *global_symtable;
 
-void create_data(data_t *data, int data_type, char *id, char *value)
-{
-    char *alloc_id = NULL,
-         *alloc_value = NULL;
-    alloc_id = (char *)malloc(sizeof(char) * (strlen(id) + 1));
-    if (alloc_id == NULL)
-    {
-        fprintf(stderr, "Compiler runtime error: unable to allocate memory");
-        //TODO abbort program
-        exit(99);
-    }
-    strcpy(alloc_id, id);
-    if (value != NULL)
-    {
-        alloc_value = (char *)malloc(sizeof(char) * (strlen(value) + 1));
-        if (alloc_value == NULL)
-        {
-            fprintf(stderr, "Compiler runtime error: unable to allocate memory");
-            //TODO abbort program
-            exit(99);
-        }
-        strcpy(alloc_value, value);
-    }
-    data->data_type = data_type;
-    data->id = alloc_id;
-    data->value = alloc_value;
-    data->param_cnt = 0;
-    data->param_id = NULL;
-}
-
 
 void syntax_error(int token_type)
 {
-    //TODO hups
     static char *string_tokens[] = {"NOT", "SUB", "ADD", "MUL", "DIV", "NOT_EQUAL", "LESS", "INTEGER", "STRING", "NIL", "LEFT_B", "RIGHT_B", "EOL", "EQUAL", "GREATER", "LESS_EQ", "GREATER_EQ", "FLOAT", "DEF", "DO", "ELSE", "END", "IF", "THEN", "WHILE", "ASSIG", "FUN", "DELIM", "VAR"};
     if (token_type == EOF)
     {
+        setbuf(stderr, 0);
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected end of file\n");
     }
     else if (token_type == EOL)
     {
+        setbuf(stderr, 0);
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected end of line\n");
     }
     else
     {
+        setbuf(stderr, 0);
+        setbuf(stdout, 0);
         fprintf(stderr, "Unexpected token: %s\n", string_tokens[token_type]);
     }
 }
@@ -63,7 +40,9 @@ int parse(void)
 {
     global_symtable = get_hash_table();
     //TODO free resources
-    return program_list() ? 2 : 0;
+    int ret = program_list() ? 0 : 2;
+    destroy_hash_table(global_symtable);
+    return ret;
 }
 
 bool program_list(void) {
@@ -72,7 +51,7 @@ bool program_list(void) {
     //rule <program_list> -> EOF
     if (token->type == EOF) //TODO
     {
-        return true;
+       return true;
     }
 
     //rule <program_list> -> <function_def> <program_list>
@@ -83,15 +62,10 @@ bool program_list(void) {
     }
 
     //rule <program_list> -> <statement> <program_list>
-    else if (token->type == IF || token->type == WHILE || token->type == VAR)  //TODO VAR == ID????
+    else
     {
         ret_token(token);
         return statement(global_symtable) && program_list();
-    }
-    else
-    {
-        syntax_error(token->type);
-        return false;
     }
 }
 
@@ -101,39 +75,53 @@ bool function_def(void) {
     //rule <function_def> -> def ID(<params>
     if (token->type == DEF)
     {
-        if ((token = get_token())->type == VAR)
+        token = get_token();
+        if (token->type == VAR || token->type ==FUN)
         {
             //if the whole rule is checked symbol table entry will be created and data inserted, but we need data
             //from this token, which will be in the next statement overwritten, so we need to save it
             token_t *tmp = token;
             if ((token = get_token())->type == LEFT_B)
             {
-                //creating symbol table entry
-                data_t *symtable_data = (data_t *) malloc(sizeof(data_t));
-                if (symtable_data == NULL)
+                if (NULL != search(global_symtable, tmp->attribute))
                 {
-                    fprintf(stderr, "Compiler runtime error: unable to allocate memory");
-                    //TODO free resources
-                    exit(99);
+                    setbuf(stdout, 0);
+                    setbuf(stderr, 0);
+                    fprintf(stderr, "Semantic error");
+                    return !ERR_SEM_DEF;
                 }
 
+                //creating symbol table entry
+                data_t symtable_data;
+
                 //inserting data from token to symbol table entry
-                create_data(symtable_data, tmp->type, tmp->attribute, NULL);
+                symtable_data.data_type = FUN;
+                symtable_data.id = string_create(NULL);
+                string_append(symtable_data.id, tmp->attribute);
+                symtable_data.value = string_create(NULL);
+                symtable_data.param_cnt = 0;
+                symtable_data.param_id = string_create(NULL);
 
                 //inserting symbol table entry to symbol table
-                insert(global_symtable, symtable_data);
+                insert(global_symtable, &symtable_data);
+
+                //clear memory
+                string_free(symtable_data.id);
+                string_free(symtable_data.value);
+                string_free(symtable_data.param_id);
+
+                //getting data entry for function from symbol table
+                data_t *symtable_data_ptr = search(global_symtable, tmp->attribute);
 
                 //creating local symtable for function body definitions and semantic analysis
                 table_item_t *function_symtable = get_hash_table();
 
-
-                return params(function_symtable, symtable_data);
+                return params(function_symtable, symtable_data_ptr);
             }
         }
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 
@@ -149,7 +137,9 @@ bool params(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            return function_body(local_symtable);
+            bool ret = function_body(local_symtable);
+            destroy_hash_table(local_symtable);
+            return ret;
         }
     }
 
@@ -160,7 +150,6 @@ bool params(table_item_t *local_symtable, data_t *symtable_data)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -175,7 +164,9 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            return function_body(local_symtable);
+            bool ret = function_body(local_symtable);
+            destroy_hash_table(local_symtable);
+            return ret;
         }
     }
 
@@ -190,49 +181,23 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
 
-bool param(data_t *symtable_data, char *param)
+bool param(data_t *symtable_data, string_t param)
 {
-    //auxiliary variables to work with dynamic array
-    int param_length = strlen(param),   //inserted string length
-        param_list_length;              //allocated memory length
 
-    //no memory was allocated
-    if (symtable_data->param_id == NULL)
+    char *string_blankspace = " ";
+    //separating parameters by blank space
+    if (symtable_data->param_id->strlen != 1)
     {
-            param_list_length = 0;
+        string_append_ch(param, string_blankspace);
     }
-    //memory was allocated
-    else
-    {
-        param_list_length = strlen(symtable_data->param_id);
-    }
+    string_append(symtable_data->param_id, param);
+    symtable_data->param_cnt++;
 
-    //new array where fits content of old array and the new inserted parameter + \0
-    char *tmp_param_list = (char *)malloc((param_length + param_list_length + 1) * sizeof(char));
-    if (tmp_param_list == NULL)
-    {
-        fprintf(stderr, "Compiler runtime error: unable to allocate memory");
-        //TODO abbort program
-        exit(99);
-    }
-    //old array copied in new array, if there was an old array
-    if (symtable_data->param_id != NULL)
-    {
-        strcpy(tmp_param_list, symtable_data->param_id);
-        //parameters must be separated by ' '
-        tmp_param_list[param_list_length] = ' ';
-    }
-    //+1 is the extra whitespace before parameter
-    strcpy(tmp_param_list + param_list_length + 1, param);
-
-    free(symtable_data->param_id);
-    symtable_data->param_id = tmp_param_list;
-    return true;  //TODO musi to tu byt
+    return true;
 }
 
 bool function_body(table_item_t *local_symtable)
@@ -257,7 +222,6 @@ bool function_body(table_item_t *local_symtable)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -280,42 +244,25 @@ bool statement(table_item_t *symtable)
         return while_statement(symtable);
     }
 
-    //rule <statement> -> <function_call> or <statement> -> <expression>
-    else if(token->type == VAR)
-    {
-        //TODO co je napr. a+b patri to do statement (zatial ano)
-        token_t *next_token = get_token();
-
-        //rule <statement> -> <function_call>
-        if (token->type == VAR)
-        {
-            ret_token(next_token);
-            ret_token(token);
-            return function_call(symtable);
-        }
-
-        //rule <statement> -> <expression>
-        else
-        {
-            ret_token(next_token);  //TODO ???
-            ret_token(token);
-            return (bool)parse_expression(symtable); //TODO co to vracia
-        }
-    }
-    //TODO tento else if
-    /*else if (token->type == INTEGER ||
-             token->type == STRING ||
-             token->type == FLOAT ||
-             token->type == NOT ||
-             token->type == SUB ||
-             token->type == ADD)
+    //rule <statement> -> <assignment> EOL
+    else
     {
         ret_token(token);
-        return (bool)parse_expression(symtable);
-    }*/
+        //TODO
+        bool result = assignment(symtable);
+        if (result != true)
+        {
+            return result;
+        }
+
+        token = get_token();
+        if (token->type == EOL)
+        {
+            return true;
+        }
+    }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -327,7 +274,7 @@ bool if_statement(table_item_t *symtable)
     //rule <if_statement> -> if <expression> then EOL <if_body>
     if (token->type == IF)
     {
-        if (parse_expression(symtable) == 0) //TODO co to vracia
+        if (parse_expression(symtable) == 0)
         {
             token = get_token();
             if (token->type == THEN)
@@ -342,7 +289,6 @@ bool if_statement(table_item_t *symtable)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -408,7 +354,7 @@ bool while_statement(table_item_t *symtable)
     //rule <while_statement> -> while <expression> do EOL <while_body>
     if (token->type == WHILE)
     {
-        if (parse_expression(symtable)) //TODO co to vracia
+        if (parse_expression(symtable) == 0)
         {
             token = get_token();
             if (token->type == DO)
@@ -423,7 +369,6 @@ bool while_statement(table_item_t *symtable)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -455,6 +400,119 @@ bool while_body(table_item_t *symtable)
     }
 }
 
+bool assignment(table_item_t *symtable) {
+    token_t *token = get_token();
+    token_t *next_token = get_token();
+    if (token == NULL)
+    {
+        return !ERR_LEX;
+    }
+
+    /*-***************************************
+         rules:
+          <assignment> -> ID = <function_call>
+          <assignment> -> ID = <expression>
+    ******************************************/
+    if (token->type == VAR && next_token->type == ASSIG)
+    {
+        //by assignment have to be updated or created symbol table entry for L-value variable
+        data_t *l_value = search(symtable, token->attribute);
+        if (l_value == NULL)
+        {
+            //creating symbol table entry
+            data_t symtable_data;
+
+            //inserting data from token to symbol table entry
+            symtable_data.data_type = VAR;
+            symtable_data.id = string_create(NULL);
+            string_append(symtable_data.id, token->attribute);
+            symtable_data.value = string_create(NULL); //TODO ma tam byt nil?
+            symtable_data.param_cnt = 0;
+            symtable_data.param_id = string_create(NULL);
+
+            //inserting symbol table entry to symbol table
+            insert(global_symtable, &symtable_data);
+
+            //clear memory
+            string_free(symtable_data.id);
+            string_free(symtable_data.value);
+            string_free(symtable_data.param_id);
+        }
+
+        //TODO
+        else if (l_value->data_type == FUN)
+        {
+            setbuf(stderr, 0);
+            setbuf(stdout, 0);
+            fprintf(stderr, "Semantic error\n");
+            return !ERR_SEM_DEF;
+        }
+
+        next_token = get_token();
+
+        //rule <assignment> -> ID = <function_call>
+        if (token->type == VAR || token->type == FUN)
+        {
+            data_t *id_data = search(symtable, next_token->attribute);
+            if (id_data != NULL && id_data->data_type == FUN)
+            {
+                ret_token(next_token);
+                //TODO
+                bool result = function_call(symtable);
+                //TODO set data type of variable
+                return result;
+            }
+        }
+        //rule <assignment> -> ID = <expression>
+        if(token->type != FUN)
+        {
+            ret_token(next_token);
+            return !parse_expression(symtable);
+        }
+        else
+        {
+            setbuf(stderr, 0);
+            setbuf(stdout, 0);
+            fprintf(stderr, "Semantic error undefined function");
+            return false;
+        }
+    }
+
+    /*-***************************************
+     rules:
+      <assignment> -> <function_call>
+      <assignment> -> <expression>
+    ******************************************/
+    else
+    {
+        //we don't analyze token after first ID in line or first function ID in line in this rule
+        ret_token(next_token);
+
+        //rule <assignment> -> <function_call>
+        if (token->type == VAR || token->type == FUN )
+        {
+            data_t *id_data = search(symtable, token->attribute);
+            if (id_data != NULL && id_data->data_type == FUN)
+            {
+                ret_token(token);
+                return function_call(symtable);
+            }
+        }
+
+        //rule <assignment> -> <expression>
+        //TODO move to bottom up parser
+        if (token->type != FUN)
+        {
+            ret_token(token);
+            return !parse_expression(symtable);
+        }
+    }
+
+    //rule failed, bad syntax
+    syntax_error(token->type);
+    return false;
+}
+
 bool function_call(table_item_t *symtable)
 {
     token_t *token = get_token();
@@ -464,16 +522,11 @@ bool function_call(table_item_t *symtable)
     {
         if (call_params() == true)
         {
-            token = get_token();
-            if (token->type == EOL)
-            {
                 return true;
-            }
         }
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -495,7 +548,6 @@ bool call_params(void)
         }
 
         //rule failed, bad syntax
-        //TODO free resources
         syntax_error(token->type);
         return false;
     }
@@ -526,7 +578,6 @@ bool call_param(void)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }
@@ -553,7 +604,6 @@ bool call_param_list(void)
     }
 
     //rule failed, bad syntax
-    //TODO free resources
     syntax_error(token->type);
     return false;
 }

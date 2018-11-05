@@ -34,21 +34,6 @@ Rule = {
 Start = {$}
 ******************************************************************************/
 
-//void destroy_stack_item(stack_item_t *item)
-//{
-//    stack_item_t *deleted = item;
-//
-//    if (item->next != NULL)
-//        item->next->prev = item->prev;
-//    if (item->prev != NULL)
-//        item->prev->next = item->next;
-//
-//    free(deleted->token->attribute);
-//    free(deleted->token);
-//    item = item->next;
-//    free(deleted);
-//}
-
 // 1: E -> id
 int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
@@ -62,7 +47,8 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_operand(hash_tb, sem_stack, symb->token);
+    //return parse_operand(hash_tb, sem_stack, symb->token);
+    return SUCCESS;
 }
 // 2: E -> ( E )
 int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -134,7 +120,8 @@ int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
+    //return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
+    return SUCCESS;
 }
 //     6: E -> E [==, !=, <, >, <=, >=] E
 int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -171,7 +158,8 @@ int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
+    //return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
+    return SUCCESS;
 }
 //   7: E -> id = E
 int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -206,8 +194,8 @@ int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    int res = parse_assig(hash_tb, sem_stack, symb3->token);
-    return res;
+    //return parse_assig(hash_tb, sem_stack, symb3->token);
+    return SUCCESS;
 }
 /*
 //     8: E -> f ([E^n])
@@ -343,8 +331,6 @@ char *get_syntax_type(int type)
             return "*";
         case PT_EQ:
             return "==";
-        case PT_ASSIG:
-            return "=";
         case PT_ID:
             return "id";
         case PT_LEFT_B:
@@ -353,10 +339,6 @@ char *get_syntax_type(int type)
             return ")";
         case PT_END:
             return "$";
-        case PT_DELIM:
-            return ",";
-        case PT_FUN:
-            return "fun";
         default:
             return "unknown";
     }
@@ -376,8 +358,9 @@ void print_prec_table(int top, int input_sym, char prec_tab)
 int parse_expression(table_item_t *hash_tb)
 {
     char prec_tab;
+    token_t *token = get_token();
     stack_t *sem_stack = init_sem_stack();
-    syntax_t *input_sym = alloc_syntax_item(get_token(), hash_tb);
+    syntax_t *input_sym = alloc_syntax_item(token, hash_tb);
     stack_t *stack = init_syntax_stack();
     if (stack == NULL || input_sym == NULL)
         return ERR_COMPILER;
@@ -394,14 +377,16 @@ int parse_expression(table_item_t *hash_tb)
         {
             stack_push(stack, input_sym);
             //print_stack(stack);
-            input_sym = alloc_syntax_item(get_token(), hash_tb);
+            token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '<')
         {
             mark_stack_term(stack);
             stack_push(stack, input_sym);
             //print_stack(stack);
-            input_sym = alloc_syntax_item(get_token(), hash_tb);
+            token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '>')
         {
@@ -421,6 +406,8 @@ int parse_expression(table_item_t *hash_tb)
     free_syntax_item(input_sym);
     free_syntax_stack(stack);
     free_sem_stack(sem_stack);
+
+    ret_token(token);
 
     return SUCCESS; //success 
 }
@@ -445,8 +432,6 @@ int map_index(int idx)
         case GREATER:
         case GREATER_EQ:
             return PT_EQ;
-        case ASSIG:
-            return PT_ASSIG;
         case VAR:
         case INTEGER:
         case FLOAT:
@@ -457,10 +442,6 @@ int map_index(int idx)
             return PT_LEFT_B;
         case RIGHT_B:
             return PT_RIGHT_B;
-        case DELIM:
-            return PT_DELIM;
-        case FUN:
-            return PT_FUN;
         case EOL:
         case THEN:
         case DO:
@@ -473,20 +454,32 @@ int map_index(int idx)
 
 char prec_table(int top, int token)
 {
-    char table[12][12] = {
-    //   not   -    +    /    ==   =    id   (    )    $    ,    f   
-        {' ' ,' ', ' ', ' ', '<', '<', '<', '<', '>', '>', '>', '<'},// not
-        {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// -
-        {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// +
-        {'>' ,'>', '>', '>', '>', '>', '<', '<', '>', '>', '>', '<'},// /
-        {'>' ,'<', '<', '<', '<', '<', '<', '<', '>', '>', '>', '<'},// ==
-        {'>' ,'<', '<', '<', '<', '>', '<', '<', '>', '>', '>', '<'},// =
-        {'>' ,'>', '>', '>', '>', '=', ' ', ' ', '>', '>', '>', ' '},// id 
-        {'<' ,'<', '<', '<', '<', '<', '<', '<', '=', ' ', '=', '<'},// (
-        {'>' ,'>', '>', '>', '>', '>', '>', ' ', '>', '>', '>', ' '},// )
-        {'<' ,'<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<'},// $
-        {'<' ,'<', '<', '<', ' ', '<', '<', '<', '=', '>', '=', '<'},// ,
-        {'<' ,'<', '<', '<', ' ', '<', '<', '=', ' ', '>', '=', ' '} // f
+    //char table[12][12] = {
+    ////   not   -    +    /    ==   =    id   (    )    $    ,    f   
+    //    {' ' ,' ', ' ', ' ', '<', '<', '<', '<', '>', '>', '>', '<'},// not
+    //    {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// -
+    //    {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// +
+    //    {'>' ,'>', '>', '>', '>', '>', '<', '<', '>', '>', '>', '<'},// /
+    //    {'>' ,'<', '<', '<', '<', '<', '<', '<', '>', '>', '>', '<'},// ==
+    //    {'>' ,'<', '<', '<', '<', '>', '<', '<', '>', '>', '>', '<'},// =
+    //    {'>' ,'>', '>', '>', '>', '=', ' ', ' ', '>', '>', '>', ' '},// id 
+    //    {'<' ,'<', '<', '<', '<', '<', '<', '<', '=', ' ', '=', '<'},// (
+    //    {'>' ,'>', '>', '>', '>', '>', '>', ' ', '>', '>', '>', ' '},// )
+    //    {'<' ,'<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<'},// $
+    //    {'<' ,'<', '<', '<', ' ', '<', '<', '<', '=', '>', '=', '<'},// ,
+    //    {'<' ,'<', '<', '<', ' ', '<', '<', '=', ' ', '>', '=', ' '} // f
+    //};
+    char table[9][9] = {
+    //   not   -    +    /    ==   id   (    )    $   
+        {' ' ,' ', ' ', ' ', '<', '<', '<', '>', '>'},// not
+        {'>' ,'>', '>', '<', '>', '<', '<', '>', '>'},// -
+        {'>' ,'>', '>', '<', '>', '<', '<', '>', '>'},// +
+        {'>' ,'>', '>', '>', '>', '<', '<', '>', '>'},// /
+        {'>' ,'<', '<', '<', '<', '<', '<', '>', '>'},// ==
+        {'>' ,'>', '>', '>', '>', ' ', ' ', '>', '>'},// id 
+        {'<' ,'<', '<', '<', '<', '<', '<', '=', ' '},// (
+        {'>' ,'>', '>', '>', '>', '>', ' ', '>', '>'},// )
+        {'<' ,'<', '<', '<', '<', '<', '<', '<', ' '} // $
     };
 
     if (top != PT_ERR && token != PT_ERR)
