@@ -146,7 +146,8 @@ bool params(table_item_t *local_symtable, data_t *symtable_data)
     //rule <params> -> <param> <param_list>
     else if (token->type == VAR)  //TODO VAR  premenovat na ID
     {
-        return param(symtable_data, token->attribute) && param_list(local_symtable, symtable_data);
+        //TODO moze sa v tejto funkcii vyskytnut chyba
+        return param(symtable_data, local_symtable, token->attribute) && param_list(local_symtable, symtable_data);
     }
 
     //rule failed, bad syntax
@@ -176,7 +177,7 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == VAR)
         {
-            return param(symtable_data, token->attribute) && param_list(local_symtable, symtable_data);
+            return param(symtable_data, local_symtable, token->attribute) && param_list(local_symtable, symtable_data);
         }
     }
 
@@ -185,9 +186,12 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
     return false;
 }
 
-bool param(data_t *symtable_data, string_t param)
+bool param(data_t *symtable_data,table_item_t *local_symtable, string_t param)
 {
 
+    /*-**************************************************************************
+        insert function parameter in global symbol table in function parameters
+    *****************************************************************************/
     char *string_blankspace = " ";
     //separating parameters by blank space
     if (symtable_data->param_id->strlen != 1)
@@ -196,6 +200,31 @@ bool param(data_t *symtable_data, string_t param)
     }
     string_append(symtable_data->param_id, param);
     symtable_data->param_cnt++;
+
+
+    /*-**************************************************************************
+        insert function parameters in local symbol table as local variables
+     *****************************************************************************/
+
+    //creating symbol table entry
+    data_t local_symtable_data;
+
+    //inserting data from token to symbol table entry
+    local_symtable_data.data_type = VAR;
+    local_symtable_data.id = string_create(NULL);
+    string_append(local_symtable_data.id, param);
+    local_symtable_data.value = string_create(NULL);
+    local_symtable_data.param_cnt = 0;
+    local_symtable_data.param_id = string_create(NULL);
+
+    //inserting symbol table entry to symbol table
+    insert(local_symtable, &local_symtable_data);
+
+    //clear memory
+    string_free(local_symtable_data.id);
+    string_free(local_symtable_data.value);
+    string_free(local_symtable_data.param_id);
+
 
     return true;
 }
