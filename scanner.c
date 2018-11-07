@@ -1,4 +1,5 @@
-#include "scanner.h"
+//#include "scanner.h"
+#include "test.h"
 #include <stdio.h>
 
 // Some simulation of scanner for testing purposes of parser.  

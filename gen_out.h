@@ -1,6 +1,76 @@
 #ifndef _GEN_OUT_H_IFJ_18_
 #define _GEN_OUT_H_IFJ_18_
 
+#include "symtable.h"
+
+enum instruction_e {
+    I_MOVE,
+    I_CREATEFRAME,
+    I_PUSHFRAME,
+    I_POPFRAME,
+    I_DEFVAR,
+    I_CALL,
+    I_RETURN,
+    I_PUSHS,
+    I_POPS,
+    I_CLEARS,
+    I_ADD,
+    I_SUB,
+    I_MUL,
+    I_DIV,
+    I_IDIV,
+    I_ADDS,
+    I_SUBS,
+    I_MULS,
+    I_DIVS,
+    I_IDIVS,
+    I_LT,
+    I_GT,
+    I_EQ,
+    I_LTS,
+    I_GTS,
+    I_EQS,
+    I_AND,
+    I_OR,
+    I_NOT,
+    I_ANDS,
+    I_ORS,
+    I_NOTS,
+    I_INT2FLOAT,
+    I_FLOAT2INT,
+    I_INT2CHAR,
+    I_STRI2INT,
+    I_INT2FLOATS,
+    I_FLOAT2INTS,
+    I_INT2CHARS,
+    I_STRI2INTS,
+    I_READ,
+    I_WRITE
+};
+
+typedef struct inst_s {
+    int instruction;
+    data_t *op1;
+    data_t *op2;
+    data_t *op3;
+} inst_t;
+
+inst_t* inst_create();
+void inst_free(inst_t *inst);
+
+void set_instruction(int instruction, data_t **op1, data_t **op2 , data_t **op3);
+void set_var(data_t *var);
+
+void create_global_frame();
+void free_global_frame();
+void create_local_frame();
+void free_local_frame();
+
+void gen_program();
+void gen_instruction(inst_t *inst);
+
+/*
+
 void MOVE(char *var, char *symb);
 void CREATEFRAME();
 void PUSHFRAME();
@@ -57,5 +127,6 @@ void WRITE(char *symb);
 
 printf("PUSHS %s", value);
 printf("POPS %s", var);
+*/
 
 #endif // _GEN_OUT_H_IFJ_18_

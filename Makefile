@@ -1,12 +1,15 @@
 CC = gcc
 CFLAGS = -I -std=c99 -g -Werror -Wall
-OBJ = test.o \
+OBJ = main.o \
 	  expressions_parser.o \
 	  symtable.o \
 	  error_handle.o \
 	  semantic_parser.o \
 	  stack.o \
 	  dynamic_string.o \
+	  list.o \
+	  gen_out.o \
+	  test.o \
 	  top_down_parser.o
 EXECUTABLE = main
 
