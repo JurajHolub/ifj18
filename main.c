@@ -12,15 +12,13 @@
 #include <stdlib.h>
 #include "semantic_parser.h"
 #include "dynamic_string.h"
+#include "scanner.h"
 #include "test.h"
 #include "gen_out.h"
 #include "list.h"
 
 int main(int argc, char **argv)
 {
-
-    return syntax_tests(argc, argv);
-
     //string_t var1 = string_create("var0");
     //string_t tmp1 = string_create("$tmp_01"); 
 
@@ -49,9 +47,28 @@ int main(int argc, char **argv)
     //op1 = search(hash_tb, var1);
     //op2 = search(hash_tb, tmp1);
     //set_instruction(I_MOVE, &op1, &op2, NULL); 
+    //set_instruction(I_ADDS, NULL, NULL, NULL); 
+    //set_instruction(I_SUBS, NULL, NULL, NULL); 
+    //set_instruction(I_MULS, NULL, NULL, NULL); 
+    //set_var(&op1);
+    //set_var(&op1);
+    //set_var(&op1);
+    //set_var(&op1);
+
+
 
     //create_local_frame();
     //set_instruction(I_MOVE, &op1, &op2, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
+    //free_local_frame();
+
+    //create_local_frame();
+    //set_instruction(I_MOVE, &op1, &op2, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
+    //set_instruction(I_DIVS, NULL, NULL, NULL); 
     //free_local_frame();
 
     //gen_program();
@@ -63,6 +80,6 @@ int main(int argc, char **argv)
     //
     //destroy_hash_table(hash_tb);
 
-    //return syntax_tests(argc, argv);
+    return syntax_tests(argc, argv);
     return 0;
 }
