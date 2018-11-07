@@ -85,13 +85,14 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data);
 
 /**
  * @brief Nonterminal symbol param checks no syntax, only insure saving of parameters in symbol table and incrementing
- * parameters counter
+ * parameters counter and creates local variables for variables in local symbol table
  *
  * @param symtable_data allocated entry for actual function in global symbol table used for inserting function's parameters
+ * @param local_symtable local symbol table for parsed function
  * @param param inserted function parameter
  * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
  */
-bool param(data_t *symtable_data, string_t param);
+bool param(data_t *symtable_data, table_item_t *local_symtable, string_t param);
 
 /**
  * @brief Nonterminal symbol function_body and it's syntactic rules simulation
