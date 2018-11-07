@@ -45,7 +45,20 @@ enum instruction_e {
     I_INT2CHARS,
     I_STRI2INTS,
     I_READ,
-    I_WRITE
+    I_WRITE,
+    I_CONCAT,
+    I_STRLEN,
+    I_GETCHAR,
+    I_SETCHAR,
+    I_TYPE,
+    I_LABEL,
+    I_JUMP,
+    I_JUMPIFEQ,
+    I_JUMPIFNEQ,
+    I_JUMPIFEQS,
+    I_JUMPIFNEQS,
+    I_BREAK,
+    I_DPRINT
 };
 
 typedef struct inst_s {
@@ -59,7 +72,7 @@ inst_t* inst_create();
 void inst_free(inst_t *inst);
 
 void set_instruction(int instruction, data_t **op1, data_t **op2 , data_t **op3);
-void set_var(data_t *var);
+void set_var(data_t **var);
 
 void create_global_frame();
 void free_global_frame();

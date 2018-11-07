@@ -73,11 +73,11 @@ void set_instruction(int instruction, data_t **op1, data_t **op2 , data_t **op3)
         gen_list_insert_last(local_frame, inst);
 }
 
-void set_var(data_t *var)
+void set_var(data_t **var)
 {
     inst_t *inst = inst_create();
     inst->instruction = I_DEFVAR;
-    inst->op1 = var;
+    inst->op1 = *var;
     inst->op2 = NULL;
     inst->op3 = NULL;
 
@@ -104,6 +104,8 @@ char* symb_type(data_t* data)
         return "float";
     else if (data->data_type == STRING)
         return "string";
+    else if (data->data_type == VAR)
+        return "LF";
     else
         return "nil";
 }
@@ -114,47 +116,106 @@ void gen_instruction(inst_t *inst)
     {
         case I_MOVE:
             printf("MOVE LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            break;
         case I_CREATEFRAME:
+            printf("CREATEFRAME\n");
+            break;
         case I_PUSHFRAME:
+            printf("PUSHFRAME\n");
+            break;
         case I_POPFRAME:
+            printf("PUSHFRAME\n");
+            break;
         case I_DEFVAR:
+            printf("DEFVAR LF@%s\n", inst->op1->id->string);
+            printf("MOVE LF@%s nil@nil\n", inst->op1->id->string);
+            break;
+        case I_LT:
+        case I_GT:
+        case I_EQ:
         case I_CALL:
         case I_RETURN:
-        case I_PUSHS:
-        case I_POPS:
-        case I_CLEARS:
         case I_ADD:
         case I_SUB:
         case I_MUL:
         case I_DIV:
         case I_IDIV:
-        case I_ADDS:
-        case I_SUBS:
-        case I_MULS:
-        case I_DIVS:
-        case I_IDIVS:
-        case I_LT:
-        case I_GT:
-        case I_EQ:
-        case I_LTS:
-        case I_GTS:
-        case I_EQS:
         case I_AND:
         case I_OR:
         case I_NOT:
-        case I_ANDS:
-        case I_ORS:
-        case I_NOTS:
         case I_INT2FLOAT:
         case I_FLOAT2INT:
         case I_INT2CHAR:
         case I_STRI2INT:
+        case I_PUSHS:
+        case I_POPS:
+        case I_CLEARS:
+            printf("ADDS\n");
+            break;
+        case I_ADDS:
+            printf("ADDS\n");
+            break;
+        case I_SUBS:
+            printf("SUBS\n");
+            break;
+        case I_MULS:
+            printf("MULS\n");
+            break;
+        case I_DIVS:
+            printf("DIVS\n");
+            break;
+        case I_IDIVS:
+            printf("IDIVS\n");
+            break;
+        case I_LTS:
+            printf("LTS\n");
+            break;
+        case I_GTS:
+            printf("GTS\n");
+            break;
+        case I_EQS:
+            printf("EQS\n");
+            break;
+        case I_ANDS:
+            printf("ANDS\n");
+            break;
+        case I_ORS:
+            printf("ORS\n");
+            break;
+        case I_NOTS:
+            printf("NOTS\n");
+            break;
         case I_INT2FLOATS:
+            printf("INT2FLOATS\n");
+            break;
         case I_FLOAT2INTS:
+            printf("FLOAT2INTS\n");
+            break;
         case I_INT2CHARS:
+            printf("INT2CHARS\n");
+            break;
         case I_STRI2INTS:
+            printf("STRI2INTS\n");
+            break;
+        case I_JUMPIFEQS:
+            printf("JUMPIFEQS\n");
+            break;
+        case I_JUMPIFNEQS:
+            printf("JUMPIFNEQS\n");
+            break;
         case I_READ:
         case I_WRITE:
+        case I_CONCAT:
+        case I_STRLEN:
+        case I_GETCHAR:
+        case I_SETCHAR:
+        case I_TYPE:
+        case I_LABEL:
+        case I_JUMP:
+        case I_JUMPIFEQ:
+        case I_JUMPIFNEQ:
+        case I_BREAK:
+        case I_DPRINT:
             ;
     }
 }
