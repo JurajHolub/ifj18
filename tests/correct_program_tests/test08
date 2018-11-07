@@ -1,3 +1,4 @@
+if
 id
 var1
 +
@@ -9,6 +10,14 @@ var1
 /
 id
 var2
+then
+eol
+else
+eol
+end
+eol
 EOF
 
-id+id != id/id
+if id+id != id/id then
+else
+end

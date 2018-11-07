@@ -9,7 +9,7 @@
 #define _SEMANTIC_PARSER_H_IFJ_18_
 
 #include "symtable.h"
-#include "test.h"
+#include "scanner.h"
 #include "stack.h"
 
 int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op);

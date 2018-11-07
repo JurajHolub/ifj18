@@ -4,9 +4,26 @@
  * @date 2019-10-25
  */
 
-#include "test.h"
+#include "scanner.h"
 #include "top_down_parser.h"
 #include "dynamic_string.h"
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "dynamic_string.h"
+
+/**
+ * @brief function get and check lexeme and its attribute for function get_token() and save it to token structure
+ * @param token already allocated token structure
+ **/
+void read_token(token_t *token);
+
+/**
+ * @brief get and save lexeme attribute for token
+ * @return return string with attribute
+ */
+string_t get_attribute(void);
 
 /**
  * @brief supported lexemes on stdin
@@ -52,7 +69,7 @@ void clean(void) {
     }
 }
 
-int main(int argc, char **argv) {
+int syntax_tests(int argc, char **argv) {
 
     if (argc < 2)
     {

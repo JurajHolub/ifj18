@@ -7,6 +7,7 @@ var2
 do
 eol
 end
+eol
 EOF
 
 while id == id then

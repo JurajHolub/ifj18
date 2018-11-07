@@ -10,7 +10,7 @@
 #define _EXPRESSIONS_PARSER_H_IFJ_18_
 
 #include <stdbool.h>
-#include "test.h"
+#include "scanner.h"
 #include "symtable.h"
 #include "stack.h"
 

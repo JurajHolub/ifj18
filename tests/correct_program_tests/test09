@@ -1,3 +1,4 @@
+if
 (
 id
 var1
@@ -7,7 +8,15 @@ var2
 )
 ==
 id
-var1 
+var1
+then
+eol
+else
+eol
+end 
+eol
 EOF
 
-(id > id) == id 
+if (id > id) == id then
+else
+end

@@ -23,7 +23,12 @@ do
     
         if test $res -eq 0
         then
-            printf "${GREEN}${file}: SUCCESS${NC}\n"
+            if [ "$path" = 'correct_program_tests' ];
+            then
+                printf "${GREEN}${file}: SUCCESS${NC}\n"
+            else
+                printf "${RED}${file}: SUCCESS${NC}\n"
+            fi
         else
             if [ "$path" = 'correct_program_tests' ];
             then
