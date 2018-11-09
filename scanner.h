@@ -14,6 +14,7 @@
  * possition of enum items please (possition is important for parser), if you
  * want add more symbols add it at the end of enum.
  */
+
 enum data_type_e {
 //  EOF = -1    Scanner make token also from end of file symbol.
     NOT = 0,    ///< Term "not".
@@ -46,6 +47,66 @@ enum data_type_e {
     DELIM,      ///< Term ",".
     VAR         ///< Term "variable".
 };
+
+enum states{
+
+    START_state=0,
+    ID_state,
+    INT_state,
+    DOUBLE_state,
+    EXPONENT_state,
+    EXPONENT_sign_state,
+    COMMENT_state,
+    CONSTANT_state,
+    FUNCTION_state,
+    SIGN_state
+    
+};
+
+/*
+enum data_type_e {
+    NOT = 0,    ///< Term "not".        
+    SUB,        ///< Term "-".          
+    ADD,        ///< Term "+".          
+    MUL,        ///< Term "*".          
+    DIV,        ///< Term "/".            
+    NOT_EQUAL,  ///< Term "!=".
+    LESS,       ///< Term "<".
+    INTEGER,    ///< Term "integer".
+    STRING,     ///< Term "string".
+    NIL,        ///< Term "nil".
+    LEFT_B,     ///< Term "(".
+    RIGHT_B,    ///< Term ")".
+    LINE_END,   ///< Term "\n".
+    EQUAL,      ///< Term "==".
+    GREATER,    ///< Term ">".
+    LESS_EQ,    ///< Term "<=".
+    GREATER_EQ, ///< Term ">=".
+    FLOAT,      ///< Term "float".
+    DEF,        ///< Term "def".
+    DO,         ///< Term "do".
+    ELSE,       ///< Term "else".
+    END,        ///< Term "end".
+    IF,         ///< Term "if".
+    THEN,       ///< Term "then".
+    WHILE,      ///< Term "while".
+    ASSIG,      ///< Term "=".
+    FUN,        ///< Term "function()".
+    DELIM,      ///< Term ",".
+    VAR,         ///< Term "variable".
+    INDENTIFIER, ///< Term "variable or function"
+    BOOL
+
+};
+
+
+/*  these are the constants for reserved words in Ruby 2.0
+    for more info https://www.tutorialspoint.com/ruby/ruby_syntax.htm
+
+    using enum because of better management of CONSTANTS
+*/
+
+
 
 /**
  * @brief Describe one terminal (symbol) of input IFJ18 language. Created by
