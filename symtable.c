@@ -12,18 +12,19 @@
 #include "scanner.h"
 #include "error_handle.h"
 
-
-void print_table(table_item_t* table)
+void iterate_hash_table(table_item_t *table, void (*handle)(data_t*))
 {
     for (int i = 0; i < HASH_SIZE; i++)
     {
-        printf("table[%d]=", i);
         for (list_t *j =table[i].head; j!=NULL; j = j->next)
         {
-            printf("%s, ", j->data->id->string);
+            (*handle)(j->data);
         }
-        printf("\n");
     }
+}
+
+void print_table(table_item_t* table)
+{
 }
 
 table_item_t* get_hash_table()
@@ -90,6 +91,22 @@ void insert(table_item_t *table, data_t *data)
     if (table == NULL)
         return;
 
+    data_t *exist = search(table, data->id);
+    if (exist)
+    {
+        string_free(exist->id);
+        string_free(exist->value);
+        string_free(exist->param_id);
+
+        exist->data_type = data->data_type;
+        exist->id = string_create(data->id->string);
+        exist->value = string_create(data->value->string);
+        exist->fun_type = data->fun_type;
+        exist->param_cnt = data->param_cnt;
+        exist->param_id = string_create(data->param_id->string);
+        return;
+    }
+
     //printf("insert %s\n", data->id);
 
     unsigned long hash = hash_fun(data->id);
@@ -137,7 +154,7 @@ data_t* search(table_item_t *table, string_t key)
     int idx = hash % HASH_SIZE;
 
     data_t *data = list_search(table[idx].head, key);
-    if (data == NULL) // search faild, should not happend
+    if (data == NULL)
         return NULL;
 
     return data;
