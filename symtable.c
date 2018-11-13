@@ -12,19 +12,17 @@
 #include "scanner.h"
 #include "error_handle.h"
 
-void iterate_hash_table(table_item_t *table, void (*handle)(data_t*))
+void print_table(table_item_t* table)
 {
     for (int i = 0; i < HASH_SIZE; i++)
     {
+        printf("table[%d]=", i);
         for (list_t *j =table[i].head; j!=NULL; j = j->next)
         {
-            (*handle)(j->data);
+            printf("%s, ", j->data->id->string);
         }
+        printf("\n");
     }
-}
-
-void print_table(table_item_t* table)
-{
 }
 
 table_item_t* get_hash_table()
@@ -68,10 +66,6 @@ void data_destroy(data_t *data)
 {
     if (data->id != NULL)
         string_free(data->id);
-    if (data->value != NULL)
-        string_free(data->value);
-    if (data->param_id != NULL)
-        string_free(data->param_id);
     
     free(data);
 }
@@ -95,19 +89,13 @@ void insert(table_item_t *table, data_t *data)
     if (exist)
     {
         string_free(exist->id);
-        string_free(exist->value);
-        string_free(exist->param_id);
 
-        exist->data_type = data->data_type;
+        exist->type = data->type;
+        exist->value = data->value;
         exist->id = string_create(data->id->string);
-        exist->value = string_create(data->value->string);
-        exist->fun_type = data->fun_type;
         exist->param_cnt = data->param_cnt;
-        exist->param_id = string_create(data->param_id->string);
         return;
     }
-
-    //printf("insert %s\n", data->id);
 
     unsigned long hash = hash_fun(data->id);
     int idx = hash % HASH_SIZE;
@@ -127,19 +115,15 @@ string_t insert_tmp(table_item_t *table, int type, string_t value)
     tmp_count++;
 
     data_t data;
-    data.data_type = type;
+    data.type = type;
     data.id = string_create(id);
-    data.value = string_create(NULL);
-    data.fun_type = VAR;
+    data.value = UNDEF;
     data.param_cnt = 0;
-    data.param_id = string_create(NULL);
 
     insert(table, &data);
 
     data_t * ret = search(table, data.id);
 
-    string_free(data.param_id);
-    string_free(data.value);
     string_free(data.id);
 
     return ret->id;
@@ -185,8 +169,6 @@ list_t* list_insert_first(data_t *data)
 
 list_t* list_insert(list_t *list, data_t *data) 
 {
-   // printf("list_insert %s\n", data->id);
-
     list_t *new = malloc(sizeof(list_t));
     if (new == NULL)
     {
@@ -201,44 +183,18 @@ list_t* list_insert(list_t *list, data_t *data)
     }
 }
 
-/*
-char* cpy_string(char *src)
-{
-    if (src == NULL)
-        return NULL;
-
-    //printf("spy_string %s\n", src);
-
-    char* dst = malloc(sizeof(char)*strlen(src));
-    if (dst == NULL)
-    {
-        mem_error();
-    }
-    else
-    {
-        strcpy(dst, src);
-    }
-
-    return dst;
-}
-*/
-
 data_t* data_copy(data_t *src)
 {
-   // printf("data_cpy %s\n", src->id);
-
     data_t* dst = malloc(sizeof(data_t));
     if (dst == NULL)
     {
         mem_error();
     }
 
-    dst->data_type = src->data_type;
+    dst->type = src->type;
+    dst->value = src->value;
     dst->id = string_create(src->id->string);
-    dst->value = string_create(src->value->string);
-    dst->fun_type = src->fun_type;
     dst->param_cnt = src->param_cnt;
-    dst->param_id = string_create(src->param_id->string);
 
     return dst;
 }

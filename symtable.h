@@ -12,6 +12,19 @@
 
 #define HASH_SIZE 53
 
+enum data_e {
+    UNDEF,
+    CONST,
+    //VAR,
+    //STRING,
+    //INTEGER,
+    //FLOAT,
+    //NIL,
+    BOOL,
+    DEF_FUN,
+    UNDEF_FUN
+};
+
 /******************************************************************************
 ***************************** INTERFACE ***************************************
 ******************************************************************************/
@@ -21,16 +34,27 @@
  * Symbols saved to Symbol table are variables and functions (not constants).
  */
 typedef struct data_s {
-    int data_type;  ///< Data type of symbol. Always value of enum type "data_type_e".
-    string_t id;       ///< Name of identificator for variable.
-    string_t value;    ///< Value of variable, it is assigned when variable was defined.
-    /** 
-     * Return data type of function if "data_type" is "FUN". Always value of
-     * enum type "data_type_e".
+    /**
+     * Data type of symbol. Could be {VAR, CONST} in symtable of some frame
+     * or {DEF_FUN, UNDEF_FUN} in symtable of functions.
      */
-    int fun_type;
-    int param_cnt;  ///< Number of function parameters.
-    string_t param_id; ///< Name of function parameters identificators, delimered by space.
+    int type;  
+    /** 
+     * True type of variable or function. It could be {INTEGER, FLOAT, STRING,
+     * NIL, BOOL}. If it is symtable of frame it is true type of variable (if 
+     * is is CONST than it is not defined) else if it is symtable of function
+     * then it is return value of function.
+     */
+    int value;  
+    string_t id;       
+    /**
+     * Name of identificator for variable, function or constant (if it is
+     * constant then id is value of constant it self).
+     */
+    int param_cnt;  
+    /**
+     *  Number of function parameters, if it is symtab of frame then it is undefined.
+     */
 } data_t;
 
 /**
@@ -101,12 +125,5 @@ data_t* data_copy(data_t *src);
 //char* cpy_string(char *src);
 void list_destroy_first(list_t **list);
 void data_destroy(data_t *data);
-/**
- * @brief Iterate over all items in hash table and handle them with function in
- * parameter.
- * @param table Table through we iterate.
- * @param handle Function whitch handle actual iterated item in hash table.
- */
-void iterate_hash_table(table_item_t *table, void (*handle)(data_t*));
 
 #endif // _SYM_TABLE_H_IFJ_18_
