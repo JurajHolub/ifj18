@@ -4,6 +4,7 @@
 #include "symtable.h"
 
 enum instruction_e {
+    I_IFJCODE18, // .IFJcode18
     I_MOVE,
     I_CREATEFRAME,
     I_PUSHFRAME,
@@ -57,8 +58,11 @@ enum instruction_e {
     I_JUMPIFNEQ,
     I_JUMPIFEQS,
     I_JUMPIFNEQS,
+    I_EXIT,
     I_BREAK,
-    I_DPRINT
+    I_DPRINT,
+    GEN_TEXT, // any text (e.g. commentary or lib fun)
+    I_UNDEF
 };
 
 typedef struct inst_s {
@@ -66,80 +70,84 @@ typedef struct inst_s {
     data_t *op1;
     data_t *op2;
     data_t *op3;
+    char *text;
 } inst_t;
 
 inst_t* inst_create();
+
 void inst_free(inst_t *inst);
 
-void set_instruction(int instruction, data_t **op1, data_t **op2 , data_t **op3);
-void set_var(data_t **var);
-
+/**
+ * @brief Add one instruction to the end of generated program. If actual frame
+ * is globale -> instruction is at the end of main body of program. If actual
+ * frame is local (function body) -> instruction is at the end of function body.
+ * @pre First must be called create_global_frame().
+ * @param instruction Type of instruction (one of enum instruction_e).
+ * @param op1 First operand of 3 addres code. If instruction has less then 1
+ * operand then parameter is set to NULL. Else it is ptr to item in symbol table.
+ * @param op2 Second operand of 3 addres code. If instruction has less then 2
+ * operand then parameter is set to NULL. Else it is ptr to item in symbol table.
+ * @param op3 Third operand of 3 addres code. If instruction has less then 3
+ * operand then parameter is set to NULL. Else it is ptr to item in symbol table.
+ */
+void add_instruction(int instruction, data_t **op1, data_t **op2 , data_t **op3);
+/**
+ * @brief Add one variable at the start of actual frame (global or local, it
+ * depends where you call it). Only instruction in actual frame whitch will be
+ * still before this variable are instruction added with add_prolog_inst().
+ */
+void add_var(data_t **var);
+/**
+ * @brief Add instruction at the start of actual frame (global or local, it
+ * depends where you call it). Instruction added to generator with this function
+ * will be always at the begining of actual frame body (also before definitions
+ * of all variables), typical use: CREATEFRAME, PUSHFRAME, LABEL ...
+ */
+void add_prolog_inst(int instruction, data_t **op1, data_t **op2 , data_t **op3);
+/**
+ * @brief Add any text at the start of actual frame. Behave like add_prolog_inst().
+ * @pre Expect not dynamicly allocated chars.
+ */
+void add_prolog_text(char *txt);
+/**
+ * @brief Add any text at the end of actual frame. Behave like add_instruction().
+ * @pre Expect not dynamicly allocated chars.
+ */
+void add_text(char *txt);
+/**
+ * @brief Create frame for main body of program. After call of this function,
+ * every instruction added to generator through set_instruction() will be
+ * generated as a part of main body.
+ * @pre Must be called only 1 time (at the start of adding instruction to
+ * generator).
+ */
 void create_global_frame();
+/**
+ * @brief Destroy list of instruction for main body. It is called only 1 time,
+ * after succes code generating.
+ */
 void free_global_frame();
+/**
+ * @brief Create local frame (frame for body of function). After call of this
+ * function every instruction added to generator with set_instruction will be
+ * generated as a part of this function body.
+ * @post Expect call of free_local_frame() at the end of function body.
+ */
 void create_local_frame();
+/**
+ * @brief End of local frame. Add whole local frame to suitable place in main
+ * body of program.
+ */
 void free_local_frame();
 
+/**
+ * @brief Generate whole program.
+ */
 void gen_program();
+
+/**
+ * @brief Generate 1 instruction.
+ */
 void gen_instruction(inst_t *inst);
-
-/*
-
-void MOVE(char *var, char *symb);
-void CREATEFRAME();
-void PUSHFRAME();
-void POPFRAME();
-void DEFVAR(char *var);
-void CALL(char *label);
-void RETURN();
-
-void PUSHS(char *var, char *symb);
-void POPS(char *var);
-void CLEARS();
-
-void ADD(char *var, char *symb1, char *symb2);
-void SUB(char *var, char *symb1, char *symb2);
-void MUL(char *var, char *symb1, char *symb2);
-void DIV(char *var, char *symb1, char *symb2);
-void IDIV(char *var, char *symb1, char *symb2);
-
-void ADDS();
-void SUBS();
-void MULS();
-void DIVS();
-void IDIVS();
-
-void LT(char *var, char *symb1, char *symb2);
-void GT(char *var, char *symb1, char *symb2);
-void EQ(char *var, char *symb1, char *symb2);
-
-void LTS();
-void GTS();
-void EQS();
-
-void AND(char *var, char *symb1, char *symb2);
-void OR(char *var, char *symb1, char *symb2);
-void NOT(char *var, char *symb1, char *symb2);
-
-void ANDS();
-void ORS();
-void NOTS();
-
-void INT2FLOAT(char *var, char *symb);
-void FLOAT2INT(char *var, char *symb);
-void INT2CHAR(char *var, char *symb);
-void STRI2INT(char *var, char *symb1, char *symb2);
-
-void INT2FLOATS();
-void FLOAT2INTS();
-void INT2CHARS();
-void STRI2INTS();
-
-void READ(char *var, char *type);
-void WRITE(char *symb);
-
-
-printf("PUSHS %s", value);
-printf("POPS %s", var);
-*/
 
 #endif // _GEN_OUT_H_IFJ_18_
