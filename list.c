@@ -22,6 +22,7 @@ gen_list_t* gen_list_create()
     
     list->first = NULL;
     list->last = NULL;
+    list->last = NULL;
 
     return list;
 }
@@ -39,7 +40,7 @@ void gen_list_insert_first(gen_list_t *list, inst_t *inst)
         list->last = item;
 
     item->next = list->first;
-    list->first = item->next;
+    list->first = item;
 
     item->inst = inst;
 }
@@ -77,6 +78,9 @@ void gen_list_append(gen_list_t *dst, gen_list_t *appended)
         {
             dst->first = appended->first;
         }
+        if (dst->last == dst->act)
+            dst->act->next = appended->first;
+
         dst->last->next = appended->first;
         dst->last = appended->last;
     }
@@ -88,12 +92,15 @@ void gen_list_delete_first(gen_list_t *list)
 {
     if (list->first != NULL)
     {
+
         gen_item_t *deleted = list->first;
         if (list->first == list->last)
             list->last = NULL;
+        if (list->first == list->act)
+            list->act = NULL;
         list->first = deleted->next;
         
-        free(deleted->inst);
+        inst_free(deleted->inst);
         free(deleted);
     }
 }
@@ -112,4 +119,46 @@ void gen_list_free(gen_list_t *list)
 
     free(list);
     list = NULL;
+}
+
+void gen_list_first(gen_list_t *list)
+{
+    list->act = list->first;
+}
+void gen_list_succ(gen_list_t *list)
+{
+    if (list->act != NULL)
+        list->act = list->act->next;
+}
+void gen_list_post_insert(gen_list_t *list, inst_t *inst)
+{
+    if (list->act != NULL)
+    {
+        gen_item_t *item = malloc(sizeof(gen_item_t));
+        if (item == NULL)
+        {
+            mem_error();
+            return;
+        }
+
+        if (list->last == list->act)
+        {
+            list->last = item;
+        }
+
+        item->next = list->act->next;
+        list->act->next = item;
+
+        item->inst = inst;
+    }
+}
+
+bool gen_list_active(gen_list_t *list)
+{
+    return list->act != NULL;
+}
+
+void gen_list_deactive(gen_list_t *list)
+{
+    list->act = NULL;
 }
