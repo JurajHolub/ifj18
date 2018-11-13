@@ -197,88 +197,6 @@ int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     //return parse_assig(hash_tb, sem_stack, symb3->token);
     return SUCCESS;
 }
-/*
-//     8: E -> f ([E^n])
-int apply_rule_8(table_item_t *hash_tb, stack_item_t *marked)
-{
-    syntax_t *symb1, *symb2, *symb3;
-    symb1 = marked->data;
-    // marked => f ( [E^n] )
-    
-    if (symb1->token->type != FUN)
-        return ERR_SYNTAX;
-
-    if (marked->next != NULL)
-    {
-        symb2 = marked->data;
-        
-        if (symb2->token->type == LEFT_B)
-        {
-            destroy_stack_item(marked->next); 
-            // marked => f E, ... ,E )
-
-            if (marked->next == NULL)
-                return ERR_SYNTAX;
-
-            int cnt = 1;
-            // marked => f E,E, ... ,E )
-
-            while (marked->next->next != NULL)
-            {
-                if (cnt % 2 == 1)   // E
-                {
-                    if (marked->next->data->is_term != false)
-                        return ERR_SYNTAX;
-                }
-                else                // ,
-                {
-                    if (marked->next->data->token->type != DELIM)
-                        return ERR_SYNTAX;
-                }
-                destroy_stack_item(marked->next); 
-
-                if (marked->next->next != NULL)
-                    cnt++;
-            }
-
-            if (cnt % 2 != 1) // E
-                return ERR_SYNTAX;
-
-            if (marked->next->data->token->type != RIGHT_B)
-                return ERR_SYNTAX;
-            
-            destroy_stack_item(marked->next); 
-        }
-        else
-        {
-            int cnt = 1;
-            while (marked->next != NULL)
-            {
-                if (cnt % 2 == 1)   // E
-                {
-                    if (marked->next->data->is_term != false)
-                        return ERR_SYNTAX;
-                }
-                else                // ,
-                {
-                    if (marked->next->data->token->type != DELIM)
-                        return ERR_SYNTAX;
-                }
-                destroy_stack_item(marked->next); 
-
-                if (marked->next != NULL)
-                    cnt++;
-            }
-
-            if (cnt % 2 != 1) // E
-                return ERR_SYNTAX;
-        }
-    }
-
-    //TODO apply semantic analyse for rule_5
-    return SUCCESS;
-}
-*/
 
 char *get_real_type(int type)
 {
@@ -454,21 +372,6 @@ int map_index(int idx)
 
 char prec_table(int top, int token)
 {
-    //char table[12][12] = {
-    ////   not   -    +    /    ==   =    id   (    )    $    ,    f   
-    //    {' ' ,' ', ' ', ' ', '<', '<', '<', '<', '>', '>', '>', '<'},// not
-    //    {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// -
-    //    {'>' ,'>', '>', '<', '>', '>', '<', '<', '>', '>', '>', '<'},// +
-    //    {'>' ,'>', '>', '>', '>', '>', '<', '<', '>', '>', '>', '<'},// /
-    //    {'>' ,'<', '<', '<', '<', '<', '<', '<', '>', '>', '>', '<'},// ==
-    //    {'>' ,'<', '<', '<', '<', '>', '<', '<', '>', '>', '>', '<'},// =
-    //    {'>' ,'>', '>', '>', '>', '=', ' ', ' ', '>', '>', '>', ' '},// id 
-    //    {'<' ,'<', '<', '<', '<', '<', '<', '<', '=', ' ', '=', '<'},// (
-    //    {'>' ,'>', '>', '>', '>', '>', '>', ' ', '>', '>', '>', ' '},// )
-    //    {'<' ,'<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<'},// $
-    //    {'<' ,'<', '<', '<', ' ', '<', '<', '<', '=', '>', '=', '<'},// ,
-    //    {'<' ,'<', '<', '<', ' ', '<', '<', '=', ' ', '>', '=', ' '} // f
-    //};
     char table[9][9] = {
     //   not   -    +    /    ==   id   (    )    $   
         {' ' ,' ', ' ', ' ', '<', '<', '<', '>', '>'},// not
