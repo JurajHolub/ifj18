@@ -8,9 +8,7 @@
 #include "dynamic_string.h"
 #include "top_down_parser.h"
 #include "error_handle.h"
-
-//symbol table used for definitions and semantic analysis in main program body
-table_item_t *global_symtable;
+#include "global_interface.h"
 
 
 void syntax_error(int token_type)
@@ -38,38 +36,54 @@ void syntax_error(int token_type)
 
 int parse(void)
 {
-    global_symtable = get_hash_table();
     //TODO free resources
-    int ret = program_list() ? 0 : 2;
-    destroy_hash_table(global_symtable);
-    return ret;
+    int analysis_result = program_list();
+    remove_all_st();
+    return analysis_result;
 }
 
-bool program_list(void) {
+int program_list(void) {
     token_t *token = get_token();
+    table_item_t *global_symtable = get_main_st();      //TODO doc
 
     //rule <program_list> -> EOF
     if (token->type == EOF) //TODO
     {
-       return true;
+       return SUCCESS;
     }
 
     //rule <program_list> -> <function_def> <program_list>
     else if (token->type == DEF)
     {
+        //expansion of non terminal symbol <function_def>
         ret_token(token);
-        return  function_def() && program_list();
+        int analysis_result = function_def();
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <program_list>
+            analysis_result = program_list();
+        }
+        return analysis_result;
     }
 
     //rule <program_list> -> <statement> <program_list>
     else
     {
+        //expansion of non terminal symbol <statement>
         ret_token(token);
-        return statement(global_symtable) && program_list();
+        int analysis_result = statement(global_symtable);
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <program_list>
+            analysis_result = program_list();
+        }
+        return analysis_result;
     }
 }
 
-bool function_def(void) {
+int function_def(void) {
     token_t *token = get_token();
 
     //rule <function_def> -> def ID(<params>
@@ -83,51 +97,42 @@ bool function_def(void) {
             token_t *tmp = token;
             if ((token = get_token())->type == LEFT_B)
             {
-                if (NULL != search(global_symtable, tmp->attribute))
-                {
-                    setbuf(stdout, 0);
-                    setbuf(stderr, 0);
-                    fprintf(stderr, "Semantic error");
-                    return !ERR_SEM_DEF;
-                }
-
                 //creating symbol table entry
                 data_t symtable_data;
 
                 //inserting data from token to symbol table entry
-                symtable_data.data_type = FUN;
+                symtable_data.type = UNDEF_FUN;
+                symtable_data.value = NIL;
                 symtable_data.id = string_create(NULL);
                 string_append(symtable_data.id, tmp->attribute);
-                symtable_data.value = string_create(NULL);
                 symtable_data.param_cnt = 0;
-                symtable_data.param_id = string_create(NULL);
 
-                //inserting symbol table entry to symbol table
-                insert(global_symtable, &symtable_data);
+                //creating local symbol table for function
+                set_local_st();
+
+                //expansion of non terminal symbol <params>
+                int analysis_result = params(&symtable_data);
+
+                //semantic analysis
+                if (analysis_result == SUCCESS)
+                {
+                    //TODO semantic action
+                }
 
                 //clear memory
                 string_free(symtable_data.id);
-                string_free(symtable_data.value);
-                string_free(symtable_data.param_id);
 
-                //getting data entry for function from symbol table
-                data_t *symtable_data_ptr = search(global_symtable, tmp->attribute);
-
-                //creating local symtable for function body definitions and semantic analysis
-                table_item_t *function_symtable = get_hash_table();
-
-                return params(function_symtable, symtable_data_ptr);
+                return analysis_result;
             }
         }
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
-
+    return ERR_SYNTAX;
 }
 
-bool params(table_item_t *local_symtable, data_t *symtable_data)
+int params(data_t *symtable_data)
 {
     token_t *token = get_token();
 
@@ -137,25 +142,32 @@ bool params(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            bool ret = function_body(local_symtable);
-            destroy_hash_table(local_symtable);
-            return ret;
+            //expansion of non terminal symbol <function_body>
+            return function_body();
         }
     }
 
     //rule <params> -> <param> <param_list>
-    else if (token->type == VAR)  //TODO VAR  premenovat na ID
+    else if (token->type == VAR)
     {
-        //TODO moze sa v tejto funkcii vyskytnut chyba
-        return param(symtable_data, local_symtable, token->attribute) && param_list(local_symtable, symtable_data);
+        //expansion of non terminal symbol <param>
+        int analysis_result = param(symtable_data, token->attribute);   //TODO malloc errors
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <param_list>
+            analysis_result = param_list(symtable_data);
+        }
+
+        return analysis_result;
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool param_list(table_item_t *local_symtable, data_t *symtable_data)
+int param_list(data_t *symtable_data)
 {
     token_t *token = get_token();
 
@@ -165,9 +177,8 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            bool ret = function_body(local_symtable);
-            destroy_hash_table(local_symtable);
-            return ret;
+            //expansion of non terminal symbol <function_body>
+            return function_body();
         }
     }
 
@@ -177,29 +188,40 @@ bool param_list(table_item_t *local_symtable, data_t *symtable_data)
         token = get_token();
         if (token->type == VAR)
         {
-            return param(symtable_data, local_symtable, token->attribute) && param_list(local_symtable, symtable_data);
+            //expansion of non terminal symbol <param>
+            int analysis_result = param(symtable_data, token->attribute);   //TODO malloc errors
+
+            if (analysis_result == SUCCESS)
+            {
+                //expansion of non terminal symbol <param_list>
+                analysis_result = param_list(symtable_data);
+            }
+
+            return analysis_result;
         }
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool param(data_t *symtable_data,table_item_t *local_symtable, string_t param)
+int param(data_t *symtable_data, string_t param)
 {
 
     /*-**************************************************************************
         insert function parameter in global symbol table in function parameters
     *****************************************************************************/
-    char *string_blankspace = " ";
+    /*char *string_blankspace = " ";
     //separating parameters by blank space
-    if (symtable_data->param_id->strlen != 1)
+    if (symtable_data->id->strlen != 1)
     {
         string_append_ch(param, string_blankspace);
     }
-    string_append(symtable_data->param_id, param);
-    symtable_data->param_cnt++;
+    string_append(symtable_data->id, param);
+    symtable_data->param_cnt++;*/
+
+    //TODO generate parameters
 
 
     /*-**************************************************************************
@@ -210,28 +232,25 @@ bool param(data_t *symtable_data,table_item_t *local_symtable, string_t param)
     data_t local_symtable_data;
 
     //inserting data from token to symbol table entry
-    local_symtable_data.data_type = VAR;
-    local_symtable_data.id = string_create(NULL);
+    local_symtable_data.type = UNDEF;
+    local_symtable_data.value = NIL;
+    local_symtable_data.id = string_create(NULL);   //TODO malloc errors
     string_append(local_symtable_data.id, param);
-    local_symtable_data.value = string_create(NULL);
     local_symtable_data.param_cnt = 0;
-    local_symtable_data.param_id = string_create(NULL);
 
     //inserting symbol table entry to symbol table
-    insert(local_symtable, &local_symtable_data);
+    insert(get_local_st(), &local_symtable_data);
 
     //clear memory
     string_free(local_symtable_data.id);
-    string_free(local_symtable_data.value);
-    string_free(local_symtable_data.param_id);
 
-
-    return true;
+    return SUCCESS;
 }
 
-bool function_body(table_item_t *local_symtable)
+int function_body()
 {
     token_t *token = get_token();
+    table_item_t *local_symtable = get_local_st();
 
     //rule <function-body> -> end EOL
     if (token->type == END)
@@ -239,23 +258,33 @@ bool function_body(table_item_t *local_symtable)
         token = get_token();
         if (token->type == EOL)
         {
-            return true;
+            return SUCCESS;
         }
     }
 
     //rule <function-body> -> <stat> <function_body>
-    else if(token->type == IF || token->type == WHILE || token->type == VAR)
+    else
     {
         ret_token(token);
-        return statement(local_symtable) && function_body(local_symtable);
+
+        //expansion of non terminal symbol <statement>
+        int analysis_result = statement(local_symtable);
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <function_body>
+            analysis_result = function_body();
+        }
+
+        return analysis_result;
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool statement(table_item_t *symtable)
+int statement(table_item_t *symtable)
 {
     token_t *token = get_token();
 
@@ -276,34 +305,33 @@ bool statement(table_item_t *symtable)
     //rule <statement> -> <assignment> EOL
     else
     {
+        //expansion of non terminal symbol <assignment>
         ret_token(token);
-        //TODO
-        bool result = assignment(symtable);
-        if (result != true)
-        {
-            return result;
-        }
+        int analysis_result = assignment(symtable);
 
-        token = get_token();
-        if (token->type == EOL)
+        if (analysis_result == SUCCESS)
         {
-            return true;
+            token = get_token();
+            analysis_result = token->type == EOL ? 0 : ERR_SYNTAX;
         }
+        return analysis_result;
     }
-
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return false;
 }
 
-bool if_statement(table_item_t *symtable)
+int if_statement(table_item_t *symtable)
 {
     token_t *token = get_token();
 
     //rule <if_statement> -> if <expression> then EOL <if_body>
     if (token->type == IF)
     {
-        if (parse_expression(symtable) == 0)
+        //expansion of non terminal symbol <expression>
+        int analysis_result = parse_expression(symtable);
+        if (analysis_result != SUCCESS)
+        {
+            return analysis_result;
+        }
+        else
         {
             token = get_token();
             if (token->type == THEN)
@@ -311,6 +339,7 @@ bool if_statement(table_item_t *symtable)
                 token = get_token();
                 if (token->type == EOL)
                 {
+                    //expansion of non terminal symbol <if_body>
                     return if_body(symtable);
                 }
             }
@@ -319,10 +348,10 @@ bool if_statement(table_item_t *symtable)
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool if_body(table_item_t *symtable)
+int if_body(table_item_t *symtable)
 {
     token_t *token = get_token();
 
@@ -332,24 +361,32 @@ bool if_body(table_item_t *symtable)
         token = get_token();
         if (token->type == EOL)
         {
+            //expansion of non terminal symbol <else_body>
             return else_body(symtable);
-        }
-        else
-        {
-            syntax_error(token->type);
-            return false;
         }
     }
 
     //rule <if_body> -> <stat> <if_body>
     else
     {
+        //expansion of non terminal symbol <statement>
         ret_token(token);
-        return statement(symtable) && if_body(symtable);
+        int analysis_result = statement(symtable);
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <if_body>
+            analysis_result = if_body(symtable);
+        }
+        return analysis_result;
     }
+
+    //rule failed, bad syntax
+    syntax_error(token->type);
+    return ERR_SYNTAX;
 }
 
-bool else_body(table_item_t *symtable)
+int else_body(table_item_t *symtable)
 {
     token_t *token = get_token();
 
@@ -359,31 +396,44 @@ bool else_body(table_item_t *symtable)
         token = get_token();
         if (token->type == EOL)
         {
-            return true;
-        }
-        else
-        {
-            syntax_error(token->type);
-            return false;
+            return SUCCESS;
         }
     }
 
     //rule <else_body> -> <stat> <else_body>
     else
     {
+        //expansion of non terminal symbol <statement>
         ret_token(token);
-        return statement(symtable) && else_body(symtable);
+        int analysis_result = statement(symtable);
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol <else_body>
+            analysis_result = else_body(symtable);
+        }
+        return analysis_result;
     }
+
+    //rule failed, bad syntax
+    syntax_error(token->type);
+    return ERR_SYNTAX;
 }
 
-bool while_statement(table_item_t *symtable)
+int while_statement(table_item_t *symtable)
 {
     token_t *token = get_token();
 
     //rule <while_statement> -> while <expression> do EOL <while_body>
     if (token->type == WHILE)
     {
-        if (parse_expression(symtable) == 0)
+        //expansion of non terminal symbol <expression>
+        int analysis_result = parse_expression(symtable);
+        if (analysis_result != SUCCESS)
+        {
+            return analysis_result;
+        }
+        else
         {
             token = get_token();
             if (token->type == DO)
@@ -391,6 +441,7 @@ bool while_statement(table_item_t *symtable)
                 token = get_token();
                 if (token->type == EOL)
                 {
+                    //expansion of non terminal symbol <while_body>
                     return while_body(symtable);
                 }
             }
@@ -399,10 +450,10 @@ bool while_statement(table_item_t *symtable)
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool while_body(table_item_t *symtable)
+int while_body(table_item_t *symtable)
 {
     token_t *token = get_token();
 
@@ -412,29 +463,37 @@ bool while_body(table_item_t *symtable)
         token = get_token();
         if (token->type == EOL)
         {
-            return true;
-        }
-        else
-        {
-            syntax_error(token->type);
-            return false;
+            return SUCCESS;
         }
     }
 
     //rule <while_body> -> <stat> <while_body>
     else
     {
+        //expansion of non terminal symbol <statement>
         ret_token(token);
-        return statement(symtable) && while_body(symtable);
+        int analysis_result = statement(symtable);
+
+        if (analysis_result == SUCCESS)
+        {
+            //expansion of non terminal symbol while_body>
+            analysis_result = while_body(symtable);
+        }
+        return analysis_result;
     }
+
+    //rule failed, bad syntax
+    syntax_error(token->type);
+    return ERR_SYNTAX;
 }
 
-bool assignment(table_item_t *symtable) {
+int assignment(table_item_t *symtable)
+{
     token_t *token = get_token();
     token_t *next_token = get_token();
     if (token == NULL)
     {
-        return !ERR_LEX;
+        return ERR_LEX;
     }
 
     /*-***************************************
@@ -444,66 +503,25 @@ bool assignment(table_item_t *symtable) {
     ******************************************/
     if (token->type == VAR && next_token->type == ASSIG)
     {
-        //by assignment have to be updated or created symbol table entry for L-value variable
-        data_t *l_value = search(symtable, token->attribute);
-        if (l_value == NULL)
-        {
-            //creating symbol table entry
-            data_t symtable_data;
-
-            //inserting data from token to symbol table entry
-            symtable_data.data_type = VAR;
-            symtable_data.id = string_create(NULL);
-            string_append(symtable_data.id, token->attribute);
-            symtable_data.value = string_create(NULL); //TODO ma tam byt nil?
-            symtable_data.param_cnt = 0;
-            symtable_data.param_id = string_create(NULL);
-
-            //inserting symbol table entry to symbol table
-            insert(global_symtable, &symtable_data);
-
-            //clear memory
-            string_free(symtable_data.id);
-            string_free(symtable_data.value);
-            string_free(symtable_data.param_id);
-        }
-
-        //TODO
-        else if (l_value->data_type == FUN)
-        {
-            setbuf(stderr, 0);
-            setbuf(stdout, 0);
-            fprintf(stderr, "Semantic error\n");
-            return !ERR_SEM_DEF;
-        }
-
+        token = get_token();
         next_token = get_token();
 
         //rule <assignment> -> ID = <function_call>
-        if (token->type == VAR || token->type == FUN)
+        if ((token->type == VAR || token->type == FUN) && (next_token->type == VAR || next_token->type == LEFT_B))
         {
-            data_t *id_data = search(symtable, next_token->attribute);
-            if (id_data != NULL && id_data->data_type == FUN)
-            {
-                ret_token(next_token);
-                //TODO
-                bool result = function_call(symtable);
-                //TODO set data type of variable
-                return result;
-            }
-        }
-        //rule <assignment> -> ID = <expression>
-        if(token->type != FUN)
-        {
+            //expansion of non terminal symbol <function_call>
             ret_token(next_token);
-            return !parse_expression(symtable);
+            ret_token(token);
+            return function_call(symtable);
         }
-        else
+
+        //rule <assignment> -> ID = <expression>
+        else if(token->type != FUN) //TODO
         {
-            setbuf(stderr, 0);
-            setbuf(stdout, 0);
-            fprintf(stderr, "Semantic error undefined function");
-            return false;
+            //expansion of non terminal symbol <expression>
+            ret_token(next_token);
+            ret_token(token);
+            return parse_expression(symtable);
         }
     }
 
@@ -514,71 +532,67 @@ bool assignment(table_item_t *symtable) {
     ******************************************/
     else
     {
-        //we don't analyze token after first ID in line or first function ID in line in this rule
-        ret_token(next_token);
-
         //rule <assignment> -> <function_call>
-        if (token->type == VAR || token->type == FUN )
+        if ((token->type == VAR || token->type == FUN) && (next_token->type == VAR || next_token->type == LEFT_B))
         {
-            data_t *id_data = search(symtable, token->attribute);
-            if (id_data != NULL && id_data->data_type == FUN)
-            {
-                ret_token(token);
-                return function_call(symtable);
-            }
+            //expansion of non terminal symbol <function_call>
+            ret_token(next_token);
+            ret_token(token);
+            return function_call(symtable);
         }
 
         //rule <assignment> -> <expression>
-        //TODO move to bottom up parser
-        if (token->type != FUN)
+        else if(token->type != FUN) //TODO
         {
+            //expansion of non terminal symbol <expression>
+            ret_token(next_token);
             ret_token(token);
-            return !parse_expression(symtable);
+            return parse_expression(symtable);
         }
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool function_call(table_item_t *symtable)
+int function_call(table_item_t *symtable)
 {
     token_t *token = get_token();
 
     //rule <function_call> -> ID <call_params> EOL
     if (token->type == VAR)
     {
-        if (call_params() == true)
-        {
-                return true;
-        }
+        //expansion of non terminal symbol <call_params>
+        return call_params();
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool call_params(void)
+int call_params(void)
 {
     token_t *token = get_token();
 
     //rule <call_params> -> (<call_param>)
     if (token->type == LEFT_B)
     {
-        if (call_param() == true)
+        //expansion of non terminal symbol <call_param>
+        int analysis_result = call_param();
+        if (analysis_result != SUCCESS)
+        {
+            return analysis_result;
+        }
+        else
         {
             token = get_token();
             if (token->type == RIGHT_B)
             {
-                return true;
+                return SUCCESS;
             }
         }
-
-        //rule failed, bad syntax
-        syntax_error(token->type);
-        return false;
     }
 
     //rule <call_params> -> <call_param>
@@ -587,9 +601,13 @@ bool call_params(void)
         ret_token(token);
         return call_param();
     }
+
+    //rule failed, bad syntax
+    syntax_error(token->type);
+    return ERR_SYNTAX;
 }
 
-bool call_param(void)
+int call_param(void)
 {
     token_t *token = get_token();
 
@@ -603,15 +621,15 @@ bool call_param(void)
     else if (token->type == RIGHT_B || token->type == EOL)
     {
         ret_token(token);
-        return true;
+        return SUCCESS;
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }
 
-bool call_param_list(void)
+int call_param_list(void)
 {
     token_t *token = get_token();
 
@@ -629,10 +647,10 @@ bool call_param_list(void)
     else if (token->type == RIGHT_B || token->type == EOL)
     {
         ret_token(token);
-        return true;
+        return SUCCESS;
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
-    return false;
+    return ERR_SYNTAX;
 }

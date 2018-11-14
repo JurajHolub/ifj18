@@ -18,23 +18,23 @@
 #include "symtable.h"
 
 /**
- * @brief Run syntax analysis, initialize and clean data used by analysis
- * @return 0 correct syntax, 2 incorrect syntax
+ * @brief Run syntax analysis
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
 int parse(void);
 
 /**
  * @brief Nonterminal symbol program_list and it's syntactic rules simulation
  *
- * Check's syntax of the main program body
+ * Check's syntax of the main program body and creates global symbol table
  *
  * <program_list> -> EOF
  * <program_list> -> <function_def> <program_list>
  * <program_list> -> <statement> <program_list>
  *
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool program_list(void);
+int program_list(void);
 
 
 /**
@@ -45,13 +45,12 @@ bool program_list(void);
  * nonterminal symbols <function_def>, <params>, <params_list>, <param>, <fun-body> are set of nonterminal symbols and
  * it's rules, that check syntactic correct function definition
  *
- * Important: this function allocates entry for function in symbol table and insert type function and it's name here
- * This function allocates local symbol table for definitions in function body, too The table entry and local symbol table
- * are given to other functions checking function definition syntax by parameter for next use
+ * Function creates entry for function in symbol table and creates local symbol table for definitions in function body.
+ * Function calls semantic analysis and generates prologue and epilogue of function.
  *
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool function_def(void);
+int function_def(void);
 
 /**
  * @brief Nonterminal symbol params and it's syntactic rules simulation
@@ -62,11 +61,10 @@ bool function_def(void);
  * nonterminal symbols <function_def>, <params>, <params_list>, <param>, <fun-body> are set of nonterminal symbols and
  * it's rules, that check syntactic correct function definition
  *
- * @param symtable_data allocated entry for actual function in global symbol table used for inserting function's parameters
- * @param local_symtable this pointer function only gives to next function for use in function function_body()
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @param symtable_data entry for actual function in global symbol table used for inserting function's parameters
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool params(table_item_t *local_symtable, data_t *symtable_data);
+int params(data_t *symtable_data);
 
 /**
  * @brief Nonterminal symbol param_list and it's syntactic rules simulation
@@ -78,21 +76,20 @@ bool params(table_item_t *local_symtable, data_t *symtable_data);
  * it's rules, that check syntactic correct function definition
  *
  * @param symtable_data allocated entry for actual function in global symbol table used for inserting function's parameters
- * @param local_symtable this pointer function only gives to next function for use in function function_body()
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool param_list(table_item_t *local_symtable, data_t *symtable_data);
+int param_list(data_t *symtable_data);
 
 /**
  * @brief Nonterminal symbol param checks no syntax, only insure saving of parameters in symbol table and incrementing
  * parameters counter and creates local variables for variables in local symbol table
  *
- * @param symtable_data allocated entry for actual function in global symbol table used for inserting function's parameters
- * @param local_symtable local symbol table for parsed function
+ * Function saves function's parameters as local variables and generates them as local variables in prologue of function.
+ * @param entry in global symbol table for actual function
  * @param param inserted function parameter
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 1
  */
-bool param(data_t *symtable_data, table_item_t *local_symtable, string_t param);
+int param(data_t *symtable_data, string_t param);
 
 /**
  * @brief Nonterminal symbol function_body and it's syntactic rules simulation
@@ -100,9 +97,9 @@ bool param(data_t *symtable_data, table_item_t *local_symtable, string_t param);
  * <function-body> -> <stat> <fun_body>
  * <function-body> -> end EOL
  * @param local_symtable symbol table used by definitions in function body, it's not symbol table used in main body of program
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool function_body(table_item_t *local_symtable);
+int function_body();
 
 
 /**
@@ -115,9 +112,9 @@ bool function_body(table_item_t *local_symtable);
  * <statement> -> <assignment> EOL
  *
  * @param symtable symbol table used by definitions in statement
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool statement(table_item_t *symtable);
+int statement(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol if_statement and it's syntactic rules simulation
@@ -128,9 +125,9 @@ bool statement(table_item_t *symtable);
  * that check syntax of if statement
  *
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool if_statement(table_item_t *symtable);
+int if_statement(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol if_body and it's syntactic rules simulation
@@ -142,9 +139,9 @@ bool if_statement(table_item_t *symtable);
  * that check syntax of if statement
  *
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool if_body(table_item_t *symtable);
+int if_body(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol else_body and it's syntactic rules simulation
@@ -156,9 +153,9 @@ bool if_body(table_item_t *symtable);
  * that check syntax of if statement
  *
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool else_body(table_item_t *symtable);
+int else_body(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol while_statement and it's syntactic rules simulation
@@ -169,9 +166,9 @@ bool else_body(table_item_t *symtable);
  * that check syntax of while statement
  *
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool while_statement(table_item_t *symtable);
+int while_statement(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol while_body and it's syntactic rules simulation
@@ -183,15 +180,13 @@ bool while_statement(table_item_t *symtable);
  * that check syntax of while statement
  *
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool while_body(table_item_t *symtable);
+int while_body(table_item_t *symtable);
 
 /**
- * @brief Nonterminal symbol assignment checks syntax, of assignment statement. In assignment can be term without
- * assignment to L-value. We use extended evaluation of this grammar rule, using semantic action finding id data type
- * in symbol table.
- * If new value is created, we will ad this to symbol table
+ * @brief Nonterminal symbol assignment checks syntax, of assignment statement and calls semantic analysis in case
+ * there is an assignment to L-value.
  *
  * <assignment> -> ID = <function_call>
  *        --if after first ID in line is = and then ID saved in symbol table as data_type function
@@ -203,9 +198,9 @@ bool while_body(table_item_t *symtable);
  *        --in other cases
  *
  * @param symtable symbol table used by definitions in statement
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool assignment(table_item_t *symtable);
+int assignment(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol function_call and it's syntactic rules simulation
@@ -216,9 +211,9 @@ bool assignment(table_item_t *symtable);
  * and it's rules, that check syntactic correct function call
  *
  * @param symtable to check correct function call according to it's definition in semantic analysis
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool function_call(table_item_t *symtable);
+int function_call(table_item_t *symtable);
 
 /**
  * @brief Nonterminal symbol call_params and it's syntactic rules simulation
@@ -229,9 +224,9 @@ bool function_call(table_item_t *symtable);
  * nonterminal symbols <function_call>, <call_params>, <call_params_list>, <call_param> are set of nonterminal symbols
  * and it's rules, that check syntactic correct function call
  *
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool call_params(void);
+int call_params(void);
 
 /**
  * @brief Nonterminal symbol call_param and it's syntactic rules simulation
@@ -242,9 +237,9 @@ bool call_params(void);
  * nonterminal symbols <function_call>, <call_params>, <call_params_list>, <call_param> are set of nonterminal symbols
  * and it's rules, that check syntactic correct function call
  *
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool call_param(void);
+int call_param(void);
 
 /**
  * @brief Nonterminal symbol call_param_list and it's syntactic rules simulation
@@ -255,8 +250,8 @@ bool call_param(void);
  * nonterminal symbols <function_call>, <call_params>, <call_params_list>, <call_param> are set of nonterminal symbols
  * and it's rules, that check syntactic correct function call
  *
- * @return true if syntax of program follow this rule derived rules. Simple syntax is correct, else false.
+ * @return 0 if parsed program is correct, else integer code according to error type
  */
-bool call_param_list(void);
+int call_param_list(void);
 
 #endif //IFJ18_TOP_DOWN_PARSER_H
