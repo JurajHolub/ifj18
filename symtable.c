@@ -106,7 +106,7 @@ void insert(table_item_t *table, data_t *data)
         table[idx].head = list_insert(table[idx].head, data);
 }
 
-string_t insert_tmp(table_item_t *table, int type, string_t value)
+string_t insert_tmp(table_item_t *table, int type)
 {
     static int tmp_count = 0; // one counter for all tmp variables => not colisions
     

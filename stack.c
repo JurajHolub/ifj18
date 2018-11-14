@@ -162,7 +162,7 @@ syntax_t* alloc_syntax_item(token_t *token, table_item_t *hash_tb)
 
     data_t *sym = search(hash_tb, token->attribute);
     if (sym != NULL)
-        copy_of_token->type = sym->data_type;
+        copy_of_token->type = sym->type;
     else
         copy_of_token->type = token->type;
 
@@ -227,8 +227,8 @@ void print_sem_stack(stack_t *sem_stack)
     stack_item_t *bot = sem_stack->bot;
     while (bot != NULL)
     {
-        char *symbol = bot->data;
-        fprintf(stderr,"%s, ", symbol);
+        string_t symbol = bot->data;
+        fprintf(stderr,"%s, ", symbol->string);
         bot = bot->next;
     }
 
@@ -258,7 +258,8 @@ void free_sem_stack(stack_t *stack)
     {
         i = stack_top(stack);
         stack_pop(stack);
-        string_free(i->data);
+        if (i->data != NULL)
+            string_free(i->data);
     }
 
     free(stack);

@@ -101,7 +101,7 @@ void insert(table_item_t *table, data_t *data);
  * @param data Data witch will be initailized.
  * @param type Type of temporary symbol initialized in data.
  */
-string_t insert_tmp(table_item_t *table, int type, string_t value);
+string_t insert_tmp(table_item_t *table, int type);
 
 /******************************************************************************
 ***************************** INSIDE LOGIC ************************************
