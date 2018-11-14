@@ -461,29 +461,56 @@ void gen_program()
     }
 }
 
-char* symb_type(data_t* data)
+string_t get_symb(data_t* data)
 {
+    char id[data->id->strlen+20];
+
     if (data->type == VAR)
     {
-        return "LF";
+        sprintf(id, "LF@%s", data->id->string);
+        return string_create(id);
     }
     else // CONST
     {
         if (data->value == INTEGER)
-            return "int";
+        {
+            sprintf(id, "int@%d", atoi(data->id->string));
+            return string_create(id);
+        }
         else if (data->value == FLOAT)
-            return "float";
+        {
+            sprintf(id, "float@%a", atof(data->id->string));
+            return string_create(id);
+        }
         else if (data->value == STRING)
-            return "string";
+        {
+            sprintf(id, "string@%s", data->id->string);
+            return string_create(id);
+        }
         else if (data->value == BOOL)
-            return "bool";
+        {
+            sprintf(id, "bool@%s", data->id->string);
+            return string_create(id);
+        }
         else
-            return "nil";
+        {
+            return string_create("nil@nil");
+        }
     }
 }
 
 void gen_instruction(inst_t *inst)
 {
+    string_t op1 = NULL;
+    string_t op2 = NULL;
+    string_t op3 = NULL;
+    if (inst->op1 != NULL)
+        op1 = get_symb(inst->op1);
+    if (inst->op2 != NULL)
+        op2 = get_symb(inst->op2);
+    if (inst->op3 != NULL)
+        op3 = get_symb(inst->op3);
+
     switch (inst->instruction)
     {
         case GEN_TEXT:
@@ -493,7 +520,7 @@ void gen_instruction(inst_t *inst)
             printf(".IFJcode18\n");
             break;
         case I_MOVE:
-            printf("MOVE LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op2), inst->op2->id->string);
+            printf("MOVE %s %s\n", op1->string, op2->string);
             break;
         case I_CREATEFRAME:
             printf("CREATEFRAME\n");
@@ -505,17 +532,17 @@ void gen_instruction(inst_t *inst)
             printf("POPFRAME\n");
             break;
         case I_DEFVAR:
-            printf("DEFVAR LF@%s\n", inst->op1->id->string);
-            printf("MOVE LF@%s nil@nil\n", inst->op1->id->string);
+            printf("DEFVAR %s\n", op1->string);
+            printf("MOVE %s nil@nil\n", op1->string);
             break;
         case I_LT:
-            printf("LT LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("LT %s %s\n", op1->string, op2->string);
             break;
         case I_GT:
-            printf("GT LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("GT %s %s\n", op1->string, op2->string);
             break;
         case I_EQ:
-            printf("EQ LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("EQ %s %s\n", op1->string, op2->string);
             break;
         case I_CALL:
             printf("CALL %s\n", inst->op1->id->string);
@@ -524,38 +551,46 @@ void gen_instruction(inst_t *inst)
             printf("RETURN\n");
             break;
         case I_ADD:
-            printf("ADD LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("ADD %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_SUB:
-            printf("SUB LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("SUB %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_MUL:
-            printf("MUL LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("MUL %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_DIV:
-            printf("DIV LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("DIV %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_IDIV:
-            printf("IADD LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("IDIV %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_AND:
-            printf("AND LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("AND %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_OR:
-            printf("OR LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("OR %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_NOT:
-            printf("NOT LF@%s %s@%s\n", inst->op1->id->string, symb_type(inst->op1), inst->op2->id->string);
+            printf("NOT %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_INT2FLOAT:
+            printf("INT2FLOAT %s %s\n", op1->string, op2->string);
+            break;
         case I_FLOAT2INT:
+            printf("FLOAT2INT %s %s\n", op1->string, op2->string);
+            break;
         case I_INT2CHAR:
+            printf("INT2CHAR %s %s\n", op1->string, op2->string);
+            break;
         case I_STRI2INT:
+            printf("STRI2INT %s %s %s\n", op1->string, op2->string, op3->string);
+            break;
         case I_PUSHS:
-            printf("PUSHS %s@%s\n", symb_type(inst->op1), inst->op1->id->string);
+            printf("PUSHS %s\n", op1->string);
             break;
         case I_POPS:
-            printf("POPS %s@%s\n", symb_type(inst->op1), inst->op1->id->string);
+            printf("POPS %s\n", op1->string);
             break;
         case I_CLEARS:
             printf("CLEARS\n");
@@ -612,12 +647,10 @@ void gen_instruction(inst_t *inst)
             printf("JUMPIFNEQS\n");
             break;
         case I_CONCAT:
-            printf("CONCAT LF@%s %s@%s %s@%s\n", inst->op1->id->string,
-            symb_type(inst->op2), inst->op2->id->string,
-            symb_type(inst->op3), inst->op3->id->string);
+            printf("CONCAT %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_TYPE:
-            printf("TYPE LF@%s %s@%s\n", symb_type(inst->op1), symb_type(inst->op2), inst->op2->id->string);
+            printf("TYPE %s %s\n", op1->string, op2->string);
             break;
         case I_LABEL:
             printf("LABEL %s\n", inst->op1->id->string);
@@ -626,14 +659,10 @@ void gen_instruction(inst_t *inst)
             printf("JUMP %s\n", inst->op1->id->string);
             break;
         case I_JUMPIFEQ:
-            printf("JUMPIFEQ %s %s@%s %s@%s\n", inst->op1->id->string,
-            symb_type(inst->op2), inst->op2->id->string,
-            symb_type(inst->op3), inst->op3->id->string);
+            printf("JUMPIFEQ %s %s %s\n", inst->op1->id->string, op2->string, op3->string);
             break;
         case I_JUMPIFNEQ:
-            printf("JUMPIFNEQ %s %s@%s %s@%s\n", inst->op1->id->string,
-            symb_type(inst->op2), inst->op2->id->string,
-            symb_type(inst->op3), inst->op3->id->string);
+            printf("JUMPIFNEQ %s %s %s\n", inst->op1->id->string, op2->string, op3->string);
             break;
         case I_EXIT:
             printf("EXIT %s\n", inst->op1->id->string);
@@ -648,4 +677,11 @@ void gen_instruction(inst_t *inst)
             fprintf(stderr, "Undefined instruction in generator.\n");
             break;
     }
+
+    if (inst->op1 != NULL)
+        string_free(op1);
+    if (inst->op2 != NULL)
+        string_free(op2);
+    if (inst->op3 != NULL)
+        string_free(op3);
 }
