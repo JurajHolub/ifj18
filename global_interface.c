@@ -135,8 +135,5 @@ void remove_all_st()
         stack_pop(&glob_local_st);
         destroy_hash_table(del);
     }
-
-    if (expr_type != NULL)
-        string_free(expr_type);
 }
 

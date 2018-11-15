@@ -47,8 +47,8 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next != NULL)
         return ERR_SYNTAX;
 
-    //return parse_operand(hash_tb, sem_stack, symb->token);
-    return SUCCESS;
+    return parse_operand(hash_tb, sem_stack, symb->token);
+    //return SUCCESS;
 }
 // 2: E -> ( E )
 int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
@@ -323,6 +323,7 @@ int parse_expression(table_item_t *hash_tb)
 
     free_syntax_item(input_sym);
     free_syntax_stack(stack);
+    print_sem_stack(sem_stack);
     free_sem_stack(sem_stack);
 
     ret_token(token);

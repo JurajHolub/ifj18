@@ -479,7 +479,7 @@ string_t get_symb(data_t* data)
         }
         else if (data->value == FLOAT)
         {
-            sprintf(id, "float@%a", atof(data->id->string));
+            sprintf(id, "float@%a", (double)atof(data->id->string));
             return string_create(id);
         }
         else if (data->value == STRING)

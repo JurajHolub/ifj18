@@ -5,11 +5,13 @@ OBJ = main.o \
 	  symtable.o \
 	  error_handle.o \
 	  semantic_parser.o \
+	  semantic_parser_td.o \
 	  stack.o \
 	  dynamic_string.o \
 	  list.o \
 	  gen_out.o \
 	  test.o \
+	  global_interface.o \
 	  top_down_parser.o
 EXECUTABLE = main
 
