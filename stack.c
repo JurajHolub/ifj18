@@ -252,14 +252,14 @@ stack_t* init_sem_stack()
 
 void free_sem_stack(stack_t *stack)
 {
-    stack_item_t *i;
+    string_t s;
 
     while (!stack_empty(stack))
     {
-        i = stack_top(stack);
+        s = stack_top(stack);
         stack_pop(stack);
-        if (i->data != NULL)
-            string_free(i->data);
+        if (s != NULL)
+            string_free(s);
     }
 
     free(stack);
