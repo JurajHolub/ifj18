@@ -40,7 +40,6 @@ int parse(void)
 {
     //TODO free resources
     int analysis_result = program_list();
-    remove_all_st();
     return analysis_result;
 }
 
@@ -529,8 +528,9 @@ int assignment(table_item_t *symtable)
             if (analysis_result == SUCCESS)
             {
                 ste_Lvalue.type = UNDEF;
+#ifdef SEMANTIC
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
-
+#endif
                 //TODO generate assignment of return value
             }
             //clear memory
@@ -547,7 +547,7 @@ int assignment(table_item_t *symtable)
             int analysis_result = parse_expression(symtable);
 
 #ifdef SEMANTIC
-            //actualize entry in symbol table for L valuea and call semantic analysis
+            //calling semantic analysis, which actualize entry in symbol table for L value, too
             if (analysis_result == SUCCESS)
             {
                 data_t *ste_ptr_Rvalue = get_expr_type();
@@ -606,9 +606,9 @@ int assignment(table_item_t *symtable)
 
                 }
             }
+#endif
             //clear memory
             string_free(ste_Lvalue.id);
-#endif
 
             return analysis_result;
         }
@@ -636,7 +636,8 @@ int assignment(table_item_t *symtable)
             //expansion of non terminal symbol <expression>
             ret_token(next_token);
             ret_token(token);
-            return parse_expression(symtable);
+            int ret = parse_expression(symtable);
+            return ret;
         }
     }
 
