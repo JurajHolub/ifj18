@@ -37,7 +37,7 @@ table_item_t* get_local_st();
  * @return Id to actual symbol table where is saved result of expression.
  * It could be VAR, VAR_INTIGER, ... ,NIL, BOOL(for if, while).
  */
-string_t get_expr_type();
+data_t *get_expr_type();
 
 /*****************************************************************************/
 /******************************* SETTERS *************************************/
@@ -52,7 +52,7 @@ void set_local_st();
  * expression.
  * @param Id to symbol table.
  */
-void set_expr_type(string_t expr);
+void set_expr_type(data_t *expr);
 /**
  * @brief Remove all symbol tables.
  */

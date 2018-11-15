@@ -21,7 +21,7 @@ gen_list_t* gen_list_create()
     }
     
     list->first = NULL;
-    list->last = NULL;
+    list->act = NULL;
     list->last = NULL;
 
     return list;

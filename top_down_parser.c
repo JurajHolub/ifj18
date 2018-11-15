@@ -9,6 +9,8 @@
 #include "top_down_parser.h"
 #include "error_handle.h"
 #include "global_interface.h"
+#include "semantic_parser.h"
+#include "gen_out.h"
 
 
 void syntax_error(int token_type)
@@ -503,6 +505,15 @@ int assignment(table_item_t *symtable)
     ******************************************/
     if (token->type == VAR && next_token->type == ASSIG)
     {
+        //creating symbol table entry for L value
+        data_t ste_Lvalue;
+        //inserting data from token to symbol table entry
+        ste_Lvalue.type = UNDEF;
+        ste_Lvalue.value = NIL;
+        ste_Lvalue.id = string_create(NULL);   //TODO malloc errors
+        string_append(ste_Lvalue.id, token->attribute);
+        ste_Lvalue.param_cnt = 0;
+
         token = get_token();
         next_token = get_token();
 
@@ -512,7 +523,19 @@ int assignment(table_item_t *symtable)
             //expansion of non terminal symbol <function_call>
             ret_token(next_token);
             ret_token(token);
-            return function_call(symtable);
+            int analysis_result = function_call(symtable);
+
+            //actualize entry in symbol table for L value and call semantic analysis
+            if (analysis_result == SUCCESS)
+            {
+                ste_Lvalue.type = UNDEF;
+                analysis_result = sem_action_assig(symtable, &ste_Lvalue);
+
+                //TODO generate assignment of return value
+            }
+            //clear memory
+            string_free(ste_Lvalue.id);
+            return analysis_result;
         }
 
         //rule <assignment> -> ID = <expression>
@@ -521,7 +544,73 @@ int assignment(table_item_t *symtable)
             //expansion of non terminal symbol <expression>
             ret_token(next_token);
             ret_token(token);
-            return parse_expression(symtable);
+            int analysis_result = parse_expression(symtable);
+
+#ifdef SEMANTIC
+            //actualize entry in symbol table for L valuea and call semantic analysis
+            if (analysis_result == SUCCESS)
+            {
+                data_t *ste_ptr_Rvalue = get_expr_type();
+                ste_Lvalue.type = ste_ptr_Rvalue->type;
+                ste_Lvalue.value = ste_ptr_Rvalue->value;
+
+                analysis_result = sem_action_assig(symtable, &ste_Lvalue);
+
+                if (analysis_result == SUCCESS)
+                {
+                    //getting symbol table entry of L value from symbol table
+                    data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
+
+                    //generating assignment
+                    add_instruction(I_POPS, &ste_ptr_Lvalue, NULL, NULL);
+
+                    //creating symbol table entry for string constant "bool"
+                    data_t ste_const_boolString;
+                    //inserting data from token to symbol table entry
+                    ste_const_boolString.type = CONST;
+                    ste_const_boolString.value = STRING;
+                    ste_const_boolString.id = string_create("bool");   //TODO malloc errors
+                    ste_const_boolString.param_cnt = 0;
+                    insert(symtable, &ste_const_boolString);
+                    //clear memory
+                    string_free(ste_const_boolString.id);
+                    data_t *ste_ptr_const_boolString = search(symtable, ste_const_boolString.id);
+
+                    //wasting memmory
+                    string_t str_var_typeString = insert_tmp(symtable, STRING);
+                    data_t *ste_ptr_var_typeString = search(symtable, str_var_typeString);
+
+                    add_instruction(I_TYPE, &ste_ptr_var_typeString, &ste_ptr_Lvalue, NULL);
+
+                    //wasting memmory
+                    string_t str_label_goodType = insert_tmp(symtable, UNDEF);
+                    data_t *ste_ptr_label_goodType = search(symtable, str_label_goodType);
+
+                    add_instruction(I_JUMPIFNEQ, &ste_ptr_label_goodType, &ste_ptr_const_boolString, &ste_ptr_Lvalue);
+
+                    //creating symbol table entry for string constant "bool"
+                    data_t ste_const_4Int;
+                    //inserting data from token to symbol table entry
+                    ste_const_4Int.type = CONST;
+                    ste_const_4Int.value = INTEGER;
+                    ste_const_4Int.id = string_create("4");   //TODO malloc errors
+                    ste_const_4Int.param_cnt = 0;
+                    insert(symtable, &ste_const_4Int);
+                    //clear memory
+                    string_free(ste_const_4Int.id);
+                    data_t *ste_ptr_const_4Int = search(symtable, ste_const_4Int.id);
+
+                    add_instruction(I_EXIT, &ste_ptr_const_4Int, NULL, NULL);
+
+                    add_instruction(I_LABEL, &ste_ptr_label_goodType, NULL, NULL);
+
+                }
+            }
+            //clear memory
+            string_free(ste_Lvalue.id);
+#endif
+
+            return analysis_result;
         }
     }
 

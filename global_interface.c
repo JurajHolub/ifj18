@@ -14,7 +14,7 @@
 table_item_t* glob_main_st = NULL;
 table_item_t* glob_fun_st = NULL;
 stack_t glob_local_st;
-string_t expr_type = NULL;
+data_t *expr_type = NULL;
 
 
 table_item_t* get_main_st()
@@ -111,12 +111,12 @@ void set_local_st()
     stack_push(&glob_local_st, local);
 }
 
-string_t get_expr_type()
+data_t *get_expr_type()
 {
     return expr_type;
 }
 
-void set_expr_type(string_t expr)
+void set_expr_type(data_t *expr)
 {
     expr_type = expr;
 }
