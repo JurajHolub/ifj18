@@ -1,9 +1,9 @@
-id
-tmp1
+int
+10
 +
-id
-tmp2
+int
+20
 eol
 EOF
 
-tmp1 + tmp2
+10 + 20

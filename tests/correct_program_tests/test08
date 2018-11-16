@@ -1,3 +1,15 @@
+id
+var1
+=
+int
+10
+eol
+id
+var2
+=
+int
+10
+eol
 if
 id
 var1
@@ -18,6 +30,8 @@ end
 eol
 EOF
 
-if id+id != id/id then
+var1=10
+var2=10
+if var1+var2 != var1/var2 then
 else
 end
