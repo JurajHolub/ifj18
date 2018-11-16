@@ -281,7 +281,7 @@ int parse_expression(table_item_t *hash_tb)
 
     free_syntax_item(input_sym);
     free_syntax_stack(stack);
-    print_sem_stack(sem_stack);
+    //print_sem_stack(sem_stack);
     free_sem_stack(sem_stack);
 
     ret_token(token);
