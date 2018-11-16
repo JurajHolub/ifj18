@@ -120,8 +120,8 @@ int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    //return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
-    return SUCCESS;
+    return parse_arit_op(hash_tb, sem_stack, symb2->token->type);
+    //return SUCCESS;
 }
 //     6: E -> E [==, !=, <, >, <=, >=] E
 int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)

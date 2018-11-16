@@ -159,12 +159,7 @@ syntax_t* alloc_syntax_item(token_t *token, table_item_t *hash_tb)
         return NULL;
     }
     copy_of_token->attribute = string_create(token->attribute->string);
-
-    data_t *sym = search(hash_tb, token->attribute);
-    if (sym != NULL)
-        copy_of_token->type = sym->type;
-    else
-        copy_of_token->type = token->type;
+    copy_of_token->type = token->type;
 
     new_syntax->token = copy_of_token;
     new_syntax->mark = 0;

@@ -11,6 +11,7 @@
 #include "error_handle.h"
 #include "expressions_parser.h"
 #include "gen_out.h"
+#include "global_interface.h"
 
 int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op)
 {
@@ -46,6 +47,7 @@ int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op)
     string_t tmp_str = string_create(op->attribute->string);
     printf("%s\n", tmp_str->string);
     
+    set_expr_type(symb);
     stack_push(sem_stack, tmp_str);
 
     return SUCCESS;
@@ -91,20 +93,21 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
     data_t *const_4 = search(sym_tb, d.id);
     string_free(d.id);
 
-    string_t str_type1 = insert_tmp(sym_tb, UNDEF);
-    string_t str_type2 = insert_tmp(sym_tb, UNDEF);
-    string_t str_tmpop1 = insert_tmp(sym_tb, UNDEF);
-    string_t str_tmpop2 = insert_tmp(sym_tb, UNDEF);
-    string_t str_same = insert_tmp(sym_tb, UNDEF);
-    string_t str_first_int = insert_tmp(sym_tb, UNDEF);
-    string_t str_first_float = insert_tmp(sym_tb, UNDEF);
-    string_t str_second_int = insert_tmp(sym_tb, UNDEF);
-    string_t str_second_float = insert_tmp(sym_tb, UNDEF);
-    string_t str_int_or_float = insert_tmp(sym_tb, UNDEF);
-    string_t str_same_int_or_float = insert_tmp(sym_tb, UNDEF);
-    string_t str_same_first_string = insert_tmp(sym_tb, UNDEF);
-    string_t str_first_int_second_float = insert_tmp(sym_tb, UNDEF);
-    string_t str_first_float_second_int = insert_tmp(sym_tb, UNDEF);
+    string_t str_res = insert_tmp(sym_tb, VAR);
+    string_t str_type1 = insert_tmp(sym_tb, VAR);
+    string_t str_type2 = insert_tmp(sym_tb, VAR);
+    string_t str_tmpop1 = insert_tmp(sym_tb, VAR);
+    string_t str_tmpop2 = insert_tmp(sym_tb, VAR);
+    string_t str_same = insert_tmp(sym_tb, VAR);
+    string_t str_first_int = insert_tmp(sym_tb, VAR);
+    string_t str_first_float = insert_tmp(sym_tb, VAR);
+    string_t str_second_int = insert_tmp(sym_tb, VAR);
+    string_t str_second_float = insert_tmp(sym_tb, VAR);
+    string_t str_int_or_float = insert_tmp(sym_tb, VAR);
+    string_t str_same_int_or_float = insert_tmp(sym_tb, VAR);
+    string_t str_same_first_string = insert_tmp(sym_tb, VAR);
+    string_t str_first_int_second_float = insert_tmp(sym_tb, VAR);
+    string_t str_first_float_second_int = insert_tmp(sym_tb, VAR);
     //LABELS
     string_t str_simple_add = insert_tmp(sym_tb, UNDEF);//$simple_add
     string_t str_string_concat = insert_tmp(sym_tb, UNDEF);//$string_concat
@@ -112,6 +115,7 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
     string_t str_convert_second = insert_tmp(sym_tb, UNDEF);//$convert_second
     string_t str_end = insert_tmp(sym_tb, UNDEF);//$end$of$parni$mlaticka
 
+    data_t *res = search(sym_tb, str_res);
     data_t *type1 = search(sym_tb, str_type1);
     data_t *type2 = search(sym_tb, str_type2);
     data_t *tmpop1 = search(sym_tb, str_tmpop1);
@@ -166,9 +170,9 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
     add_instruction(I_AND, &first_int_second_float, &first_int, &second_float);//AND LF@first_int_second_float LF@first_int LF@second_float
     add_instruction(I_AND, &first_float_second_int, &first_float, &second_int);//AND LF@first_float_second_int LF@first_float LF@second_int
     add_instruction(I_JUMPIFEQ, &simple_add, &same_int_or_float, &true_const);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
-    add_instruction(I_JUMPIFEQ, &string_concat, &same_first_string, NULL);//JUMPIFEQ $string_concat LF@same_first_string bool@true
-    add_instruction(I_JUMPIFEQ, &convert_first, &first_int_second_float, NULL);//JUMPIFEQ $convert_first LF@first_int_second_float bool@true
-    add_instruction(I_JUMPIFEQ, &convert_second, &first_float_second_int, NULL);//JUMPIFEQ $convert_second LF@first_float_second_int bool@true
+    add_instruction(I_JUMPIFEQ, &string_concat, &same_first_string, &true_const);//JUMPIFEQ $string_concat LF@same_first_string bool@true
+    add_instruction(I_JUMPIFEQ, &convert_first, &first_int_second_float, &true_const);//JUMPIFEQ $convert_first LF@first_int_second_float bool@true
+    add_instruction(I_JUMPIFEQ, &convert_second, &first_float_second_int, &true_const);//JUMPIFEQ $convert_second LF@first_float_second_int bool@true
     add_instruction(I_EXIT, &const_4, NULL, NULL);//EXIT int@4
     add_instruction(I_LABEL, &simple_add, NULL, NULL);//LABEL $simple_add
     add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -346,6 +350,9 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
     string_free(op1);
     string_free(op2);
 */
+
+    set_expr_type(res);
+
     return SUCCESS;
 }
 
