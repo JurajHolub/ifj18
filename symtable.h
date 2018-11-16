@@ -20,7 +20,7 @@ enum data_e {
     //INTEGER,
     //FLOAT,
     //NIL,
-    BOOL,
+    //BOOL,
     DEF_FUN,
     UNDEF_FUN
 };

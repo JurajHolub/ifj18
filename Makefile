@@ -10,7 +10,7 @@ OBJ = main.o \
 	  dynamic_string.o \
 	  list.o \
 	  gen_out.o \
-	  test.o \
+	  scanner.o \
 	  global_interface.o \
 	  top_down_parser.o
 EXECUTABLE = main
