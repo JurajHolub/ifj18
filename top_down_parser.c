@@ -528,9 +528,9 @@ int assignment(table_item_t *symtable)
             if (analysis_result == SUCCESS)
             {
                 ste_Lvalue.type = UNDEF;
-#ifdef SEMANTIC
+//#ifdef SEMANTIC
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
-#endif
+//#endif
                 //TODO generate assignment of return value
             }
             //clear memory
@@ -546,7 +546,7 @@ int assignment(table_item_t *symtable)
             ret_token(token);
             int analysis_result = parse_expression(symtable);
 
-#ifdef SEMANTIC
+//#ifdef SEMANTIC
             //calling semantic analysis, which actualize entry in symbol table for L value, too
             if (analysis_result == SUCCESS)
             {
@@ -573,8 +573,8 @@ int assignment(table_item_t *symtable)
                     ste_const_boolString.param_cnt = 0;
                     insert(symtable, &ste_const_boolString);
                     //clear memory
-                    string_free(ste_const_boolString.id);
                     data_t *ste_ptr_const_boolString = search(symtable, ste_const_boolString.id);
+                    string_free(ste_const_boolString.id);
 
                     //wasting memmory
                     string_t str_var_typeString = insert_tmp(symtable, STRING);
@@ -597,8 +597,8 @@ int assignment(table_item_t *symtable)
                     ste_const_4Int.param_cnt = 0;
                     insert(symtable, &ste_const_4Int);
                     //clear memory
-                    string_free(ste_const_4Int.id);
                     data_t *ste_ptr_const_4Int = search(symtable, ste_const_4Int.id);
+                    string_free(ste_const_4Int.id);
 
                     add_instruction(I_EXIT, &ste_ptr_const_4Int, NULL, NULL);
 
@@ -606,7 +606,7 @@ int assignment(table_item_t *symtable)
 
                 }
             }
-#endif
+//#endif
             //clear memory
             string_free(ste_Lvalue.id);
 
