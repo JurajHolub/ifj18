@@ -23,13 +23,8 @@ Term = {int, float, string, nil, $, (, ), <, >, <=, >=, ==, !=, +, -, *, /, EOL,
 Rule = {
      1: E -> id
      2: E -> ( E )
-     3: E -> - E
-     4: E -> not E
-     5: E -> E [-,+,/,*] E 
-     6: E -> E [==, !=, <, >, <=, >=] E
-     7: E -> id = E
-     8: E -> f ([E^n])
-     9: E -> f [E^n]
+     3: E -> E [-,+,/,*] E 
+     4: E -> E [==, !=, <, >, <=, >=] E
 }
 Start = {$}
 ******************************************************************************/
@@ -158,44 +153,7 @@ int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     if (marked->next->next->next != NULL)
         return ERR_SYNTAX;
 
-    //return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
-    return SUCCESS;
-}
-//   7: E -> id = E
-int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
-{
-    syntax_t *symb1, *symb2, *symb3;
-    symb1 = marked->data;
-
-    // marked => id = E
-    if (!symb1->is_term)
-        return ERR_SYNTAX;
-
-    if (marked->next == NULL)
-        return ERR_SYNTAX;
-
-    symb2 = marked->next->data;
-
-    if (symb2->token->type != ASSIG)
-        return ERR_SYNTAX;
-
-    // marked => E E
-
-    if (marked->next->next == NULL)
-        return ERR_SYNTAX;
-
-    symb3 = marked->next->next->data;
-        
-    if (symb3->is_term != false)
-        return ERR_SYNTAX;
-
-    // marked => E
-
-    if (marked->next->next->next != NULL)
-        return ERR_SYNTAX;
-
-    //return parse_assig(hash_tb, sem_stack, symb3->token);
-    return SUCCESS;
+    return parse_logic_op(hash_tb, sem_stack, symb2->token->type);
 }
 
 char *get_real_type(int type)
@@ -409,8 +367,6 @@ int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack)
     if ((res = apply_rule_3(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
     if ((res = apply_rule_4(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
-        rule_exist = res;
-    if ((res = apply_rule_5(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
 
     if (rule_exist != ERR_SYNTAX)
