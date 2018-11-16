@@ -536,13 +536,13 @@ void gen_instruction(inst_t *inst)
             printf("MOVE %s nil@nil\n", op1->string);
             break;
         case I_LT:
-            printf("LT %s %s\n", op1->string, op2->string);
+            printf("LT %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_GT:
-            printf("GT %s %s\n", op1->string, op2->string);
+            printf("GT %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_EQ:
-            printf("EQ %s %s\n", op1->string, op2->string);
+            printf("EQ %s %s %s\n", op1->string, op2->string, op3->string);
             break;
         case I_CALL:
             printf("CALL %s\n", inst->op1->id->string);
@@ -665,7 +665,7 @@ void gen_instruction(inst_t *inst)
             printf("JUMPIFNEQ %s %s %s\n", inst->op1->id->string, op2->string, op3->string);
             break;
         case I_EXIT:
-            printf("EXIT %s\n", inst->op1->id->string);
+            printf("EXIT %s\n", op1->string);
             break;
         case I_BREAK:
             printf("BREAK\n");
