@@ -4,7 +4,7 @@
  * @date 2018-10-16
  * @brief Implementation of top-down parser
  */
-
+#define SEMANTIC
 #include "dynamic_string.h"
 #include "top_down_parser.h"
 #include "error_handle.h"
@@ -62,16 +62,23 @@ int program_list(void) {
 
         if (analysis_result == SUCCESS)
         {
-            //expansion of non terminal symbol <program_list>
+            //expansion of non terminal symbol <program_list> EOL
             analysis_result = program_list();
+
+            //token = get_token();
+            //if(token->type !=  EOF)
+            //{
+            //    analysis_result = ERR_SYNTAX;
+            //}
         }
+
         return analysis_result;
     }
 
     //rule <program_list> -> <statement> <program_list>
     else
     {
-        //expansion of non terminal symbol <statement>
+        //expansion of non terminal symbol <statement> EOL
         ret_token(token);
         int analysis_result = statement(global_symtable);
 
@@ -79,6 +86,12 @@ int program_list(void) {
         {
             //expansion of non terminal symbol <program_list>
             analysis_result = program_list();
+
+            token = get_token();
+            if(token->type !=  EOF)
+            {
+                analysis_result = ERR_SYNTAX;
+            }
         }
         return analysis_result;
     }
@@ -99,29 +112,27 @@ int function_def(void) {
             if ((token = get_token())->type == LEFT_B)
             {
                 //creating symbol table entry
-                data_t symtable_data;
+                data_t ste_newfc;
 
                 //inserting data from token to symbol table entry
-                symtable_data.type = UNDEF_FUN;
-                symtable_data.value = NIL;
-                symtable_data.id = string_create(NULL);
-                string_append(symtable_data.id, tmp->attribute);
-                symtable_data.param_cnt = 0;
+                ste_newfc.type = UNDEF_FUN;
+                ste_newfc.value = NIL;
+                ste_newfc.id = string_create(NULL);
+                string_append(ste_newfc.id, tmp->attribute);
+                ste_newfc.param_cnt = 0;
 
-                //creating local symbol table for function
+                //crating list of parameters saved in string separated by blank space
+                string_t str_params = string_create(NULL);
+
+                //creating local symbol table
                 set_local_st();
 
                 //expansion of non terminal symbol <params>
-                int analysis_result = params(&symtable_data);
-
-                //semantic analysis
-                if (analysis_result == SUCCESS)
-                {
-                    //TODO semantic action
-                }
+                int analysis_result = params(&ste_newfc, str_params);
 
                 //clear memory
-                string_free(symtable_data.id);
+                string_free(ste_newfc.id);
+                string_free(str_params);
 
                 return analysis_result;
             }
@@ -133,9 +144,58 @@ int function_def(void) {
     return ERR_SYNTAX;
 }
 
-int params(data_t *symtable_data)
+#ifdef SEMANTIC
+
+int generate_function_prologue(data_t *ste_newfc, data_t **ste_params, data_t *fc_end_label)
+{
+    //calling semantic analysis, which actualize entry in symbol table for L value, too
+    //creating local frame
+    add_text("Text k");
+    create_local_frame();
+    add_text("Text m");
+    //label function end
+    string_t str_label_fcend = insert_tmp(get_main_st(), UNDEF);
+    fc_end_label = search(get_main_st(), str_label_fcend);
+    //generating jump to function end
+    add_prolog_inst(I_JUMP, &fc_end_label, NULL, NULL);
+    //generating function label
+    data_t *ste_ptr_label_fcbeg = search(get_fun_st(), ste_newfc->id);
+    add_prolog_inst(I_LABEL, &ste_ptr_label_fcbeg, NULL, NULL);
+    //generating new stack frame
+    add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
+    //generating push of stack frame
+    add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
+
+    //generate parameters
+    for (int i = 0; i < ste_newfc->param_cnt; i++)
+    {
+        add_text("#Test t");
+        add_var(ste_params + i);
+        add_instruction(I_POPS, ste_params + 1, NULL, NULL);
+    }
+
+    //clear memory
+    string_free(str_label_fcend);
+
+    return SUCCESS;
+}
+
+
+int generate_function_epilogue(data_t *fc_end_label)
+{
+    add_instruction(I_POPFRAME, NULL, NULL, NULL);
+    add_instruction(I_RETURN, NULL, NULL, NULL);
+    add_instruction(I_LABEL, &fc_end_label, NULL, NULL);
+    free_local_frame();
+
+    return SUCCESS;
+}
+#endif
+
+int params(data_t *ste_newfc, string_t str_params)
 {
     token_t *token = get_token();
+    int analysis_result;
 
     //rule <params> -> ) EOL <function_body>
     if(token->type == RIGHT_B)
@@ -143,24 +203,42 @@ int params(data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            //expansion of non terminal symbol <function_body>
-            return function_body();
+            //semantic analysis
+            data_t **ste_ptrptr_params_array = malloc(ste_newfc->param_cnt * sizeof(data_t));
+            if (ste_ptrptr_params_array == NULL)
+            {
+                return ERR_COMPILER;
+            }
+            analysis_result = sem_action_fcdef(ste_newfc, str_params, ste_ptrptr_params_array);
+            if (analysis_result == SUCCESS)
+            {
+                //generating function prologue
+                data_t *fc_end_label;
+                analysis_result = generate_function_prologue(ste_newfc, ste_ptrptr_params_array, fc_end_label);
+                if (analysis_result == SUCCESS)
+                {
+                    //expansion of non terminal symbol <function_body>
+                    analysis_result = function_body();
+                    if (analysis_result == SUCCESS)
+                    {
+                        analysis_result = generate_function_epilogue(fc_end_label);
+                    }
+                }
+            }
+            return analysis_result;
         }
     }
 
     //rule <params> -> <param> <param_list>
     else if (token->type == VAR)
     {
-        //expansion of non terminal symbol <param>
-        int analysis_result = param(symtable_data, token->attribute);   //TODO malloc errors
+        //appending parameter in parameters list and separating by blank space and increasing parameters number
+        if ((ste_newfc->param_cnt)++ != 0)
+            string_append_ch(str_params, " ");
+        string_append(str_params, token->attribute);
 
-        if (analysis_result == SUCCESS)
-        {
-            //expansion of non terminal symbol <param_list>
-            analysis_result = param_list(symtable_data);
-        }
-
-        return analysis_result;
+        //expansion of non terminal symbol <param_list>
+        return param_list(ste_newfc, str_params);
     }
 
     //rule failed, bad syntax
@@ -168,9 +246,10 @@ int params(data_t *symtable_data)
     return ERR_SYNTAX;
 }
 
-int param_list(data_t *symtable_data)
+int param_list(data_t *ste_newfc, string_t str_params)
 {
     token_t *token = get_token();
+    int analysis_result;
 
     //rule <params_list> -> ) EOL <function_body>
     if(token->type == RIGHT_B)
@@ -178,8 +257,29 @@ int param_list(data_t *symtable_data)
         token = get_token();
         if (token->type == EOL)
         {
-            //expansion of non terminal symbol <function_body>
-            return function_body();
+            //semantic analysis
+            data_t **ste_ptrptr_params_array = malloc(ste_newfc->param_cnt * sizeof(data_t));
+            if (ste_ptrptr_params_array == NULL)
+            {
+                return ERR_COMPILER;
+            }
+            analysis_result = sem_action_fcdef(ste_newfc, str_params, ste_ptrptr_params_array);
+            if (analysis_result == SUCCESS)
+            {
+                //generating function prologue
+                data_t *fc_end_label;
+                analysis_result = generate_function_prologue(ste_newfc, ste_ptrptr_params_array, fc_end_label);
+                if (analysis_result == SUCCESS)
+                {
+                    //expansion of non terminal symbol <function_body>
+                    analysis_result = function_body();
+                    if (analysis_result ==SUCCESS)
+                    {
+                        analysis_result = generate_function_epilogue(fc_end_label);
+                    }
+                }
+            }
+            return analysis_result;
         }
     }
 
@@ -189,63 +289,19 @@ int param_list(data_t *symtable_data)
         token = get_token();
         if (token->type == VAR)
         {
-            //expansion of non terminal symbol <param>
-            int analysis_result = param(symtable_data, token->attribute);   //TODO malloc errors
+            //appending parameter in parameters list and separating by blank space and increasing parameters number
+            if ((ste_newfc->param_cnt)++ != 0)
+                string_append_ch(str_params, " ");
+            string_append(str_params, token->attribute);
 
-            if (analysis_result == SUCCESS)
-            {
-                //expansion of non terminal symbol <param_list>
-                analysis_result = param_list(symtable_data);
-            }
-
-            return analysis_result;
+            //expansion of non terminal symbol <param_list>
+            return param_list(ste_newfc, str_params);
         }
     }
 
     //rule failed, bad syntax
     syntax_error(token->type);
     return ERR_SYNTAX;
-}
-
-int param(data_t *symtable_data, string_t param)
-{
-
-    /*-**************************************************************************
-        insert function parameter in global symbol table in function parameters
-    *****************************************************************************/
-    /*char *string_blankspace = " ";
-    //separating parameters by blank space
-    if (symtable_data->id->strlen != 1)
-    {
-        string_append_ch(param, string_blankspace);
-    }
-    string_append(symtable_data->id, param);
-    symtable_data->param_cnt++;*/
-
-    //TODO generate parameters
-
-
-    /*-**************************************************************************
-        insert function parameters in local symbol table as local variables
-     *****************************************************************************/
-
-    //creating symbol table entry
-    data_t local_symtable_data;
-
-    //inserting data from token to symbol table entry
-    local_symtable_data.type = UNDEF;
-    local_symtable_data.value = NIL;
-    local_symtable_data.id = string_create(NULL);   //TODO malloc errors
-    string_append(local_symtable_data.id, param);
-    local_symtable_data.param_cnt = 0;
-
-    //inserting symbol table entry to symbol table
-    insert(get_local_st(), &local_symtable_data);
-
-    //clear memory
-    string_free(local_symtable_data.id);
-
-    return SUCCESS;
 }
 
 int function_body()
