@@ -54,19 +54,27 @@ int main(int argc, char **argv)
     add_prolog_inst(I_IFJCODE18, NULL, NULL, NULL);
     add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
     add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
-    
+
+    //creating symbol table entry for var int for testing purposes
+    data_t *ste_ptr_test = malloc(sizeof(data_t));
+    //inserting data from token to symbol table entry
+    ste_ptr_test->type = CONST;
+    ste_ptr_test->value = INTEGER;
+    ste_ptr_test->id = string_create("tmp4");
+    ste_ptr_test->param_cnt = 0;
+
+    set_expr_type(ste_ptr_test);
+
     int ret = syntax_tests(argc, argv);
-    
+
     add_instruction(I_POPFRAME, NULL, NULL, NULL);
 
     if (ret == SUCCESS)
         gen_program();
 
     free_global_frame();
-
-    //gen_program();
-    //free_global_frame();
-    //remove_all_st();
+    free(ste_ptr_test);
+    remove_all_st();
 
     return ret;
 }

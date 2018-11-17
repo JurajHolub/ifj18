@@ -1,42 +1,18 @@
-if
-int
-10
-==
-int
-11
-then
-eol
+def
 id
-a
-=
-int
-5
-eol
-else
-eol
+foo
+(
 id
-a
-=
-float
-5.5
-eol
-end
-eol
+abc
+,
 id
-b
-=
-int
-5
-/
+def
+,
 id
-a
+ghe
+)
 eol
 EOF
 
-if 10 == 11 then
-    a=5
-else
-    a=5.5
+def foo(abc, def, ghe)
 end
-
-b=5/a

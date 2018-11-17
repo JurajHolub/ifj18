@@ -158,8 +158,8 @@ token_t *get_token(void) {
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        fprintf(stderr,"Lexeme: %s\n", lexemes[tokens[0]->type]);
-        if (tokens[0]->attribute != NULL)
+        fprintf(stderr, "Lexeme: %s\n", tokens[0]->type == EOF ? "EOF" : lexemes[tokens[0]->type]);
+        if (tokens[0]->attribute != NULL || tokens[0]->type != EOF)
         {
             setbuf(stdout, 0);
             setbuf(stderr, 0);
@@ -180,8 +180,8 @@ token_t *get_token(void) {
     fprintf(stderr,"--------------------\n");
     setbuf(stderr, 0);
     setbuf(stdout, 0);
-    fprintf(stderr,"Lexeme: %s\n", lexemes[tokens[1]->type]);
-    if (tokens[1]->attribute != NULL)
+    fprintf(stderr, "Lexeme: %s\n", tokens[1]->type == EOF ? "EOF" : lexemes[tokens[1]->type]);
+    if (tokens[1]->attribute != NULL  || tokens[1]->type != EOF)
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
