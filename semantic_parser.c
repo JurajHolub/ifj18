@@ -472,18 +472,21 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         string_t str_first_float = insert_tmp(sym_tb, VAR);
         string_t str_second_int = insert_tmp(sym_tb, VAR);
         string_t str_second_float = insert_tmp(sym_tb, VAR);
-        string_t str_int_or_float = insert_tmp(sym_tb, VAR);
-        string_t str_same_int_or_float = insert_tmp(sym_tb, VAR);
+        string_t str_int_and_int = insert_tmp(sym_tb, VAR);
+        string_t str_float_and_float = insert_tmp(sym_tb, VAR);
         string_t str_first_int_second_float = insert_tmp(sym_tb, VAR);
         string_t str_first_float_second_int = insert_tmp(sym_tb, VAR);
         string_t str_second_int_zero = insert_tmp(sym_tb, VAR);
         string_t str_second_float_zero = insert_tmp(sym_tb, VAR);
-        string_t str_zero_div = insert_tmp(sym_tb, VAR);
         //LABELS
-        string_t str_simple_add = insert_tmp(sym_tb, UNDEF);//$simple_add
         string_t str_convert_first = insert_tmp(sym_tb, UNDEF);//$convert_first
         string_t str_convert_second = insert_tmp(sym_tb, UNDEF);//$convert_second
-        string_t str_zero_err = insert_tmp(sym_tb, UNDEF);//$zero_err
+        string_t str_no_zero_err_0 = insert_tmp(sym_tb, UNDEF);//$zero_err
+        string_t str_no_zero_err_1 = insert_tmp(sym_tb, UNDEF);//$zero_err
+        string_t str_no_zero_err_2 = insert_tmp(sym_tb, UNDEF);//$zero_err
+        string_t str_no_zero_err_3 = insert_tmp(sym_tb, UNDEF);//$zero_err
+        string_t str_int_int = insert_tmp(sym_tb, UNDEF);
+        string_t str_float_float = insert_tmp(sym_tb, UNDEF);
         string_t str_end = insert_tmp(sym_tb, UNDEF);//$end$of$parni$mlaticka
 
         data_t *type1 = search(sym_tb, str_type1);
@@ -495,17 +498,20 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         data_t *first_float = search(sym_tb, str_first_float);
         data_t *second_int = search(sym_tb, str_second_int);
         data_t *second_float = search(sym_tb, str_second_float);
-        data_t *int_or_float = search(sym_tb, str_int_or_float);
-        data_t *same_int_or_float = search(sym_tb, str_same_int_or_float);
+        data_t *int_and_int = search(sym_tb, str_int_and_int);
+        data_t *float_and_float = search(sym_tb, str_float_and_float);
         data_t *first_int_second_float = search(sym_tb, str_first_int_second_float);
         data_t *first_float_second_int = search(sym_tb, str_first_float_second_int);    
-        data_t *simple_add = search(sym_tb, str_simple_add);
         data_t *convert_first = search(sym_tb, str_convert_first);
         data_t *convert_second = search(sym_tb, str_convert_second);
         data_t *second_int_zero = search(sym_tb, str_second_int_zero);
         data_t *second_float_zero = search(sym_tb, str_second_float_zero);
-        data_t *zero_div = search(sym_tb, str_zero_div);
-        data_t *zero_err = search(sym_tb, str_zero_err);
+        data_t *no_zero_err_0 = search(sym_tb, str_no_zero_err_0);
+        data_t *no_zero_err_1 = search(sym_tb, str_no_zero_err_1);
+        data_t *no_zero_err_2 = search(sym_tb, str_no_zero_err_2);
+        data_t *no_zero_err_3 = search(sym_tb, str_no_zero_err_3);
+        data_t *int_int = search(sym_tb, str_int_int);
+        data_t *float_float = search(sym_tb, str_float_float);
         data_t *end = search(sym_tb, str_end);
 
         add_var(&type1);//DEFVAR LF@$type1
@@ -517,13 +523,12 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_var(&first_float);//DEFVAR LF@first_float
         add_var(&second_int);//DEFVAR LF@second_int
         add_var(&second_float);//DEFVAR LF@second_float
-        add_var(&int_or_float);//DEFVAR LF@int_or_float
-        add_var(&same_int_or_float);//DEFVAR LF@same_int_or_float
+        add_var(&int_and_int);//DEFVAR LF@int_or_float
+        add_var(&float_and_float);//DEFVAR LF@int_or_float
         add_var(&first_int_second_float);//DEFVAR LF@first_int_second_float
         add_var(&first_float_second_int);//DEFVAR LF@first_float_second_int
         add_var(&second_int_zero);//DEFVAR LF@$second_int_zero
         add_var(&second_float_zero);//DEFVAR LF@$second_float_zero
-        add_var(&zero_div);//DEFVAR LF@$zero_div
         
         add_instruction(I_POPS, &tmpop2, NULL, NULL);//POPS LF@$tmp$op2
         add_instruction(I_POPS, &tmpop1, NULL, NULL);//POPS LF@$tmp$op1
@@ -534,39 +539,51 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_instruction(I_EQ, &first_float, &type1, &float_const);//EQ LF@first_float LF@$type1 string@float
         add_instruction(I_EQ, &second_int, &type2, &int_const);//EQ LF@second_int LF@$type2 string@int
         add_instruction(I_EQ, &second_float, &type2, &float_const);//EQ LF@second_float LF@$type2 string@float
-        add_instruction(I_OR, &int_or_float, &first_int, &first_float);//OR LF@int_or_float LF@first_int LF@first_float
-        add_instruction(I_AND, &same_int_or_float, &same, &int_or_float);//AND LF@same_int_or_float LF@same LF@int_or_float
+        add_instruction(I_AND, &int_and_int, &first_int, &second_int);//OR LF@int_or_float LF@first_int LF@first_float
+        add_instruction(I_AND, &float_and_float, &first_float, &second_float);//AND LF@same_int_or_float LF@same LF@int_or_float
         add_instruction(I_AND, &first_int_second_float, &first_int, &second_float);//AND LF@first_int_second_float LF@first_int LF@second_float
         add_instruction(I_AND, &first_float_second_int, &first_float, &second_int);//AND LF@first_float_second_int LF@first_float LF@second_int
-        add_instruction(I_EQ, &second_int_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
-        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
-        add_instruction(I_AND, &second_int_zero, &second_int_zero, &second_int);// AND LF@second_int_zero LF@second_int_zero LF@second_int
-        add_instruction(I_AND, &second_float_zero, &second_float_zero, &second_float);// AND LF@second_float_zero LF@second_float_zero LF@second_float
-        add_instruction(I_OR, &zero_div, &second_int_zero, &second_float_zero);// OR LF@zero_div LF@second_int_zero LF@second_float_zero
-        add_instruction(I_JUMPIFEQ, &simple_add, &same_int_or_float, &true_const);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
+        add_instruction(I_JUMPIFEQ, &int_int, &first_int, &second_int);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
+        add_instruction(I_JUMPIFEQ, &float_float, &first_float, &second_float);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
         add_instruction(I_JUMPIFEQ, &convert_first, &first_int_second_float, &true_const);//JUMPIFEQ $convert_first LF@first_int_second_float bool@true
         add_instruction(I_JUMPIFEQ, &convert_second, &first_float_second_int, &true_const);//JUMPIFEQ $convert_second LF@first_float_second_int bool@true
-        add_instruction(I_JUMPIFEQ, &zero_err, &zero_div, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
         add_instruction(I_EXIT, &const_4, NULL, NULL);//EXIT int@4
-        add_instruction(I_LABEL, &simple_add, NULL, NULL);//LABEL $simple_add
+        add_instruction(I_LABEL, &int_int, NULL, NULL);//LABEL $simple_add
+        add_instruction(I_EQ, &second_int_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_1, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
+        add_instruction(I_LABEL, &no_zero_err_1, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
         add_instruction(I_PUSHS, &tmpop2, NULL, NULL);//PUSHS LF@$tmp$op2
         add_instruction(I_IDIVS, NULL, NULL, NULL);//IDIVS
+        add_instruction(I_LABEL, &float_float, NULL, NULL);//LABEL $simple_add
+        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_0, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
+        add_instruction(I_LABEL, &no_zero_err_0, NULL, NULL);//LABEL $zero_err
+        add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
+        add_instruction(I_PUSHS, &tmpop2, NULL, NULL);//PUSHS LF@$tmp$op2
+        add_instruction(I_DIVS, NULL, NULL, NULL);//IDIVS
         add_instruction(I_JUMP, &end, NULL, NULL);//JUMP $end$of$parni$mlaticka
         add_instruction(I_LABEL, &convert_first, NULL, NULL);//LABEL $convert_first
         add_instruction(I_INT2FLOAT, &tmpop1, &tmpop1, NULL);//INT2FLOAT LF@$tmp$op1 LF@$tmp$op1
+        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_2, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
+        add_instruction(I_LABEL, &no_zero_err_2, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
         add_instruction(I_PUSHS, &tmpop2, NULL, NULL);//PUSHS LF@$tmp$op2
         add_instruction(I_DIVS, NULL, NULL, NULL);//DIVS
         add_instruction(I_JUMP, &end, NULL, NULL);//JUMP $end$of$parni$mlaticka
         add_instruction(I_LABEL, &convert_second, NULL, NULL);//LABEL $convert_second
         add_instruction(I_INT2FLOAT, &tmpop2, &tmpop2, NULL);//INT2FLOAT LF@$tmp$op2 LF@$tmp$op2
+        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_3, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
+        add_instruction(I_LABEL, &no_zero_err_3, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
         add_instruction(I_PUSHS, &tmpop2, NULL, NULL);//PUSHS LF@$tmp$op2
         add_instruction(I_DIVS, NULL, NULL, NULL);//DIVS
-        add_instruction(I_JUMP, &end, NULL, NULL);//JUMP $end$of$parni$mlaticka
-        add_instruction(I_LABEL, &zero_err, NULL, NULL);//LABEL $zero_err
-        add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
         add_instruction(I_LABEL, &end, NULL, NULL);//LABEL $end$of$parni$mlaticka
 
     }
