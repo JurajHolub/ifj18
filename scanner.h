@@ -45,7 +45,8 @@ enum data_type_e {
     ASSIG,      ///< Term "=".
     FUN,        ///< Term "function()".
     DELIM,      ///< Term ",".
-    VAR         ///< Term "variable".
+    VAR,         ///< Term "variable".
+    BOOL
 };
 
 enum states{
@@ -57,56 +58,17 @@ enum states{
     EXPONENT_state,
     EXPONENT_sign_state,
     COMMENT_state,
+    COMMENT_BEGIN_state,
+    COMMENT_END_state,
+    COMMENT_END_ENTER_state,
+    COMMENT_END_ENTER2_state,
     CONSTANT_state,
     FUNCTION_state,
-    SIGN_state
+    SIGN_state,
+    N_state,
+    STRING_state
     
 };
-
-/*
-enum data_type_e {
-    NOT = 0,    ///< Term "not".        
-    SUB,        ///< Term "-".          
-    ADD,        ///< Term "+".          
-    MUL,        ///< Term "*".          
-    DIV,        ///< Term "/".            
-    NOT_EQUAL,  ///< Term "!=".
-    LESS,       ///< Term "<".
-    INTEGER,    ///< Term "integer".
-    STRING,     ///< Term "string".
-    NIL,        ///< Term "nil".
-    LEFT_B,     ///< Term "(".
-    RIGHT_B,    ///< Term ")".
-    LINE_END,   ///< Term "\n".
-    EQUAL,      ///< Term "==".
-    GREATER,    ///< Term ">".
-    LESS_EQ,    ///< Term "<=".
-    GREATER_EQ, ///< Term ">=".
-    FLOAT,      ///< Term "float".
-    DEF,        ///< Term "def".
-    DO,         ///< Term "do".
-    ELSE,       ///< Term "else".
-    END,        ///< Term "end".
-    IF,         ///< Term "if".
-    THEN,       ///< Term "then".
-    WHILE,      ///< Term "while".
-    ASSIG,      ///< Term "=".
-    FUN,        ///< Term "function()".
-    DELIM,      ///< Term ",".
-    VAR,         ///< Term "variable".
-    INDENTIFIER, ///< Term "variable or function"
-    BOOL
-
-};
-
-
-  these are the constants for reserved words in Ruby 2.0
-    for more info https://www.tutorialspoint.com/ruby/ruby_syntax.htm
-
-    using enum because of better management of CONSTANTS
-*/
-
-
 
 /**
  * @brief Describe one terminal (symbol) of input IFJ18 language. Created by
@@ -139,5 +101,9 @@ token_t* get_token();
  * parser recieve after nearest call of get_token().
  */
 void ret_token(token_t *token);
+
+
+
+
 
 #endif // _SCANER_H_IFJ_18_

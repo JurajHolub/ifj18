@@ -1,28 +1,5 @@
-id
-var1
-=
-int
-10
-eol
-id
-var2
-=
-int
-10
-eol
-while
-id
-var1
-==
-id
-var2
-do
-eol
-end
-eol
-EOF
-
 var1=10
 var2=10
-while var1 == var2 then
+while var1 == var2 do
 end
+

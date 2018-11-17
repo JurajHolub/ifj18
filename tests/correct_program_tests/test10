@@ -1,12 +1,1 @@
-id
-var1
-=
-int
-10
-+
-float
-1.0
-eol
-EOF
-
 var1 = 10 + 1.0

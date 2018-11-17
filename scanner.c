@@ -1,62 +1,29 @@
-//#include "scanner.h"
-#include "test.h"
+/**
+ * @file scanner.c
+ * @brief Declaration of scanner interface for parser.
+ * @date November 2018
+ * @author Samuel Krempsky
+ */
+
+#include "scanner.h"
+#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#define TRUE 1
+#define FALSE 0
 
-// Some simulation of scanner for testing purposes of parser.  
-/* //Jakub's code for testing purposes
-token_t t;
-int cnt = -1;
-
-struct tmp_t {
-    char* attribute;
-    int type;
-};
-
-struct tmp_t tokens[] = {
-        {.type = VAR, .attribute = "id"},//id
-        {.type = ASSIG, .attribute = ""},//+
-        {.type = VAR, .attribute = "id"},//id
-        {.type = EQUAL, .attribute = ""},//-
-        {.type = VAR, .attribute = "id"},//id
-        {.type = EOL, .attribute = ""}
-};
-
-// return always constant test aritmetic expression
-token_t* get_token()
-{
-    if (cnt != -1)
-        string_free(t.attribute);
-    cnt++;
-    t.type = tokens[cnt].type;
-    t.attribute = string_create(tokens[cnt].attribute);
-    //printf("get_token(%s)\n", t.attribute->string);
-    return &t;
-//    cnt++;
-//
-//    //printf("get_token(%s)\n", tokens[cnt].key);
-//    return &tokens[cnt];
-}
-
+token_t enterToken;
 token_t tokenNext;
-token_t tokens[10];
-char nextchar='\0';
+char nextchar;//='\0';
+int globalVar=1;
 
-/*
+token_t *tokens[2] = {NULL, NULL};
+int returned_token = 0;
+int get= 1;
 
-typedef struct token_s {
-    int type;   ///< Type of parsed symbol. Always value of enum type "data_type_e".
-   
-     * Value of parsed symbol.
-     * NULL if type is one of *,/,-,+,(,) ...
-     * String representation of parsed value if type is integer, float or string.
-     * Name of variable if type is VAR (variable).
-     
-    string_t attribute; 
-} token_t;
 
-*/
-
-int controlKeyWords(char testString[], token_t *token){
+int controlKeyWords(char *testString, token_t *token){
 
 
     char keyWords[9][10]={
@@ -108,7 +75,7 @@ int controlKeyWords(char testString[], token_t *token){
     
 }
 
-int controlConstants(char testString[],token_t *token){
+int controlConstants(char *testString,token_t *token){
      char keyWords[5][10]={
         "int","bool","float","string","nil"
     };
@@ -141,23 +108,23 @@ int controlConstants(char testString[],token_t *token){
 
 }
 
-int controlWords(char testString[], token_t *token){
+int controlWords(char *testString, token_t *token){
 
     if(testString[0]=='_' || (testString[0] >= 'a' && testString[0] <= 'z') ){
-        token->type=INDENTIFIER;
+        token->type=VAR;
     }
 
     return TRUE;
 }
 
-int controlInt(char testString[],token_t *token){
+int controlInt(char *testString,token_t *token){
 
     token->type=INTEGER;
     return TRUE;
 
 }
 
-int controlDouble(char testString[],token_t *token){
+int controlDouble(char *testString,token_t *token){
 
     token->type=FLOAT;
     return TRUE;
@@ -225,7 +192,8 @@ int controlOperators(char c, token_t *token, char scndOperator){
         return TRUE;
     }
     else if (c=='\n' && scndOperator=='\0'){
-        token->type=LINE_END;
+        enterToken.type=EOL;
+        token->type=EOL;
         return TRUE;
     }
     else if (c==',' && scndOperator=='\0'){
@@ -250,30 +218,125 @@ int controlSigns(char c){
 
 }
 
-token_t get_token(){
 
-    token_t returnToken;
+void charAppend(token_t *token,char c){
+
+    
+    char append_char[5]={0};
+    append_char[0]=c;
+
+    string_append_ch(token->attribute,append_char);
+}
+
+void clean(void) {
+    if (tokens[1] != NULL)
+    {
+        if (tokens[1]->attribute == NULL)
+        {
+            free((void *) tokens[1]->attribute);
+        }
+        free((void *) tokens[1]);
+    }
+    if (tokens[1] != NULL)
+    {
+        if (tokens[1]->attribute == NULL)
+        {
+            free((void *) tokens[1]->attribute);
+        }
+        free((void *) tokens[2]);
+    }
+}
+
+token_t *get_token(){
+
+    //max 2 tokens can be returned
+    assert(returned_token >= 0 && returned_token <= 2);
+    //if token was returned from scanner, there is no need to get new token. We return last token the function got
+    //saved in global array
+    if (returned_token > 0)
+    {
+        //every time there is a returned token, the last returned token is on position 1 in tokens array
+        token_t *tmp = tokens[1];
+
+        //if we have 2 tokens returned we have to rotate the array to get token, that will be now returned to position 0,
+        //where is saved in case, that will be returned
+
+        if (returned_token == 2)
+        {
+            tokens[1] = tokens[0];
+            tokens[0] = tmp;
+        }
+
+        //decrement number of returned_tokens, because last returned token will be used now
+        returned_token--;
+
+        //last returned token will be given to parser
+        return tmp;
+    }
+    //there are no returned tokens, so the oldest saved token is deleted and on its place is saved last token and
+    //on the place of last token will be saved new token in next steps
+    if (tokens[0] != NULL)
+    {
+        if (tokens[0]->attribute != NULL)
+        {
+            string_free(tokens[0]->attribute);
+        }
+        free((void *) tokens[0]);
+    }
+    tokens[0] = tokens[1];
+    //allocation of new token
+    tokens[1] = (token_t *) malloc(sizeof(token_t));
+    if (tokens[1] == NULL)
+    {
+        fprintf(stderr, "Malloc fail\n");
+        clean();
+    }
+    //data will be achieved and inserted in token
+
+    //token_t *tokens[1]=malloc(sizeof(token_t));
+    char *str = NULL;
+    string_t string=string_create(str);
+    tokens[1]->attribute=string;
+
 
     int commentSwitch=0;
 
-    int stringSwitch=0;
-    int quotationMarkCounter=0;
 
     char testString[64]={0};
+    
     char c;
 
     int charCounter=0;
 
 
     int state=START_state;
+    int state2=N_state;
+
+
+
     
 
+
+
+
+
+    //char *testString_IFJ;
+    //string_t stringTest=string_create(testString_IFJ);
+
     if(tokenNext.type==NOT_EQUAL){
+
         nextchar='\0';
         tokenNext.type=NOT;
-        returnToken.type=NOT_EQUAL;
-        return returnToken;
+        tokens[1]->type=NOT_EQUAL;
+	    return tokens[1];
 
+    }
+
+    if(enterToken.type==EOL){
+
+        enterToken.type=NOT;
+        state2=COMMENT_BEGIN_state;
+    
     }
     
         //printf(">%c<\n",nextchar);
@@ -284,18 +347,25 @@ token_t get_token(){
     }
     else if( (nextchar>='a' && nextchar <= 'z')  || nextchar=='_'){
         state=ID_state;
+
+        charAppend(tokens[1],nextchar);
+        
+
+        /*
         testString[charCounter]=nextchar;
-        charCounter++;
+        charCounter++;*/
 
     }
     else if (nextchar>='0' && nextchar <= '9'){
         state=INT_state;
+        charAppend(tokens[1],nextchar);
+        /*
         testString[charCounter]=nextchar;
-        charCounter++;
+        charCounter++;*/
     }
-    else if(controlOperators(nextchar,&returnToken,'\0')==TRUE){
+    else if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
         nextchar='\0';
-        return returnToken;
+        return tokens[1];
     }
    
     /**/
@@ -303,25 +373,25 @@ token_t get_token(){
     while((c=getchar())!=EOF){
 
         if(state==SIGN_state){
-            if( c=='=' || c =='!' || c=='<' || c == '>' ){
+            if( c=='=' ){
 
-                if(controlOperators(nextchar,&returnToken,c)==TRUE){
+                if(controlOperators(nextchar,tokens[1],c)==TRUE){
                     nextchar='\0';
-                    return returnToken;
+                    return tokens[1];
                 }
 
             }
             else if((c>='a' && c <= 'z')  || c=='_'){
                 //treba už vracať token a pamätať si prvú vec čo je tuna
-                if(controlOperators(nextchar,&returnToken,'\0')==TRUE){
+                if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    return tokens[1];
                 }
             }
             else if (c>='0' && c <= '9'){
-                if(controlOperators(nextchar,&returnToken,'\0')==TRUE){
+                if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    return tokens[1];
                 }
             }
         }
@@ -334,52 +404,60 @@ token_t get_token(){
 
             if (c=='\n'){
                 commentSwitch=0;
-                //returnToken.type=LINE_END;
-                //return returnToken;
+                //tokens[1].type=LINE_END;
+                //printf("get_token %s\n", tokens[1]->attribute->string); 
+                 return tokens[1];
                 //TODO problem with '\n' and the comments
             }
             else 
                 commentSwitch=1;
 
-        }
-        else if(state==SIGN_state){
-            
-            
-
-        }
-        else if( c=='"' || stringSwitch==1){
-            //printf("%c",c );
-            if (c=='"' && quotationMarkCounter==0){
-
-                quotationMarkCounter++;
-                stringSwitch=1;
-            
-            }
-            else if(c=='"' && quotationMarkCounter==1){
-                quotationMarkCounter=0;
-                stringSwitch=0;
-            
-            }
-
         }            
-        
+        else if (state==STRING_state){
+            
+            if(c=='"'){
+                tokens[1]->type=STRING;
+            }
+
+            charAppend(tokens[1],c);
+            /*
+            testString[charCounter]=c;
+            charCounter++;*/
+        }
         else if (state==START_state){
             
             
             if ( (c>='a' && c <= 'z') || c=='_'){
+
                 state=ID_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+
+                /*testString[charCounter]=c;
+                charCounter++;*/
             }
             else if(c>='0' && c <= '9'){
 
                 state=INT_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
                 
             }
-            else if(controlOperators(c,&returnToken,'\0')==TRUE && (c!=' '|| c!='\t') ){
-                return returnToken;
+            else if(c=='=' && state2==COMMENT_BEGIN_state){
+                
+                state2=N_state;
+                state=COMMENT_BEGIN_state;
+
+            }
+            else if(c=='=' || c =='!' || c=='<' || c == '>' ){
+                nextchar=c;
+                state=SIGN_state;
+            }
+            else if(c=='"'){
+                state=STRING_state;
+            }
+            else if(controlOperators(c,tokens[1],'\0')==TRUE && (c!=' '|| c!='\t') ){
+                return tokens[1];
             }
             else if( c==' ' || c=='\t'){
                 state=START_state;
@@ -391,16 +469,72 @@ token_t get_token(){
 
 
         }
+        else if(state==COMMENT_BEGIN_state){
+            
+            testString[charCounter]=c;
+            charCounter++;
+
+            if(charCounter==5){//error by one
+                char beginTest[]="begin";
+                if(strcmp(testString,beginTest) == 0){
+
+                    for (int i = 0; i < 64; i++)testString[i]='\0';
+                    charCounter=0;
+
+                    state=COMMENT_END_state;
+                }
+                else{
+                    //error
+                }
+
+            }
+                
+        }
+        else if(state==COMMENT_END_state){
+
+            if(c=='\n'){
+                state=COMMENT_END_ENTER_state;
+            }
+        }
+        else if(state==COMMENT_END_ENTER_state){
+            if(c=='='){
+
+                state=COMMENT_END_ENTER2_state;
+                
+            }
+            else{
+                state=COMMENT_END_state;
+            }
+        }
+        else if(state==COMMENT_END_ENTER2_state){
+
+            testString[charCounter]=c;
+            charCounter++;
+            
+
+            if(charCounter==3){
+                char endTest[]="end";
+                
+                if(strcmp(testString,endTest) == 0){
+                    state=START_state;
+                }
+                else{
+                    state=COMMENT_END_state;
+                    //error
+                }
+
+            }
+        }
         else if(state==FUNCTION_state){
             if(controlSigns(c)==TRUE && c!='='){
-                returnToken.type=FUN;
-                return returnToken;
+                tokens[1]->type=FUN;
+                return tokens[1];
             }
             else if(c=='='){
                 testString[charCounter-1]='\0';
                 tokenNext.type=NOT_EQUAL;
-                returnToken.type=INDENTIFIER;
-                return returnToken;
+                tokens[1]->type=VAR;
+                return tokens[1];
 
 
             }
@@ -409,38 +543,44 @@ token_t get_token(){
             }
         }
         else if(state==ID_state){
-            if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9')){
+            if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
                 state=ID_state;
 
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+
+                /*testString[charCounter]=c;
+                charCounter++;*/
 
             }
             else if(c=='@'){
 
 
-                if(controlConstants(testString,&returnToken)==TRUE);
+                if(controlConstants(testString,tokens[1])==TRUE);
                 state=CONSTANT_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+
+                /*testString[charCounter]=c;
+                charCounter++;*/
 
             }
             else if(c=='?' || c== '!'){
                 state=FUNCTION_state;
-                testString[charCounter]=c;
-                charCounter++;
+
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             }
             else if(controlSigns(c)==TRUE){
 
                 
 
-                if(controlKeyWords(testString,&returnToken)==TRUE){
+                if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
                     nextchar=c;
-                    return returnToken;
+                    return tokens[1];
                 }      
-                if(controlWords(testString,&returnToken)==TRUE){
+                if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    return tokens[1];
                 } 
 
             }
@@ -449,38 +589,45 @@ token_t get_token(){
             if (c>='0' && c <= '9'){
 
                 state=INT_state;
-                testString[charCounter]=c;
-                charCounter++;
+
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
 
             }
             else if( c== '.'){
                 state=DOUBLE_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             }
             else if(controlSigns(c)==TRUE){
                 
-                if(controlInt(testString,&returnToken)==TRUE) return returnToken;
+                if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) 
+                    return tokens[1];
 
             }
         }
         else if(state==DOUBLE_state){
             
             if (c>='0' && c <= '9'){
-
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             
             }
             else if(c=='e'|| c=='E'){
                 //probably some error
+                //TODO chyták
                 state=EXPONENT_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             }
-            else if (controlSigns(c)==TRUE){
+            else if (controlSigns(c) == TRUE){
                 
-                if(controlDouble(testString,&returnToken)==TRUE) return returnToken;
+                if( controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE) 
+                    return tokens[1];
             }
             else{
                 //error
@@ -492,17 +639,20 @@ token_t get_token(){
             if(c>='0' && c <= '9'){
 
                 state=EXPONENT_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             }
             else if(c=='+' || c == '-'){
                 state=EXPONENT_sign_state;
+                charAppend(tokens[1],c);
+                /*
                 testString[charCounter]=c;
-                charCounter++;
+                charCounter++;*/
             }
             else if (controlSigns(c)==TRUE) {
-                returnToken.type=FLOAT;
-                return returnToken;
+                tokens[1]->type=FLOAT;
+                return tokens[1];
             }
             else{
                 //error
@@ -512,14 +662,15 @@ token_t get_token(){
             if(c>='0' && c <= '9'){
 
                 state=EXPONENT_sign_state;
-                testString[charCounter]=c;
-                charCounter++;
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
             
             }
             else if (controlSigns(c)==TRUE)  {
                 //printf("%s\n", testString);
-                returnToken.type=FLOAT;
-                return returnToken;
+                tokens[1]->type=FLOAT;
+                return tokens[1];
             }
             else{
                 //error
@@ -529,13 +680,15 @@ token_t get_token(){
         else if(state ==CONSTANT_state){
             if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='-' || c=='+'){
                 state=CONSTANT_state;
+                charAppend(tokens[1],c);
+                /*
                 testString[charCounter]=c;
-                charCounter++;
+                charCounter++;*/
 
             }
             else if (controlSigns(c)==TRUE){
                 // TODO control of constant
-                return returnToken;
+                return tokens[1];
             }
             else {
                 //error
@@ -548,63 +701,30 @@ token_t get_token(){
         
     }
 
-    
+     tokens[1]->type = EOF;
+     tokens[1]->attribute = string_create(NULL);
+	 return tokens[1];
+
 }
 
-//main for testing purposes
-/*
-int main(int argc, char const *argv[])
+void ret_token(token_t* token)
 {
-    
-    
-    token_t token;
-    while (1){
-        token=get_token();
-
-        if(token.type<100 && token.type>-1){
-            printf("%d\n",token.type);
-        }
-        else break;
+    //dummy check if no invalid token is returned
+    assert(token != NULL);
+    //if we 1 token was retrned before, we have to rotate the array to get returned token to last token position,
+    //position 1
+    if (returned_token == 1)
+    {
+        token_t *tmp = tokens[1];
+        tokens[1] = tokens[0];
+        tokens[0] = tmp;
     }
-    /*token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
-    token=get_token();
-    printf("%d\n",token.type);
 
+    //counter of returned tokens incrementation
+    returned_token++;
 
-    
-
-
-    return 0;
+    //assert(tokens[1] == token);
 }
-/**/
+
+
+

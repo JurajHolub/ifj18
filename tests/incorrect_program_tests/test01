@@ -1,9 +1,1 @@
-id
-var1
-+
-id
-var2
-/
-EOF
-
-id+-id
+10+-10
