@@ -29,8 +29,8 @@ int parse(void);
  * Check's syntax of the main program body and creates global symbol table
  *
  * <program_list> -> EOF
- * <program_list> -> <function_def> <program_list>
- * <program_list> -> <statement> <program_list>
+ * <program_list> -> <function_def> <program_list> EOF
+ * <program_list> -> <statement> <program_list> EOF
  *
  * @return 0 if parsed program is correct, else integer code according to error type
  */
@@ -42,7 +42,7 @@ int program_list(void);
  *
  * <function_def> -> def ID(<params>
  *
- * nonterminal symbols <function_def>, <params>, <params_list>, <param>, <fun-body> are set of nonterminal symbols and
+ * nonterminal symbols <function_def>, <params>, <params_list>, <fun-body> are set of nonterminal symbols and
  * it's rules, that check syntactic correct function definition
  *
  * Function creates entry for function in symbol table and creates local symbol table for definitions in function body.
@@ -56,40 +56,29 @@ int function_def(void);
  * @brief Nonterminal symbol params and it's syntactic rules simulation
  *
  * <params> -> ) EOL <function_body>
- * <params> -> <param> <param_list>
+ * <params> -> id <param_list>
  *
- * nonterminal symbols <function_def>, <params>, <params_list>, <param>, <fun-body> are set of nonterminal symbols and
+ * nonterminal symbols <function_def>, <params>, <params_list>, <fun-body> are set of nonterminal symbols and
  * it's rules, that check syntactic correct function definition
  *
  * @param symtable_data entry for actual function in global symbol table used for inserting function's parameters
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int params(data_t *symtable_data);
+int params(data_t *ste_newfc, string_t str_params);
 
 /**
  * @brief Nonterminal symbol param_list and it's syntactic rules simulation
  *
  * <param_list> -> ) EOL <function_body>
- * <param_list> -> , <param> <param_list>
+ * <param_list> -> , id <param_list>
  *
- * nonterminal symbols <function_def>, <params>, <params_list>, <param>, <fun-body> are set of nonterminal symbols and
+ * nonterminal symbols <function_def>, <params>, <params_list>, <fun-body> are set of nonterminal symbols and
  * it's rules, that check syntactic correct function definition
  *
  * @param symtable_data allocated entry for actual function in global symbol table used for inserting function's parameters
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int param_list(data_t *symtable_data);
-
-/**
- * @brief Nonterminal symbol param checks no syntax, only insure saving of parameters in symbol table and incrementing
- * parameters counter and creates local variables for variables in local symbol table
- *
- * Function saves function's parameters as local variables and generates them as local variables in prologue of function.
- * @param entry in global symbol table for actual function
- * @param param inserted function parameter
- * @return 1
- */
-int param(data_t *symtable_data, string_t param);
+int param_list(data_t *ste_newfc, string_t str_params);
 
 /**
  * @brief Nonterminal symbol function_body and it's syntactic rules simulation

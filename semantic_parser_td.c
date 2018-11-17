@@ -7,8 +7,10 @@
 
 #include "semantic_parser.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "error_handle.h"
 #include "global_interface.h"
 #include "gen_out.h"
@@ -43,4 +45,64 @@ int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry)
     }
 
     return SUCCESS;
+}
+
+int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array)
+{
+    //TODO prehladat vsetky tabulky
+    //detection of variable to function redefinition
+    if (NULL != search(get_main_st(), ste_ptr_newfc->id))
+    {
+        return ERR_SEM_DEF;
+    }
+    else
+    {
+        //detection of function redefinition
+        data_t *func_in_tab = search(get_fun_st(), ste_ptr_newfc->id);
+        if (func_in_tab == NULL)
+        {
+            insert(get_fun_st(), ste_ptr_newfc);
+        }
+        //detection of bad parameters number in function call before definition
+        else if (func_in_tab->type == UNDEF_FUN)
+        {
+            if (func_in_tab->param_cnt != ste_ptr_newfc->param_cnt)
+            {
+                return ERR_SEM_DEF;
+            }
+            else
+            {
+                func_in_tab->type = DEF_FUN;
+            }
+        }
+
+        //checking parameters, if they don't redefine function or other parameter and parsing to function symbol table
+        //pointers to symbol table entries of parameters are saved in array for generator
+        int i = 0;
+        char *param = strtok(str_params->string, " ");
+        while(param != NULL)
+        {
+            //creating symbol table entry
+            data_t ste_newparam;
+
+            //inserting data from token to symbol table entry
+            ste_newparam.type = UNDEF;
+            ste_newparam.value = NIL;
+            ste_newparam.id = string_create(param);
+            ste_newparam.param_cnt = 0;
+
+            if (NULL != search(get_fun_st(), ste_newparam.id) || NULL != search(get_local_st(), ste_newparam.id))
+            {
+                return ERR_SEM_DEF;
+            }
+
+            insert(get_local_st(), &ste_newparam);
+            assert(i < ste_ptr_newfc->param_cnt);
+            params_array[i] = search(get_local_st(), ste_newparam.id);
+
+            param = strtok(NULL, " ");
+            i++;
+        }
+        return SUCCESS;
+    }
 }
