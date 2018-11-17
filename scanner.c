@@ -249,8 +249,6 @@ void clean(void) {
 
 token_t *get_token(){
 
-    printf("get_token\n");
-
     //max 2 tokens can be returned
     assert(returned_token >= 0 && returned_token <= 2);
     //if token was returned from scanner, there is no need to get new token. We return last token the function got
@@ -711,7 +709,6 @@ token_t *get_token(){
 
 void ret_token(token_t* token)
 {
-    printf("ret_token\n");
     //dummy check if no invalid token is returned
     assert(token != NULL);
     //if we 1 token was retrned before, we have to rotate the array to get returned token to last token position,

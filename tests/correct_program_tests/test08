@@ -1,5 +1,8 @@
 var1=10
 var2=10
 if var1+var2 != var1/var2 then
+    x=10
 else
+    x=11
 end
+
