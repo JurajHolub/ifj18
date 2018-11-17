@@ -86,8 +86,8 @@ int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params
             data_t ste_newparam;
 
             //inserting data from token to symbol table entry
-            ste_newparam.type = UNDEF;
-            ste_newparam.value = NIL;
+            ste_newparam.type = VAR;
+            ste_newparam.value = UNDEF;
             ste_newparam.id = string_create(param);
             ste_newparam.param_cnt = 0;
 

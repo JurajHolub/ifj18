@@ -36,8 +36,6 @@ int main(int argc, char **argv)
         gen_program();
 
     free_global_frame();
-    free(ste_ptr_test);
-    remove_all_st();
 
     remove_all_st();
 

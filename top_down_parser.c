@@ -144,21 +144,20 @@ int function_def(void) {
     return ERR_SYNTAX;
 }
 
-#ifdef SEMANTIC
+//#ifdef SEMANTIC
 
 int generate_function_prologue(data_t *ste_newfc, data_t **ste_params, data_t *fc_end_label)
 {
     //calling semantic analysis, which actualize entry in symbol table for L value, too
     //creating local frame
-    add_text("Text k");
     create_local_frame();
-    add_text("Text m");
+    add_prolog_text("####### BEGIN USER FUNCTION ######\n");
     //label function end
     string_t str_label_fcend = insert_tmp(get_main_st(), UNDEF);
     fc_end_label = search(get_main_st(), str_label_fcend);
     //generating jump to function end
     add_prolog_inst(I_JUMP, &fc_end_label, NULL, NULL);
-    //generating function label
+    ////generating function label
     data_t *ste_ptr_label_fcbeg = search(get_fun_st(), ste_newfc->id);
     add_prolog_inst(I_LABEL, &ste_ptr_label_fcbeg, NULL, NULL);
     //generating new stack frame
@@ -169,13 +168,12 @@ int generate_function_prologue(data_t *ste_newfc, data_t **ste_params, data_t *f
     //generate parameters
     for (int i = 0; i < ste_newfc->param_cnt; i++)
     {
-        add_text("#Test t");
         add_var(ste_params + i);
         add_instruction(I_POPS, ste_params + 1, NULL, NULL);
     }
 
     //clear memory
-    string_free(str_label_fcend);
+    //string_free(str_label_fcend);
 
     return SUCCESS;
 }
@@ -186,11 +184,12 @@ int generate_function_epilogue(data_t *fc_end_label)
     add_instruction(I_POPFRAME, NULL, NULL, NULL);
     add_instruction(I_RETURN, NULL, NULL, NULL);
     add_instruction(I_LABEL, &fc_end_label, NULL, NULL);
+    add_text("####### END USER FUNCTION ######\n");
     free_local_frame();
 
     return SUCCESS;
 }
-#endif
+//#endif
 
 int params(data_t *ste_newfc, string_t str_params)
 {
@@ -213,7 +212,8 @@ int params(data_t *ste_newfc, string_t str_params)
             if (analysis_result == SUCCESS)
             {
                 //generating function prologue
-                data_t *fc_end_label;
+                string_t str_fun_end_label = insert_tmp(get_main_st(), UNDEF);
+                data_t *fc_end_label = search(get_main_st(), str_fun_end_label);
                 analysis_result = generate_function_prologue(ste_newfc, ste_ptrptr_params_array, fc_end_label);
                 if (analysis_result == SUCCESS)
                 {
@@ -267,7 +267,8 @@ int param_list(data_t *ste_newfc, string_t str_params)
             if (analysis_result == SUCCESS)
             {
                 //generating function prologue
-                data_t *fc_end_label;
+                string_t str_fun_end_label = insert_tmp(get_main_st(), UNDEF);
+                data_t *fc_end_label = search(get_main_st(), str_fun_end_label);
                 analysis_result = generate_function_prologue(ste_newfc, ste_ptrptr_params_array, fc_end_label);
                 if (analysis_result == SUCCESS)
                 {
