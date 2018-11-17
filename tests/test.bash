@@ -17,7 +17,7 @@ do
     for file in $path/*
     do
 
-        ./main $file > /dev/null 2>&1
+        ./main < $file > /dev/null 2>&1
         res=$?
         ret="return value: $res"
     
