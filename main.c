@@ -17,45 +17,18 @@
 #include "list.h"
 #include "global_interface.h"
 #include "error_handle.h"
+#include "top_down_parser.h"
 
 int main(int argc, char **argv)
 {
     
-    //table_item_t* hash_tb = get_main_st();
-    //create_global_frame();
-
-    //data_t d;
-    //d.id = string_create("10");
-    //d.type = CONST;
-    //d.value = INTEGER;
-    //d.param_cnt = 0;
-    //insert(hash_tb, &d);
-    //data_t* var1 = search(hash_tb, d.id);
-    //string_free(d.id);
-    //add_var(&var1);
-
-    //d.id = string_create("20");
-    //d.type = CONST;
-    //d.value = INTEGER;
-    //d.param_cnt = 0;
-    //insert(hash_tb, &d);
-    //data_t* var2 = search(hash_tb, d.id);
-    //string_free(d.id);
-    //add_var(&var2);
-
-    //add_prolog_inst(I_IFJCODE18, NULL, NULL, NULL);
-    //add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
-    //add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
-
-    //add_instruction(I_POPFRAME, NULL, NULL, NULL);
-
     create_global_frame();
 
     add_prolog_inst(I_IFJCODE18, NULL, NULL, NULL);
     add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
     add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
     
-    int ret = syntax_tests(argc, argv);
+    int ret = parse();
     
     add_instruction(I_POPFRAME, NULL, NULL, NULL);
 
@@ -63,10 +36,6 @@ int main(int argc, char **argv)
         gen_program();
 
     free_global_frame();
-
-    //gen_program();
-    //free_global_frame();
-    //remove_all_st();
 
     return ret;
 }

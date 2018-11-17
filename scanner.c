@@ -1,9 +1,10 @@
 /**
- * @file scanner.h
- * @author Samuel Krempsky <xkremp01@stud.fit.vutbr.cz>
+ * @file scanner.c
  * @brief Declaration of scanner interface for parser.
- * @date October 2018
+ * @date November 2018
+ * @author Samuel Krempsky
  */
+
 #include "scanner.h"
 #include <string.h>
 #include <stdio.h>
@@ -13,9 +14,12 @@
 
 token_t enterToken;
 token_t tokenNext;
-token_t tokens[10];
 char nextchar;//='\0';
 int globalVar=1;
+
+int get = -1;
+int ret = -1;
+token_t tokens[2];
 
 
 int controlKeyWords(char *testString, token_t *token){
@@ -226,10 +230,49 @@ void charAppend(token_t *token,char c){
 
 token_t *get_token(){
 
-    token_t *returnToken=malloc(sizeof(token_t));
+    //if (get == 1)
+    //    printf("tokans[0].at\"%s\", type=%d \t\ttokans[1].at\"%s\", type=%d\n",tokens[0].attribute->string, tokens[0].type,tokens[1].attribute->string, tokens[1].type);
+
+    if ((get == -1 && ret == -1) || (get == 0 && ret == 0))
+    {
+        get++;
+        ret++;
+//    fprintf(stderr, "get_token(), get %d, ret %d\n", get, ret);
+    }
+    else if (get == 1 && ret == 1)
+    {
+        tokens[0].attribute = tokens[1].attribute;
+        tokens[0].type = tokens[1].type;
+//    fprintf(stderr, "get_token(), get %d, ret %d\n", get, ret);
+    }
+    else if (get == 1 && ret == 0)
+    {
+        ret++;
+//    fprintf(stderr, "get_token(), get %d, ret %d\n", get, ret);
+    //    printf("get_token %s\n", tokens[1].attribute->string); 
+
+        return &tokens[1];
+    }
+    else if (get == 0 && ret == -1)
+    {
+        ret++;
+//    fprintf(stderr, "get_token(), get %d, ret %d\n", get, ret);
+      //  printf("get_token %s\n", tokens[0].attribute->string); 
+	 return &tokens[0];
+    }
+    else if (get == 1 && ret == -1)
+    {
+        ret++;
+
+//    fprintf(stderr, "get_token(), get %d, ret %d\n", get, ret);
+     //   printf("get_token %s\n", tokens[0].attribute->string); 
+	 return &tokens[0];
+    }
+
+    //token_t *&tokens[get]=malloc(sizeof(token_t));
     char *str = NULL;
     string_t string=string_create(str);
-    returnToken->attribute=string;
+    tokens[get].attribute=string;
 
 
     int commentSwitch=0;
@@ -260,8 +303,9 @@ token_t *get_token(){
 
         nextchar='\0';
         tokenNext.type=NOT;
-        returnToken->type=NOT_EQUAL;
-        return returnToken;
+        tokens[get].type=NOT_EQUAL;
+        printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
 
     }
 
@@ -281,7 +325,7 @@ token_t *get_token(){
     else if( (nextchar>='a' && nextchar <= 'z')  || nextchar=='_'){
         state=ID_state;
 
-        charAppend(returnToken,nextchar);
+        charAppend(&tokens[get],nextchar);
         
 
         /*
@@ -291,14 +335,15 @@ token_t *get_token(){
     }
     else if (nextchar>='0' && nextchar <= '9'){
         state=INT_state;
-        charAppend(returnToken,nextchar);
+        charAppend(&tokens[get],nextchar);
         /*
         testString[charCounter]=nextchar;
         charCounter++;*/
     }
-    else if(controlOperators(nextchar,returnToken,'\0')==TRUE){
+    else if(controlOperators(nextchar,&tokens[get],'\0')==TRUE){
         nextchar='\0';
-        return returnToken;
+        printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
     }
    
     /**/
@@ -308,23 +353,26 @@ token_t *get_token(){
         if(state==SIGN_state){
             if( c=='=' ){
 
-                if(controlOperators(nextchar,returnToken,c)==TRUE){
+                if(controlOperators(nextchar,&tokens[get],c)==TRUE){
                     nextchar='\0';
-                    return returnToken;
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 }
 
             }
             else if((c>='a' && c <= 'z')  || c=='_'){
                 //treba už vracať token a pamätať si prvú vec čo je tuna
-                if(controlOperators(nextchar,returnToken,'\0')==TRUE){
+                if(controlOperators(nextchar,&tokens[get],'\0')==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 }
             }
             else if (c>='0' && c <= '9'){
-                if(controlOperators(nextchar,returnToken,'\0')==TRUE){
+                if(controlOperators(nextchar,&tokens[get],'\0')==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 }
             }
         }
@@ -337,8 +385,9 @@ token_t *get_token(){
 
             if (c=='\n'){
                 commentSwitch=0;
-                //returnToken.type=LINE_END;
-                //return returnToken;
+                //&tokens[get].type=LINE_END;
+                //printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 //TODO problem with '\n' and the comments
             }
             else 
@@ -348,10 +397,10 @@ token_t *get_token(){
         else if (state==STRING_state){
             
             if(c=='"'){
-                returnToken->type=STRING;
+                tokens[get].type=STRING;
             }
 
-            charAppend(returnToken,c);
+            charAppend(&tokens[get],c);
             /*
             testString[charCounter]=c;
             charCounter++;*/
@@ -362,7 +411,7 @@ token_t *get_token(){
             if ( (c>='a' && c <= 'z') || c=='_'){
 
                 state=ID_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
 
                 /*testString[charCounter]=c;
                 charCounter++;*/
@@ -370,7 +419,7 @@ token_t *get_token(){
             else if(c>='0' && c <= '9'){
 
                 state=INT_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
                 
@@ -388,8 +437,9 @@ token_t *get_token(){
             else if(c=='"'){
                 state=STRING_state;
             }
-            else if(controlOperators(c,returnToken,'\0')==TRUE && (c!=' '|| c!='\t') ){
-                return returnToken;
+            else if(controlOperators(c,&tokens[get],'\0')==TRUE && (c!=' '|| c!='\t') ){
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else if( c==' ' || c=='\t'){
                 state=START_state;
@@ -459,14 +509,16 @@ token_t *get_token(){
         }
         else if(state==FUNCTION_state){
             if(controlSigns(c)==TRUE && c!='='){
-                returnToken->type=FUN;
-                return returnToken;
+                tokens[get].type=FUN;
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else if(c=='='){
                 testString[charCounter-1]='\0';
                 tokenNext.type=NOT_EQUAL;
-                returnToken->type=VAR;
-                return returnToken;
+                tokens[get].type=VAR;
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
 
 
             }
@@ -478,7 +530,7 @@ token_t *get_token(){
             if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
                 state=ID_state;
 
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
 
                 /*testString[charCounter]=c;
                 charCounter++;*/
@@ -487,9 +539,9 @@ token_t *get_token(){
             else if(c=='@'){
 
 
-                if(controlConstants(testString,returnToken)==TRUE);
+                if(controlConstants(testString,&tokens[get])==TRUE);
                 state=CONSTANT_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
 
                 /*testString[charCounter]=c;
                 charCounter++;*/
@@ -498,7 +550,7 @@ token_t *get_token(){
             else if(c=='?' || c== '!'){
                 state=FUNCTION_state;
 
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
@@ -506,13 +558,15 @@ token_t *get_token(){
 
                 
 
-                if(controlKeyWords(returnToken->attribute->string, returnToken) == TRUE){
+                if(controlKeyWords(tokens[get].attribute->string, &tokens[get]) == TRUE){
                     nextchar=c;
-                    return returnToken;
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 }      
-                if(controlWords(returnToken->attribute->string,returnToken)==TRUE){
+                if(controlWords(tokens[get].attribute->string,&tokens[get])==TRUE){
                     nextchar=c;
-                    return returnToken;
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
                 } 
 
             }
@@ -522,28 +576,29 @@ token_t *get_token(){
 
                 state=INT_state;
 
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
 
             }
             else if( c== '.'){
                 state=DOUBLE_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
             else if(controlSigns(c)==TRUE){
                 
-                if(controlInt(returnToken->attribute->string, returnToken) == TRUE) 
-                    return returnToken;
+                if(controlInt(tokens[get].attribute->string, &tokens[get]) == TRUE) 
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
 
             }
         }
         else if(state==DOUBLE_state){
             
             if (c>='0' && c <= '9'){
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             
@@ -552,14 +607,15 @@ token_t *get_token(){
                 //probably some error
                 //TODO chyták
                 state=EXPONENT_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
             else if (controlSigns(c) == TRUE){
                 
-                if( controlDouble(returnToken->attribute->string, returnToken) == TRUE) 
-                    return returnToken;
+                if( controlDouble(tokens[get].attribute->string, &tokens[get]) == TRUE) 
+                    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else{
                 //error
@@ -571,20 +627,21 @@ token_t *get_token(){
             if(c>='0' && c <= '9'){
 
                 state=EXPONENT_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
             else if(c=='+' || c == '-'){
                 state=EXPONENT_sign_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*
                 testString[charCounter]=c;
                 charCounter++;*/
             }
             else if (controlSigns(c)==TRUE) {
-                returnToken->type=FLOAT;
-                return returnToken;
+                tokens[get].type=FLOAT;
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else{
                 //error
@@ -594,15 +651,16 @@ token_t *get_token(){
             if(c>='0' && c <= '9'){
 
                 state=EXPONENT_sign_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
             
             }
             else if (controlSigns(c)==TRUE)  {
                 //printf("%s\n", testString);
-                returnToken->type=FLOAT;
-                return returnToken;
+                tokens[get].type=FLOAT;
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else{
                 //error
@@ -612,7 +670,7 @@ token_t *get_token(){
         else if(state ==CONSTANT_state){
             if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='-' || c=='+'){
                 state=CONSTANT_state;
-                charAppend(returnToken,c);
+                charAppend(&tokens[get],c);
                 /*
                 testString[charCounter]=c;
                 charCounter++;*/
@@ -620,7 +678,8 @@ token_t *get_token(){
             }
             else if (controlSigns(c)==TRUE){
                 // TODO control of constant
-                return returnToken;
+                printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
             }
             else {
                 //error
@@ -633,21 +692,26 @@ token_t *get_token(){
         
     }
 
-    return NULL;
+    tokens[get].type = EOF;
+    tokens[get].attribute = string_create(NULL);
+    printf("get_token %s\n", tokens[get].attribute->string); 
+	 return &tokens[get];
 
 }
 
-
-
-void ret_token(token_t *token)
+void ret_token(token_t* token)
 {
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
+//    if (get == 1)
+//        printf("tokans[0].at\"%s\", type=%d \t\ttokans[1].at\"%s\", type=%d\n",tokens[0].attribute->string, tokens[0].type,tokens[1].attribute->string, tokens[1].type);
+    if (ret == -1)
+        fprintf(stderr, "Return token older than 2 before.\n");
+    if (tokens[ret].type != token->type || !string_is_equal(tokens[ret].attribute ,token->attribute))
+        fprintf(stderr, "Return not last token.\n");
+
+    printf("ret_token %s\n", token->attribute->string);
+    ret--;
+//    fprintf(stderr, "ret_token(), get %d, ret %d\n", get, ret);
 }
+
 
 
