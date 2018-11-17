@@ -100,7 +100,7 @@ enum data_type_e {
 };
 
 
-/*  these are the constants for reserved words in Ruby 2.0
+  these are the constants for reserved words in Ruby 2.0
     for more info https://www.tutorialspoint.com/ruby/ruby_syntax.htm
 
     using enum because of better management of CONSTANTS

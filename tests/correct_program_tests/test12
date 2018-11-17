@@ -1,0 +1,42 @@
+if
+int
+10
+==
+int
+11
+then
+eol
+id
+a
+=
+int
+5
+eol
+else
+eol
+id
+a
+=
+float
+5.5
+eol
+end
+eol
+id
+b
+=
+int
+5
+/
+id
+a
+eol
+EOF
+
+if 10 == 11 then
+    a=5
+else
+    a=5.5
+end
+
+b=5/a
