@@ -22,40 +22,22 @@
 int main(int argc, char **argv)
 {
     
-    //create_global_frame();
+    create_global_frame();
 
-    //add_prolog_inst(I_IFJCODE18, NULL, NULL, NULL);
-    //add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
-    //add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
-    //
-    //int ret = parse();
-    //
-    //add_instruction(I_POPFRAME, NULL, NULL, NULL);
-
-    //if (ret == SUCCESS)
-    //    gen_program();
-
-    //free_global_frame();
+    add_prolog_inst(I_IFJCODE18, NULL, NULL, NULL);
+    add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
+    add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
     
-    token_t *token;
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
-    printf("ret_token\n");
-    ret_token(token);
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
-    printf("ret_token\n");
-    ret_token(token);
-    printf("ret_token\n");
-    ret_token(token);
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
-    token=get_token();
-    printf("Token attribute=\"%s\", type=%d\n", token->attribute->string, token->type);
+    int ret = parse();
+    
+    add_instruction(I_POPFRAME, NULL, NULL, NULL);
 
-    return 0;
+    if (ret == SUCCESS)
+        gen_program();
+
+    free_global_frame();
+
+    remove_all_st();
+
+    return ret;
 }
