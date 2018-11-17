@@ -73,7 +73,7 @@ int syntax_tests(int argc, char **argv) {
 
     if (argc < 2)
     {
-        printf("Set input test file.\n");
+        fprintf(stderr,"Set input test file.\n");
         return 1;
     }
 
@@ -153,43 +153,43 @@ token_t *get_token(void) {
 
     setbuf(stdout, 0);
     setbuf(stderr, 0);
-    printf("--------------------\n");
+    fprintf(stderr,"--------------------\n");
     if (tokens[0] != NULL)
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        printf("Lexeme: %s\n", lexemes[tokens[0]->type]);
+        fprintf(stderr,"Lexeme: %s\n", lexemes[tokens[0]->type]);
         if (tokens[0]->attribute != NULL)
         {
             setbuf(stdout, 0);
             setbuf(stderr, 0);
-            printf("Lexeme attribute: %s\n", tokens[0]->attribute->string);
+            fprintf(stderr,"Lexeme attribute: %s\n", tokens[0]->attribute->string);
         }
     }
     else
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        printf("Lexeme: NULL\n");
+        fprintf(stderr,"Lexeme: NULL\n");
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        printf("Lexeme attribute: NULL\n");
+        fprintf(stderr,"Lexeme attribute: NULL\n");
     }
     setbuf(stderr, 0);
     setbuf(stdout, 0);
-    printf("--------------------\n");
+    fprintf(stderr,"--------------------\n");
     setbuf(stderr, 0);
     setbuf(stdout, 0);
-    printf("Lexeme: %s\n", lexemes[tokens[1]->type]);
+    fprintf(stderr,"Lexeme: %s\n", lexemes[tokens[1]->type]);
     if (tokens[1]->attribute != NULL)
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        printf("Lexeme attribute: %s\n", tokens[1]->attribute->string);
+        fprintf(stderr,"Lexeme attribute: %s\n", tokens[1]->attribute->string);
     }
     setbuf(stdout, 0);
     setbuf(stderr, 0);
-    printf("--------------------\n\n");
+    fprintf(stderr,"--------------------\n\n");
     //--///////////////////////////////////////////////////////////////////////////////////////////
     //--/////////////////////////////////////TESTING OUTPUT END////////////////////////////////////
 
@@ -255,7 +255,7 @@ void read_token(token_t *token) {
     {
         setbuf(stdout, 0);
         setbuf(stderr, 0);
-        printf("Unknown lexeme");
+        fprintf(stderr,"Unknown lexeme");
         token->type = 99;
     }
 }
@@ -292,61 +292,61 @@ string_t get_attribute(void) {
 }
 
 void test_of_test(void) {
-    printf("TEST\n");
-    printf("------------------------------------------------------------\n\n");
+    fprintf(stderr,"TEST\n");
+    fprintf(stderr,"------------------------------------------------------------\n\n");
 
 
-    printf("----------------------\n");
-    printf("Get token\n");
-    printf("----------------------\n\n");
+    fprintf(stderr,"----------------------\n");
+    fprintf(stderr,"Get token\n");
+    fprintf(stderr,"----------------------\n\n");
 
     token_t *test = get_token();
 
-    printf("\nLexeme: %s\n", lexemes[test->type]);
+    fprintf(stderr,"\nLexeme: %s\n", lexemes[test->type]);
     if (test->attribute != NULL)
     {
-        printf("Lexeme attribute: %s\n", test->attribute->string);
+        fprintf(stderr,"Lexeme attribute: %s\n", test->attribute->string);
     }
     putchar('\n');
 
 
-    printf("----------------------\n");
-    printf("Return token\n");
-    printf("----------------------\n\n");
+    fprintf(stderr,"----------------------\n");
+    fprintf(stderr,"Return token\n");
+    fprintf(stderr,"----------------------\n\n");
 
     ret_token(test);
 
 
-    printf("----------------------\n");
-    printf("Get token\n");
-    printf("----------------------\n\n");
+    fprintf(stderr,"----------------------\n");
+    fprintf(stderr,"Get token\n");
+    fprintf(stderr,"----------------------\n\n");
 
     test = get_token();
 
-    printf("Lexeme: %s\n", lexemes[test->type]);
+    fprintf(stderr,"Lexeme: %s\n", lexemes[test->type]);
     if (test->attribute != NULL)
     {
-        printf("Lexeme attribute: %s\n", test->attribute->string);
+        fprintf(stderr,"Lexeme attribute: %s\n", test->attribute->string);
     }
 }
 
 void test_of_test2(void) {
-    printf("TEST\n");
-    printf("------------------------------------------------------------\n\n");
+    fprintf(stderr,"TEST\n");
+    fprintf(stderr,"------------------------------------------------------------\n\n");
 
     token_t *test;
     do
     {
-        printf("\n\n----------------------\n");
-        printf("Get token\n");
-        printf("----------------------\n\n");
+        fprintf(stderr,"\n\n----------------------\n");
+        fprintf(stderr,"Get token\n");
+        fprintf(stderr,"----------------------\n\n");
 
         test = get_token();
 
-        printf("\nLexeme: %s\n", lexemes[test->type]);
+        fprintf(stderr,"\nLexeme: %s\n", lexemes[test->type]);
         if (test->attribute != NULL)
         {
-            printf("Lexeme attribute: %s\n", test->attribute->string);
+            fprintf(stderr,"Lexeme attribute: %s\n", test->attribute->string);
         }
     }while(test->type != EOF);
 }
@@ -365,7 +365,7 @@ void test_of_test2(void) {
         exit(99);
     }
 
-    printf("Gimme attribute:  ");
+    fprintf(stderr,"Gimme attribute:  ");
     char c = getchar();
     //reading the whole input
     while (c != '\n')

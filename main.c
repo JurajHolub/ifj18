@@ -56,8 +56,12 @@ int main(int argc, char **argv)
     add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
     
     int ret = syntax_tests(argc, argv);
+    
+    add_instruction(I_POPFRAME, NULL, NULL, NULL);
+
     if (ret == SUCCESS)
         gen_program();
+
     free_global_frame();
 
     //gen_program();

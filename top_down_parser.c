@@ -551,7 +551,7 @@ int assignment(table_item_t *symtable)
             if (analysis_result == SUCCESS)
             {
                 data_t *ste_ptr_Rvalue = get_expr_type();
-                ste_Lvalue.type = ste_ptr_Rvalue->type;
+                ste_Lvalue.type = VAR;//ste_ptr_Rvalue->type;
                 ste_Lvalue.value = ste_ptr_Rvalue->value;
 
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
@@ -577,16 +577,17 @@ int assignment(table_item_t *symtable)
                     string_free(ste_const_boolString.id);
 
                     //wasting memmory
-                    string_t str_var_typeString = insert_tmp(symtable, STRING);
+                    string_t str_var_typeString = insert_tmp(symtable, VAR);
                     data_t *ste_ptr_var_typeString = search(symtable, str_var_typeString);
 
+                    add_var(&ste_ptr_var_typeString);
                     add_instruction(I_TYPE, &ste_ptr_var_typeString, &ste_ptr_Lvalue, NULL);
 
                     //wasting memmory
                     string_t str_label_goodType = insert_tmp(symtable, UNDEF);
                     data_t *ste_ptr_label_goodType = search(symtable, str_label_goodType);
 
-                    add_instruction(I_JUMPIFNEQ, &ste_ptr_label_goodType, &ste_ptr_const_boolString, &ste_ptr_Lvalue);
+                    add_instruction(I_JUMPIFNEQ, &ste_ptr_label_goodType, &ste_ptr_const_boolString, &ste_ptr_var_typeString);
 
                     //creating symbol table entry for string constant "bool"
                     data_t ste_const_4Int;

@@ -32,7 +32,6 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
 int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
 int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
 int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
-int apply_rule_5(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
 /**
  * @brief Debug print of stack.
  */
