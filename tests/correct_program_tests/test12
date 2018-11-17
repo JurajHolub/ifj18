@@ -1,18 +1,1 @@
-def
-id
-foo
-(
-id
-abc
-,
-id
-def
-,
-id
-ghe
-)
-eol
-EOF
-
 def foo(abc, def, ghe)
-end
