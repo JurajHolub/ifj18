@@ -1,3 +1,17 @@
+/**
+ * @author Matej Parobek (xparob00)
+ * @file top_down_parser.c
+ * @date 2018-10-16
+ * @brief Implementation of top-down parser
+ */
+#define SEMANTIC
+#include "dynamic_string.h"
+#include "top_down_parser.h"
+#include "error_handle.h"
+#include "global_interface.h"
+#include "semantic_parser.h"
+#include "gen_out.h"
+#include <string.h>
 
 
 void syntax_error(int token_type)
@@ -529,6 +543,7 @@ int while_body(table_item_t *symtable, bool main_body_while)
 
 int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
 {
+    add_var(&ste_ptr_Lvalue);
     //getting Rvalue
     add_instruction(I_POPS, &ste_ptr_Lvalue, NULL, NULL);
 
