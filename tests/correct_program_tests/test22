@@ -1,0 +1,13 @@
+# Program 1: Vypocet faktorialu (iterativne)
+print "Cislo pro vypocet faktorialu: 10"
+a = 10
+if a < 0 then
+    print("\nFaktorial nelze spocitat\n")
+else
+    vysl = 1
+    while a > 0 do
+        vysl = vysl * a
+        a = a - 1
+    end
+    print "\nVysledek␣je:", vysl, "\n"
+end

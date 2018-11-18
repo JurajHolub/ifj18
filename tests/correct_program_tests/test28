@@ -1,0 +1,6 @@
+var1 = 25
+var2 = 25.0
+x =var1
+print x
+x =var2
+print x
