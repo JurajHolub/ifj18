@@ -4,9 +4,6 @@ cd ../ && make -f Makefile
 cd tests/
 cp ../main .
 
-count=1
-test_cnt=9
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color

@@ -1,6 +1,5 @@
-a=inputs
-b=inputf
-c=inputs
+a="jozko"
+b="ferko"
 print a
 d = a+ b
 print d

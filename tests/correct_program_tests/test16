@@ -1,0 +1,8 @@
+
+def foo (a, b)
+    x = 10
+end
+
+a=10
+b=20
+foo a, b

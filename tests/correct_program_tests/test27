@@ -1,0 +1,17 @@
+
+a= 5
+void_fun a
+print a, "\n"
+
+a=20
+void_fun(a)
+print a, "\n"
+
+def void_fun(a)
+    if a < 10 then
+        x= "string"
+    else
+        x = 10
+    end
+end
+
