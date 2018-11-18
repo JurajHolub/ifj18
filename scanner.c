@@ -228,22 +228,24 @@ void charAppend(token_t *token,char c){
     string_append_ch(token->attribute,append_char);
 }
 
-void clean(void) {
-    if (tokens[1] != NULL)
+void free_scanner() {
+    if (tokens[0] != NULL)
     {
-        if (tokens[1]->attribute == NULL)
+        if (tokens[0]->attribute != NULL)
         {
-            free((void *) tokens[1]->attribute);
+            string_free(tokens[0]->attribute);
         }
-        free((void *) tokens[1]);
+        free(tokens[0]);
+        tokens[0] = NULL;
     }
     if (tokens[1] != NULL)
     {
-        if (tokens[1]->attribute == NULL)
+        if (tokens[1]->attribute != NULL)
         {
-            free((void *) tokens[1]->attribute);
+            string_free(tokens[1]->attribute);
         }
-        free((void *) tokens[2]);
+        free(tokens[1]);
+        tokens[1] = NULL;
     }
 }
 
@@ -281,7 +283,7 @@ token_t *get_token(){
         {
             string_free(tokens[0]->attribute);
         }
-        free((void *) tokens[0]);
+        free(tokens[0]);
     }
     tokens[0] = tokens[1];
     //allocation of new token
@@ -289,7 +291,7 @@ token_t *get_token(){
     if (tokens[1] == NULL)
     {
         fprintf(stderr, "Malloc fail\n");
-        clean();
+        free_scanner();
     }
     //data will be achieved and inserted in token
 
@@ -701,9 +703,8 @@ token_t *get_token(){
         
     }
 
-     tokens[1]->type = EOF;
-     tokens[1]->attribute = string_create(NULL);
-	 return tokens[1];
+    tokens[1]->type = EOF;
+    return tokens[1];
 
 }
 

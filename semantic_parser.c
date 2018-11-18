@@ -198,13 +198,13 @@ int sem_action_add(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
             add_instruction(I_ADDS, NULL, NULL, NULL);//ADDS
             res->value = FLOAT;
         }
-        else if (symb1->value == INTEGER && symb2->value == FLOAT)
+        else if (symb1->value == FLOAT && symb2->value == INTEGER)
         {
             add_instruction(I_INT2FLOATS, NULL, NULL, NULL);//INT2FLOATS
             add_instruction(I_ADDS, NULL, NULL, NULL);//ADDS
             res->value = FLOAT;
         }
-        else if (symb1->value == FLOAT && symb2->value == INTEGER)
+        else if (symb1->value == INTEGER && symb2->value == FLOAT)
         {
             string_t str_tmpop1 = insert_tmp(sym_tb, VAR);
             string_t str_tmpop2 = insert_tmp(sym_tb, VAR);
@@ -234,7 +234,7 @@ int sem_action_add(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
             add_instruction(I_POPS, &tmpop2, NULL, NULL);//POPS LF@$tmp$op2
             add_instruction(I_POPS, &tmpop1, NULL, NULL);//POPS LF@$tmp$op1
             add_instruction(I_CONCAT, &tmpop1, &tmpop1, &tmpop2);// CONCAT LF@$tmp$op1 LF@$tmp$op1 LF@$tmp$op2
-            add_instruction(I_ADDS, NULL, NULL, NULL);//ADDS
+            add_instruction(I_PUSHS, &tmpop1, NULL, NULL);
 
             res->value = STRING;
         }
@@ -258,7 +258,7 @@ int sem_action_sub_mul(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int a
     add_text("######################## BEGIN PARNI MLATICKA NA ODCITANI A NASOBENI\n");
     if (symb1->value == UNDEF || symb2->value == UNDEF)
     {
-        int instr = arit_op == SUB ? I_SUB : I_MUL;
+        int instr = arit_op == SUB ? I_SUBS : I_MULS;
 
         data_t d;
         d.type = CONST;
@@ -272,7 +272,8 @@ int sem_action_sub_mul(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int a
         insert(sym_tb, &d);
         data_t *float_const = search(sym_tb, d.id);
         string_free(d.id);
-        d.id = string_create("string");
+        d.value = BOOL;
+        d.id = string_create("true");
         insert(sym_tb, &d);
         data_t *true_const = search(sym_tb, d.id);
         string_free(d.id);
@@ -380,13 +381,13 @@ int sem_action_sub_mul(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int a
         {
             res->value = FLOAT;
         }
-        else if (symb1->value == INTEGER && symb2->value == FLOAT)
+        else if (symb1->value == FLOAT && symb2->value == INTEGER)
         {
             add_instruction(I_INT2FLOATS, NULL, NULL, NULL);//INT2FLOATS
 
             res->value = FLOAT;
         }
-        else if (symb1->value == FLOAT && symb2->value == INTEGER)
+        else if (symb1->value == INTEGER && symb2->value == FLOAT)
         {
             string_t str_tmpop1 = insert_tmp(sym_tb, VAR);
             string_t str_tmpop2 = insert_tmp(sym_tb, VAR);
@@ -458,6 +459,8 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         d.id = string_create("0");
         insert(sym_tb, &d);
         data_t *const_int_0 = search(sym_tb, d.id);
+        string_free(d.id);
+        d.id = string_create("0.0");
         d.value = FLOAT;
         insert(sym_tb, &d);
         data_t *const_float_0 = search(sym_tb, d.id);
@@ -543,8 +546,8 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_instruction(I_AND, &float_and_float, &first_float, &second_float);//AND LF@same_int_or_float LF@same LF@int_or_float
         add_instruction(I_AND, &first_int_second_float, &first_int, &second_float);//AND LF@first_int_second_float LF@first_int LF@second_float
         add_instruction(I_AND, &first_float_second_int, &first_float, &second_int);//AND LF@first_float_second_int LF@first_float LF@second_int
-        add_instruction(I_JUMPIFEQ, &int_int, &first_int, &second_int);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
-        add_instruction(I_JUMPIFEQ, &float_float, &first_float, &second_float);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
+        add_instruction(I_JUMPIFEQ, &int_int, &int_and_int, &true_const);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
+        add_instruction(I_JUMPIFEQ, &float_float, &float_and_float, &true_const);//JUMPIFEQ $simple_add LF@same_int_or_float bool@true
         add_instruction(I_JUMPIFEQ, &convert_first, &first_int_second_float, &true_const);//JUMPIFEQ $convert_first LF@first_int_second_float bool@true
         add_instruction(I_JUMPIFEQ, &convert_second, &first_float_second_int, &true_const);//JUMPIFEQ $convert_second LF@first_float_second_int bool@true
         add_instruction(I_EXIT, &const_4, NULL, NULL);//EXIT int@4
@@ -556,9 +559,10 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
         add_instruction(I_PUSHS, &tmpop2, NULL, NULL);//PUSHS LF@$tmp$op2
         add_instruction(I_IDIVS, NULL, NULL, NULL);//IDIVS
+        add_instruction(I_JUMP, &end, NULL, NULL);//JUMP $end$of$parni$mlaticka
         add_instruction(I_LABEL, &float_float, NULL, NULL);//LABEL $simple_add
-        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
-        add_instruction(I_JUMPIFNEQ, &no_zero_err_0, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_0, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
         add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
         add_instruction(I_LABEL, &no_zero_err_0, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -568,7 +572,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_instruction(I_LABEL, &convert_first, NULL, NULL);//LABEL $convert_first
         add_instruction(I_INT2FLOAT, &tmpop1, &tmpop1, NULL);//INT2FLOAT LF@$tmp$op1 LF@$tmp$op1
         add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
-        add_instruction(I_JUMPIFNEQ, &no_zero_err_2, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_2, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
         add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
         add_instruction(I_LABEL, &no_zero_err_2, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -578,7 +582,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         add_instruction(I_LABEL, &convert_second, NULL, NULL);//LABEL $convert_second
         add_instruction(I_INT2FLOAT, &tmpop2, &tmpop2, NULL);//INT2FLOAT LF@$tmp$op2 LF@$tmp$op2
         add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
-        add_instruction(I_JUMPIFNEQ, &no_zero_err_3, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+        add_instruction(I_JUMPIFNEQ, &no_zero_err_3, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
         add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
         add_instruction(I_LABEL, &no_zero_err_3, NULL, NULL);//LABEL $zero_err
         add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -611,6 +615,8 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         d.id = string_create("0");
         insert(sym_tb, &d);
         data_t *const_int_0 = search(sym_tb, d.id);
+        string_free(d.id);
+        d.id = string_create("0.0");
         d.value = FLOAT;
         insert(sym_tb, &d);
         data_t *const_float_0 = search(sym_tb, d.id);
@@ -631,7 +637,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         {
             add_var(&second_int_zero);
             add_instruction(I_EQ, &second_int_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
-            add_instruction(I_JUMPIFEQ, &zero_err, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+            add_instruction(I_JUMPIFNEQ, &zero_err, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
             add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
             add_instruction(I_LABEL, &zero_err, NULL, NULL);//LABEL $zero_err
             add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -644,7 +650,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         {
             add_var(&second_float_zero);
             add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
-            add_instruction(I_JUMPIFEQ, &zero_err, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+            add_instruction(I_JUMPIFNEQ, &zero_err, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
             add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
             add_instruction(I_LABEL, &zero_err, NULL, NULL);//LABEL $zero_err
             add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -658,7 +664,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
             add_var(&second_float_zero);
             add_instruction(I_INT2FLOAT, &tmpop2, &tmpop2, NULL);//INT2FLOAT LF@$tmp$op1 LF@$tmp$op1
             add_instruction(I_EQ, &second_float_zero, &tmpop2, &const_float_0);// EQ LF@second_float_zero LF@$tmp$op2 float@0x0p+0
-            add_instruction(I_JUMPIFEQ, &zero_err, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
+            add_instruction(I_JUMPIFNEQ, &zero_err, &second_float_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
             add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
             add_instruction(I_LABEL, &zero_err, NULL, NULL);//LABEL $zero_err
             add_instruction(I_PUSHS, &tmpop1, NULL, NULL);//PUSHS LF@$tmp$op1
@@ -671,7 +677,7 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
         {
             add_var(&second_int_zero);
             add_instruction(I_INT2FLOAT, &tmpop1, &tmpop1, NULL);//INT2FLOAT LF@$tmp$op1 LF@$tmp$op1
-            add_instruction(I_EQ, &second_int_zero, &tmpop2, &const_int_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
+            add_instruction(I_EQ, &second_int_zero, &tmpop2, &const_float_0);// EQ LF@second_int_zero LF@$tmp$op2 int@0 
             add_instruction(I_JUMPIFNEQ, &zero_err, &second_int_zero, &true_const);// JUMPIFEQ $zero_err LF@zero_div bool@true
             add_instruction(I_EXIT, &const_9, NULL, NULL);//EXIT int@9
             add_instruction(I_LABEL, &zero_err, NULL, NULL);//LABEL $zero_err
@@ -696,12 +702,14 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
 int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
 {
     int res;
-    string_t op1 = stack_top(sem_stack);
-    data_t *symb1 = search(sym_tb, op1);
-    stack_pop(sem_stack);
     string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
+    string_free(op2);
+    string_t op1 = stack_top(sem_stack);
+    data_t *symb1 = search(sym_tb, op1);
+    stack_pop(sem_stack);
+    string_free(op1);
 
     if (arit_op == ADD)// handle ADD and CONCAT
     {
@@ -723,8 +731,11 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
     return res;
 }
 
-void cmp_instr(int logic_op, data_t *op1, data_t *op2, data_t *tmp, bool pop_operands)
+void cmp_instr(int logic_op, data_t *op1, data_t *op2, data_t *tmp)
 {
+    add_instruction(I_PUSHS, &op1, NULL, NULL);
+    add_instruction(I_PUSHS, &op2, NULL, NULL);
+
     if (logic_op == EQUAL)
     {
         add_instruction(I_EQS, NULL, NULL, NULL);// EQS
@@ -744,11 +755,6 @@ void cmp_instr(int logic_op, data_t *op1, data_t *op2, data_t *tmp, bool pop_ope
     }
     else if (logic_op == LESS_EQ)
     {
-        if (pop_operands)
-        {
-            add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@op2
-            add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@op1
-        }
         add_instruction(I_LT, &tmp, &op1, &op2);//LT LF@tmp LF@op1 LF@op2
         add_instruction(I_PUSHS, &tmp, NULL, NULL);//PUSHS LF@tmp
         add_instruction(I_EQ, &tmp, &op1, &op2);//EQ LF@tmp LF@op1 LF@op2
@@ -757,11 +763,6 @@ void cmp_instr(int logic_op, data_t *op1, data_t *op2, data_t *tmp, bool pop_ope
     }
     else if (logic_op == GREATER_EQ)
     {
-        if (pop_operands)
-        {
-            add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@op2
-            add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@op1
-        }
         add_instruction(I_GT, &tmp, &op1, &op2);//GT LF@tmp LF@op1 LF@op2
         add_instruction(I_PUSHS, &tmp, NULL, NULL);//PUSHS LF@tmp
         add_instruction(I_EQ, &tmp, &op1, &op2);//EQ LF@tmp LF@op1 LF@op2
@@ -786,6 +787,8 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
     add_var(&tmp);// DEFVAR LF@tmp
 
     add_text("######################## BEGIN PARNI MLATICKA COMPARE\n");
+    add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@op2
+    add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@op1
     if (symb1->value == UNDEF || symb2->value == UNDEF)
     {
         string_t str_type1 = insert_tmp(sym_tb, VAR);
@@ -874,8 +877,6 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_var(&float_and_int);// DEFVAR LF@float_and_int
         add_var(&strings);// DEFVAR LF@strings
 
-        add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@op2
-        add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@op1
         add_instruction(I_TYPE, &type1, &op1, NULL);//TYPE LF@type1 LF@op1
         add_instruction(I_TYPE, &type2, &op2, NULL);//TYPE LF@type2 LF@op2
         add_instruction(I_EQ, &same, &type1, &type2);// EQ LF@same LF@type1 LF@type2
@@ -895,58 +896,58 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_instruction(I_JUMPIFEQ, &cmp_float_int, &float_and_int, &const_true);// JUMPIFEQ cmp_float_int LF@float_and_int bool@true
         add_instruction(I_JUMPIFEQ, &cmp_string, &strings, &const_true);// JUMPIFEQ cmp_string LF@strings bool@true
         if (logic_op == EQUAL)
+        {
             add_instruction(I_PUSHS, &const_false, NULL, NULL);// PUSHS bool@false
+            add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
+        }
         else if (logic_op == NOT_EQUAL)
+        {
             add_instruction(I_PUSHS, &const_true, NULL, NULL);// PUSHS bool@true
+            add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
+        }
         else
             add_instruction(I_EXIT, &const_4, NULL, NULL);// EXIT int@4
         add_instruction(I_LABEL, &cmp_int_int, NULL, NULL);// LABEL cmp_int_int
-        cmp_instr(logic_op, op1, op2, tmp, true);
+        cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
         add_instruction(I_LABEL, &cmp_float_float, NULL, NULL);// LABEL cmp_float_float
-        cmp_instr(logic_op, op1, op2, tmp, true);
+        cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
         add_instruction(I_LABEL, &cmp_int_float, NULL, NULL);// LABEL cmp_int_float
-        add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@$op2
-        add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@$op1
         add_instruction(I_INT2FLOAT, &op1, &op1, NULL);// INT2FLOAT LF@op1 LF@op1
-        cmp_instr(logic_op, op1, op2, tmp, false);
+        cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
         add_instruction(I_LABEL, &cmp_float_int, NULL, NULL);// LABEL cmp_float_int
-        add_instruction(I_INT2FLOATS, NULL, NULL, NULL);// INT2FLOATS
-        cmp_instr(logic_op, op1, op2, tmp, true);
+        add_instruction(I_INT2FLOAT, &op2, &op2, NULL);// INT2FLOAT LF@op1 LF@op1
+        cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
         add_instruction(I_LABEL, &cmp_string, NULL, NULL);// LABEL cmp_string
-        cmp_instr(logic_op, op1, op2, tmp, true);
+        cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_LABEL, &end, NULL, NULL);// LABEL end
     }
     else // if (symb1->value == UNDEF || symb2->value == UNDEF)
     {
-        if (symb1->value == INTEGER && symb1->value == INTEGER)
+        if (symb1->value == INTEGER && symb2->value == INTEGER)
         {
-            cmp_instr(logic_op, op1, op2, tmp, true);
+            cmp_instr(logic_op, op1, op2, tmp);
         }
-        else if (symb1->value == FLOAT && symb1->value == FLOAT)
+        else if (symb1->value == FLOAT && symb2->value == FLOAT)
         {
-            cmp_instr(logic_op, op1, op2, tmp, true);
+            cmp_instr(logic_op, op1, op2, tmp);
         }
-        else if (symb1->value == FLOAT && symb1->value == INTEGER)
+        else if (symb1->value == FLOAT && symb2->value == INTEGER)
         {
-            add_instruction(I_INT2FLOATS, NULL, NULL, NULL);//INT2FLOATS
-            cmp_instr(logic_op, op1, op2, tmp, true);
+            add_instruction(I_INT2FLOAT, &op2, &op2, NULL);
+            cmp_instr(logic_op, op1, op2, tmp);
         }
-        else if (symb1->value == INTEGER && symb1->value == FLOAT)
+        else if (symb1->value == INTEGER && symb2->value == FLOAT)
         {
-            add_var(&op1);//DEFVAR LF@$tmp$op1
-            add_var(&op2);//DEFVAR LF@$tmp$op2
-            add_instruction(I_POPS, &op2, NULL, NULL);//POPS LF@$tmp$op2
-            add_instruction(I_POPS, &op1, NULL, NULL);//POPS LF@$tmp$op1
-            add_instruction(I_INT2FLOAT, &op1, &op1, NULL);//INT2FLOAT LF@$tmp$op1 LF@$tmp$op1
-            cmp_instr(logic_op, op1, op2, tmp, false);
+            add_instruction(I_INT2FLOAT, &op1, &op1, NULL);
+            cmp_instr(logic_op, op1, op2, tmp);
         }
-        else if (symb1->value == STRING && symb1->value == STRING)
+        else if (symb1->value == STRING && symb2->value == STRING)
         {
-            cmp_instr(logic_op, op1, op2, tmp, true);
+            cmp_instr(logic_op, op1, op2, tmp);
         }
         else
         {
@@ -991,12 +992,14 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
 int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
 {
     int res;
-    string_t op1 = stack_top(sem_stack);
-    data_t *symb1 = search(sym_tb, op1);
-    stack_pop(sem_stack);
     string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
+    string_free(op2);
+    string_t op1 = stack_top(sem_stack);
+    data_t *symb1 = search(sym_tb, op1);
+    stack_pop(sem_stack);
+    string_free(op1);
 
     res = sem_action_cmp(sym_tb, symb1, symb2, logic_op);
 

@@ -46,7 +46,11 @@ enum data_type_e {
     FUN,        ///< Term "function()".
     DELIM,      ///< Term ",".
     VAR,         ///< Term "variable".
-    BOOL
+    BOOL,
+    UNDEF,
+    CONST,
+    DEF_FUN,
+    UNDEF_FUN
 };
 
 enum states{
@@ -103,6 +107,10 @@ token_t* get_token();
 void ret_token(token_t *token);
 
 
+/**
+ * @brief Deallocate all memory used in scanner.
+ */
+void free_scanner();
 
 
 
