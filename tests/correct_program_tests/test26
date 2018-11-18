@@ -3,4 +3,4 @@ def add (num1, num2)
 end
 
 res = add(10, 20)
-print res, "\n"
+print res
