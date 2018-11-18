@@ -702,14 +702,14 @@ int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2)
 int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op)
 {
     int res;
-    string_t op1 = stack_top(sem_stack);
-    data_t *symb1 = search(sym_tb, op1);
-    stack_pop(sem_stack);
-    string_free(op1);
     string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
     string_free(op2);
+    string_t op1 = stack_top(sem_stack);
+    data_t *symb1 = search(sym_tb, op1);
+    stack_pop(sem_stack);
+    string_free(op1);
 
     if (arit_op == ADD)// handle ADD and CONCAT
     {
@@ -992,14 +992,14 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
 int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op)
 {
     int res;
-    string_t op1 = stack_top(sem_stack);
-    data_t *symb1 = search(sym_tb, op1);
-    stack_pop(sem_stack);
-    string_free(op1);
     string_t op2 = stack_top(sem_stack);
     data_t *symb2 = search(sym_tb, op2);
     stack_pop(sem_stack);
     string_free(op2);
+    string_t op1 = stack_top(sem_stack);
+    data_t *symb1 = search(sym_tb, op1);
+    stack_pop(sem_stack);
+    string_free(op1);
 
     res = sem_action_cmp(sym_tb, symb1, symb2, logic_op);
 
