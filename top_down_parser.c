@@ -41,6 +41,14 @@ int parse(void)
 {
     //TODO free resources
     int analysis_result = program_list();
+    if (analysis_result == SUCCESS)
+    {
+        token_t *token = get_token();
+        if (token->type != EOF)
+        {
+            analysis_result = ERR_SYNTAX;
+        }
+    }
     return analysis_result;
 }
 
@@ -51,7 +59,8 @@ int program_list(void) {
     //rule <program_list> -> EOF
     if (token->type == EOF) //TODO
     {
-       return SUCCESS;
+        ret_token(token);
+        return SUCCESS;
     }
 
     //rule <program_list> -> <function_def> <program_list>
@@ -65,12 +74,6 @@ int program_list(void) {
         {
             //expansion of non terminal symbol <program_list> EOL
             analysis_result = program_list();
-
-            //token = get_token();
-            //if(token->type !=  EOF)
-            //{
-            //    analysis_result = ERR_SYNTAX;
-            //}
         }
 
         return analysis_result;
@@ -79,7 +82,7 @@ int program_list(void) {
     //rule <program_list> -> <statement> <program_list>
     else
     {
-        //expansion of non terminal symbol <statement> EOL
+        //expansion of non terminal symbol <statement>
         ret_token(token);
         int analysis_result = statement(global_symtable, true);
 
@@ -87,12 +90,6 @@ int program_list(void) {
         {
             //expansion of non terminal symbol <program_list>
             analysis_result = program_list();
-
-            token = get_token();
-            if(token->type !=  EOF)
-            {
-                analysis_result = ERR_SYNTAX;
-            }
         }
         return analysis_result;
     }
