@@ -543,7 +543,7 @@ int while_body(table_item_t *symtable, bool main_body_while)
 
 int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
 {
-    add_var(&ste_ptr_Lvalue);
+    //add_var(&ste_ptr_Lvalue);
     //getting Rvalue
     add_instruction(I_POPS, &ste_ptr_Lvalue, NULL, NULL);
 
@@ -664,7 +664,7 @@ int assignment(table_item_t *symtable, bool main_body_assig)
             //calling semantic analysis, which actualize entry in symbol table for L value, too
             if (analysis_result == SUCCESS)
             {
-                data_t *ste_ptr_Rvalue = get_expr_type();
+                //data_t *ste_ptr_Rvalue = get_expr_type();
                 //ste_Lvalue.value = ste_ptr_Rvalue->value;
 
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
