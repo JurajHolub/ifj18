@@ -268,11 +268,23 @@ int parse_expression(table_item_t *hash_tb)
         {
             int result = find_rule(hash_tb, stack, sem_stack);
             if (result != SUCCESS)
-                return result; //error
+            {
+                free_syntax_item(input_sym);
+                free_syntax_stack(stack);
+                free_sem_stack(sem_stack);
+
+                return result; // SEMANTIC ERROR
+            }
             //print_stack(stack);
         }
         else
-            return ERR_SYNTAX; //ERROR
+        {
+            free_syntax_item(input_sym);
+            free_syntax_stack(stack);
+            free_sem_stack(sem_stack);
+
+            return ERR_SYNTAX; // SYNTAX ERROR
+        }
 
         top_term = get_top_term(stack)->data;
         top = map_index(top_term->token->type);
