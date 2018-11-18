@@ -1,6 +1,5 @@
 a=10
 b=11
-foo a, b
 
 def foo ( a, b )
     if ( a == b) then
@@ -9,3 +8,5 @@ def foo ( a, b )
         x=1
     end
 end
+
+foo a, b

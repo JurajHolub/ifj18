@@ -1,5 +1,10 @@
 #!/bin/bash
 
+cd ../ && make -f Makefile
+cd tests/
+cp ../main .
+
+YELLOW='\033[1;33m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
@@ -11,6 +16,8 @@ fi
 for path in correct_program_tests/*
 do
     file=`basename "$path"`
+
+    printf "${YELLOW}*******************************${file}*******************************${NC}\n"
 
     ./main < $path > "output/compiler_output_$file" 2> /dev/null
     compiler_res=$?
@@ -27,11 +34,13 @@ do
         diff_res=$?
         if test $diff_res -eq 0
         then
-            printf "${GREEN}${file}: SUCCESS${NC}\n"
+            printf "    ${GREEN}${file}: SUCCESS${NC}\n"
         else
-            printf "${RED}${file}: FAILED${NC}\n"
+            printf "    ${RED}${file}: INTERPRET FAILED ${interpret_res} ${NC}\n"
             diff "output/ruby_output_$file" "output/interpret_output_$file" #reprint fail
         fi
+    else
+        printf "    ${RED}${file}: COMPILER FAILED ${compiler_res} ${NC}\n"
     fi
 
 done

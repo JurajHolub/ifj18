@@ -1,5 +1,5 @@
 var1=10
-var2=10
+var2=11
 while var1 == var2 do
 end
 

@@ -1,3 +1,4 @@
-def foo(1, i, ghe)
+def foo(a, i, ghe)
 end
 
+foo(1,1,1)

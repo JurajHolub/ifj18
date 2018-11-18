@@ -1,7 +1,7 @@
 a="jozko"
 b="ferko"
 print a
-d = a+ b
+d = a + b
 print d
-e = substr(c, 0, 5)
+e = substr(d, 0, 5)
 print e
