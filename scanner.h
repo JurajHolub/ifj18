@@ -46,7 +46,11 @@ enum data_type_e {
     FUN,        ///< Term "function()".
     DELIM,      ///< Term ",".
     VAR,         ///< Term "variable".
-    BOOL
+    BOOL,
+    UNDEF,
+    CONST,
+    DEF_FUN,
+    UNDEF_FUN
 };
 
 enum states{

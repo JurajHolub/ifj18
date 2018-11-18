@@ -16,8 +16,12 @@ int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op);
 int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op);
 int parse_assig(table_item_t *sym_tb, stack_t* sem_stack, token_t *new_var);
 int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op);
-int convert_type(stack_t* sem_stack, table_item_t *sym_tb, data_t* symb1, data_t* symb2);
 int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry);
 int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array);
+
+int sem_action_add(table_item_t *sym_tb, data_t *symb1, data_t *symb2);
+int sem_action_sub_mul(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int arit_op);
+int sem_action_div(table_item_t *sym_tb, data_t *symb1, data_t *symb2);
+int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic_op);
     
 #endif // _SEMANTIC_PARSER_H_IFJ_18_
