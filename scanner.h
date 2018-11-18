@@ -107,6 +107,10 @@ token_t* get_token();
 void ret_token(token_t *token);
 
 
+/**
+ * @brief Deallocate all memory used in scanner.
+ */
+void free_scanner();
 
 
 
