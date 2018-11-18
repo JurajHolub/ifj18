@@ -13,6 +13,64 @@
 #define TRUE 1
 #define FALSE 0
 
+//#define DEBUG
+
+#ifdef DEBUG
+
+static char *lexemes[] = {"not", "-", "+", "*", "/", "!=", "<", "int", "str", "nil", "(", ")", "eol", "==", ">",
+                          "<=", ">=", "float", "def", "do", "else", "end", "if", "then", "while", "=", "FUN", ",",
+                          "id", "EOF"};
+
+#define PRINT_TOKENS \
+    setbuf(stdout, 0);\
+    setbuf(stderr, 0);\
+    fprintf(stderr,"--------------------\n");\
+    if (tokens[0] != NULL)\
+    {\
+        setbuf(stdout, 0);\
+        setbuf(stderr, 0);\
+        fprintf(stderr, "Lexeme: %s\n", tokens[0]->type == EOF ? "EOF" : lexemes[tokens[0]->type]);\
+        if (tokens[0]->attribute != NULL || tokens[0]->type != EOF)\
+        {\
+            setbuf(stdout, 0);\
+            setbuf(stderr, 0);\
+            fprintf(stderr,"Lexeme attribute: %s\n", tokens[0]->attribute->string);\
+        }\
+    }\
+    else\
+    {\
+        setbuf(stdout, 0);\
+        setbuf(stderr, 0);\
+        fprintf(stderr,"Lexeme: NULL\n");\
+        setbuf(stdout, 0);\
+        setbuf(stderr, 0);\
+        fprintf(stderr,"Lexeme attribute: NULL\n");\
+    }\
+    setbuf(stderr, 0);\
+    setbuf(stdout, 0);\
+    fprintf(stderr,"--------------------\n");\
+    setbuf(stderr, 0);\
+    setbuf(stdout, 0);\
+    fprintf(stderr, "Lexeme: %s\n", tokens[1]->type == EOF ? "EOF" : lexemes[tokens[1]->type]);\
+    if (tokens[1]->attribute != NULL  || tokens[1]->type != EOF)\
+    {\
+        setbuf(stdout, 0);\
+        setbuf(stderr, 0);\
+        fprintf(stderr,"Lexeme attribute: %s\n", tokens[1]->attribute->string);\
+    }\
+    setbuf(stdout, 0);\
+    setbuf(stderr, 0);\
+    fprintf(stderr,"--------------------\n\n");\
+    //--///////////////////////////////////////////////////////////////////////////////////////////
+    //--/////////////////////////////////////TESTING OUTPUT END////////////////////////////////////
+
+#else
+
+#define PRINT_TOKENS
+
+#endif
+
+
 token_t enterToken;
 token_t tokenNext;
 char nextchar;//='\0';
@@ -273,6 +331,7 @@ token_t *get_token(){
         returned_token--;
 
         //last returned token will be given to parser
+        PRINT_TOKENS
         return tmp;
     }
     //there are no returned tokens, so the oldest saved token is deleted and on its place is saved last token and
@@ -330,6 +389,7 @@ token_t *get_token(){
         nextchar='\0';
         tokenNext.type=NOT;
         tokens[1]->type=NOT_EQUAL;
+        PRINT_TOKENS
 	    return tokens[1];
 
     }
@@ -367,6 +427,7 @@ token_t *get_token(){
     }
     else if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
         nextchar='\0';
+        PRINT_TOKENS
         return tokens[1];
     }
    
@@ -379,6 +440,7 @@ token_t *get_token(){
 
                 if(controlOperators(nextchar,tokens[1],c)==TRUE){
                     nextchar='\0';
+                    PRINT_TOKENS
                     return tokens[1];
                 }
 
@@ -387,12 +449,14 @@ token_t *get_token(){
                 //treba už vracať token a pamätať si prvú vec čo je tuna
                 if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
+                    PRINT_TOKENS
                     return tokens[1];
                 }
             }
             else if (c>='0' && c <= '9'){
                 if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
+                    PRINT_TOKENS
                     return tokens[1];
                 }
             }
@@ -407,7 +471,8 @@ token_t *get_token(){
             if (c=='\n'){
                 commentSwitch=0;
                 //tokens[1].type=LINE_END;
-                //printf("get_token %s\n", tokens[1]->attribute->string); 
+                //printf("get_token %s\n", tokens[1]->attribute->string);
+                PRINT_TOKENS
                  return tokens[1];
                 //TODO problem with '\n' and the comments
             }
@@ -459,6 +524,7 @@ token_t *get_token(){
                 state=STRING_state;
             }
             else if(controlOperators(c,tokens[1],'\0')==TRUE && (c!=' '|| c!='\t') ){
+                PRINT_TOKENS
                 return tokens[1];
             }
             else if( c==' ' || c=='\t'){
@@ -530,12 +596,14 @@ token_t *get_token(){
         else if(state==FUNCTION_state){
             if(controlSigns(c)==TRUE && c!='='){
                 tokens[1]->type=FUN;
+                PRINT_TOKENS
                 return tokens[1];
             }
             else if(c=='='){
                 testString[charCounter-1]='\0';
                 tokenNext.type=NOT_EQUAL;
                 tokens[1]->type=VAR;
+                PRINT_TOKENS
                 return tokens[1];
 
 
@@ -578,10 +646,12 @@ token_t *get_token(){
 
                 if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
                     nextchar=c;
+                    PRINT_TOKENS
                     return tokens[1];
                 }      
                 if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
                     nextchar=c;
+                    PRINT_TOKENS
                     return tokens[1];
                 } 
 
@@ -605,8 +675,10 @@ token_t *get_token(){
             }
             else if(controlSigns(c)==TRUE){
                 
-                if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) 
+                if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
+                    PRINT_TOKENS
                     return tokens[1];
+                }
 
             }
         }
@@ -628,8 +700,10 @@ token_t *get_token(){
             }
             else if (controlSigns(c) == TRUE){
                 
-                if( controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE) 
+                if( controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE) {
+                    PRINT_TOKENS
                     return tokens[1];
+                }
             }
             else{
                 //error
@@ -654,6 +728,7 @@ token_t *get_token(){
             }
             else if (controlSigns(c)==TRUE) {
                 tokens[1]->type=FLOAT;
+                PRINT_TOKENS
                 return tokens[1];
             }
             else{
@@ -672,6 +747,7 @@ token_t *get_token(){
             else if (controlSigns(c)==TRUE)  {
                 //printf("%s\n", testString);
                 tokens[1]->type=FLOAT;
+                PRINT_TOKENS
                 return tokens[1];
             }
             else{
@@ -690,6 +766,7 @@ token_t *get_token(){
             }
             else if (controlSigns(c)==TRUE){
                 // TODO control of constant
+                PRINT_TOKENS
                 return tokens[1];
             }
             else {
