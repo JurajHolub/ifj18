@@ -17,6 +17,14 @@
 #include "scanner.h"
 #include "symtable.h"
 
+#define PARAMS_SIZE 15
+
+typedef struct params_s
+{
+    int array_size;
+    data_t *params;
+} *params_t;
+
 /**
  * @brief Run syntax analysis
  * @return 0 if parsed program is correct, else integer code according to error type
@@ -103,7 +111,7 @@ int function_body();
  * @param symtable symbol table used by definitions in statement
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int statement(table_item_t *symtable);
+int statement(table_item_t *symtable, bool main_body_st);
 
 /**
  * @brief Nonterminal symbol if_statement and it's syntactic rules simulation
@@ -116,7 +124,7 @@ int statement(table_item_t *symtable);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int if_statement(table_item_t *symtable);
+int if_statement(table_item_t *symtable, bool main_body_if);
 
 /**
  * @brief Nonterminal symbol if_body and it's syntactic rules simulation
@@ -130,7 +138,7 @@ int if_statement(table_item_t *symtable);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int if_body(table_item_t *symtable);
+int if_body(table_item_t *symtable, bool main_body_if);
 
 /**
  * @brief Nonterminal symbol else_body and it's syntactic rules simulation
@@ -144,7 +152,7 @@ int if_body(table_item_t *symtable);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int else_body(table_item_t *symtable);
+int else_body(table_item_t *symtable, bool main_body_else);
 
 /**
  * @brief Nonterminal symbol while_statement and it's syntactic rules simulation
@@ -157,7 +165,7 @@ int else_body(table_item_t *symtable);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int while_statement(table_item_t *symtable);
+int while_statement(table_item_t *symtable, bool main_body_while);
 
 /**
  * @brief Nonterminal symbol while_body and it's syntactic rules simulation
@@ -171,7 +179,7 @@ int while_statement(table_item_t *symtable);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int while_body(table_item_t *symtable);
+int while_body(table_item_t *symtable, bool main_body_while);
 
 /**
  * @brief Nonterminal symbol assignment checks syntax, of assignment statement and calls semantic analysis in case
@@ -189,7 +197,7 @@ int while_body(table_item_t *symtable);
  * @param symtable symbol table used by definitions in statement
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int assignment(table_item_t *symtable);
+int assignment(table_item_t *symtable, bool main_body_assig);
 
 /**
  * @brief Nonterminal symbol function_call and it's syntactic rules simulation
@@ -202,7 +210,7 @@ int assignment(table_item_t *symtable);
  * @param symtable to check correct function call according to it's definition in semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int function_call(table_item_t *symtable);
+int function_call(table_item_t *symtable, bool accept_undef);
 
 /**
  * @brief Nonterminal symbol call_params and it's syntactic rules simulation
@@ -215,7 +223,7 @@ int function_call(table_item_t *symtable);
  *
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int call_params(void);
+int call_params(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params);
 
 /**
  * @brief Nonterminal symbol call_param and it's syntactic rules simulation
@@ -228,7 +236,7 @@ int call_params(void);
  *
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int call_param(void);
+int call_param(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params);
 
 /**
  * @brief Nonterminal symbol call_param_list and it's syntactic rules simulation
@@ -241,6 +249,6 @@ int call_param(void);
  *
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int call_param_list(void);
+int call_param_list(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params);
 
 #endif //IFJ18_TOP_DOWN_PARSER_H

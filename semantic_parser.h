@@ -11,6 +11,7 @@
 #include "symtable.h"
 #include "scanner.h"
 #include "stack.h"
+#include "top_down_parser.h"
 
 int parse_arit_op(table_item_t *sym_tb, stack_t* sem_stack, int arit_op);
 int parse_logic_op(table_item_t *sym_tb, stack_t* sem_stack, int logic_op);
@@ -19,5 +20,6 @@ int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op);
 int convert_type(stack_t* sem_stack, table_item_t *sym_tb, data_t* symb1, data_t* symb2);
 int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry);
 int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array);
+int sem_action_callfc(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params, bool accept_undef);
     
 #endif // _SEMANTIC_PARSER_H_IFJ_18_

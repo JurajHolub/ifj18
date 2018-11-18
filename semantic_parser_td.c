@@ -47,8 +47,7 @@ int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry)
     return SUCCESS;
 }
 
-int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array)
-{
+int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array) {
     //TODO prehladat vsetky tabulky
     //detection of variable to function redefinition
     if (NULL != search(get_main_st(), ste_ptr_newfc->id))
@@ -63,7 +62,7 @@ int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params
         {
             insert(get_fun_st(), ste_ptr_newfc);
         }
-        //detection of bad parameters number in function call before definition
+            //detection of bad parameters number in function call before definition
         else if (func_in_tab->type == UNDEF_FUN)
         {
             if (func_in_tab->param_cnt != ste_ptr_newfc->param_cnt)
@@ -80,7 +79,7 @@ int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params
         //pointers to symbol table entries of parameters are saved in array for generator
         int i = 0;
         char *param = strtok(str_params->string, " ");
-        while(param != NULL)
+        while (param != NULL)
         {
             //creating symbol table entry
             data_t ste_newparam;
@@ -106,3 +105,54 @@ int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params
         return SUCCESS;
     }
 }
+
+int sem_action_callfc(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params, bool accept_undef)
+{
+    //check function definition
+    data_t *found = search(get_fun_st(), ste_ptr_callfc->id);
+    if (found != NULL)
+    {
+        if (strcmp(found->id->string, "print") != 0)
+        {
+            if (found->param_cnt != ste_ptr_callfc->param_cnt)
+            {
+                return ERR_SEM_FUN;
+            }
+        }
+    }
+    else
+    {
+        if (accept_undef)
+        {
+            insert(get_fun_st(), ste_ptr_callfc);
+        }
+        else
+        {
+            return ERR_SEM_DEF;
+        }
+    }
+
+    //check function parameters
+    for (int i = 0; i < ste_ptr_callfc->param_cnt; i++)
+    {
+        if ((params->params[i]).type == VAR)
+        {
+            if (NULL == search(symtable, (params->params)[i].id))
+            {
+                return ERR_SEM_DEF;
+            }
+        }
+        else if (((params->params)[i].type == CONST) && ((params->params)[i].value == INTEGER || (params->params)[i].value == STRING ||
+                 (params->params)[i].value == FLOAT || (params->params)[i].value == NIL))
+        {
+            insert(symtable, (params->params) + i);
+        }
+        else
+        {
+            return ERR_SEM_ELSE;
+        }
+    }
+
+    return SUCCESS;
+}
+
