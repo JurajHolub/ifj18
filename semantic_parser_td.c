@@ -36,6 +36,8 @@ int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry)
 
         //generating variable definition
         aux_symtable_entry = search(vars_symtable, l_value_entry->id);
+
+        aux_symtable_entry->type = VAR; // JURAJ EDIT: this is not set before
         add_var(&aux_symtable_entry);
     }
     else    //l value variable is in symbol table and will be updated

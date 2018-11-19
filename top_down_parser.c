@@ -558,6 +558,7 @@ int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
     //generating auxiliary variable for saving data type of Rvalue
     string_t str_var_typeString = insert_tmp(symtable, VAR);
     data_t *ste_ptr_var_typeString = search(symtable, str_var_typeString);
+
     add_var(&ste_ptr_var_typeString);
 
     //saving data type of Rvalue
@@ -632,7 +633,7 @@ int assignment(table_item_t *symtable, bool main_body_assig)
             //actualize entry in symbol table for L value and call semantic analysis
             if (analysis_result == SUCCESS)
             {
-                ste_Lvalue.type = UNDEF;
+                ste_Lvalue.value = UNDEF; //JURAJ EDIT: set return value to UNDEF, type is still VAR
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
 
                 //generating assignment
