@@ -1,0 +1,2 @@
+var="string s medzerou"
+print var, "\n"
