@@ -591,6 +591,7 @@ int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
 {
     //getting Rvalue
     add_instruction(I_POPS, &ste_ptr_Lvalue, NULL, NULL);
+    add_instruction(I_CLEARS, NULL, NULL, NULL);
 
     //creating symbol table entry for string constant "bool"
     data_t ste_const_boolString;
@@ -691,10 +692,77 @@ int assignment(table_item_t *symtable, bool main_body_assig)
                     //getting symbol table entry of L value from symbol table
                     data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
                     generate_assignment(symtable, ste_ptr_Lvalue);
+                    if (!main_body_assig)
+                    {
+                        add_instruction(I_PUSHS, &ste_ptr_Lvalue, NULL, NULL);
+                    }
                 }
             }
             //clear memory
             string_free(ste_Lvalue.id);
+            return analysis_result;
+        }
+
+        //special case function without parameters
+        else if ((token->type == VAR || token->type == FUN) &&
+                 (next_token->type == EOL))
+        {
+            int analysis_result;
+            if (search(symtable, token->attribute))
+            {
+                //expansion of non terminal symbol <expression>
+                ret_token(next_token);
+                ret_token(token);
+                analysis_result = parse_expression(symtable);
+
+                //calling semantic analysis, which actualize entry in symbol table for L value, too
+                if (analysis_result == SUCCESS)
+                {
+                    data_t *ste_ptr_Rvalue = get_expr_type();
+                    ste_Lvalue.type = VAR;
+                    ste_Lvalue.value = ste_ptr_Rvalue->value;
+
+                    analysis_result = sem_action_assig(symtable, &ste_Lvalue);
+
+                    //generating assignment
+                    if (analysis_result == SUCCESS)
+                    {
+                        //getting symbol table entry of L value from symbol table
+                        data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
+                        generate_assignment(symtable, ste_ptr_Lvalue);
+                        if (!main_body_assig)
+                        {
+                            add_instruction(I_PUSHS, &ste_ptr_Lvalue, NULL, NULL);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //expansion of non terminal symbol <function_call>
+                ret_token(next_token);
+                ret_token(token);
+                analysis_result = function_call(symtable, !main_body_assig);
+
+                //actualize entry in symbol table for L value and call semantic analysis
+                if (analysis_result == SUCCESS)
+                {
+                    ste_Lvalue.value = UNDEF; //JURAJ EDIT: set return value to UNDEF, type is still VAR
+                    analysis_result = sem_action_assig(symtable, &ste_Lvalue);
+
+                    //generating assignment
+                    if (analysis_result == SUCCESS)
+                    {
+                        //getting symbol table entry of L value from symbol table
+                        data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
+                        generate_assignment(symtable, ste_ptr_Lvalue);
+                        if (!main_body_assig)
+                        {
+                            add_instruction(I_PUSHS, &ste_ptr_Lvalue, NULL, NULL);
+                        }
+                    }
+                }
+            }
             return analysis_result;
         }
 
@@ -722,6 +790,10 @@ int assignment(table_item_t *symtable, bool main_body_assig)
                     //getting symbol table entry of L value from symbol table
                     data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
                     generate_assignment(symtable, ste_ptr_Lvalue);
+                    if (!main_body_assig)
+                    {
+                        add_instruction(I_PUSHS, &ste_ptr_Lvalue, NULL, NULL);
+                    }
                 }
             }
             //clear memory
@@ -749,6 +821,26 @@ int assignment(table_item_t *symtable, bool main_body_assig)
             ret_token(next_token);
             ret_token(token);
             return function_call(symtable, !main_body_assig);
+        }
+
+        else if ((token->type == VAR || token->type == FUN) &&
+                 (next_token->type == EOL))
+        {
+            if (search(symtable, token->attribute))
+            {
+                //expansion of non terminal symbol <expression>
+                ret_token(next_token);
+                ret_token(token);
+                int ret = parse_expression(symtable);
+                return ret;
+            }
+            else
+            {
+                //expansion of non terminal symbol <function_call>
+                ret_token(next_token);
+                ret_token(token);
+                return function_call(symtable, !main_body_assig);
+            }
         }
 
         //rule <assignment> -> <expression>
