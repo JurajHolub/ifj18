@@ -1,0 +1,7 @@
+less= 10
+more=20
+if less < more then
+    print less
+else
+    print more
+end

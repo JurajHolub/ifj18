@@ -37,7 +37,6 @@ do
             printf "    ${GREEN}${file}: SUCCESS${NC}\n"
         else
             printf "    ${RED}${file}: INTERPRET FAILED ${interpret_res} ${NC}\n"
-            diff "output/ruby_output_$file" "output/interpret_output_$file" #reprint fail
         fi
     else
         printf "    ${RED}${file}: COMPILER FAILED ${compiler_res} ${NC}\n"
