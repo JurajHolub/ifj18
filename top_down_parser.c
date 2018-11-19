@@ -732,9 +732,11 @@ int generate_function_call (table_item_t *symtable, data_t *ste_ptr_callfc, para
         //inserting data from token to symbol table entry
         ste_const_paramsNmInt.type = CONST;
         ste_const_paramsNmInt.value = INTEGER;
-        //TODO string to int
-        //ste_const_paramsNmInt.id = string_create(ste_ptr_callfc->id);
-        ste_const_paramsNmInt.id = string_create("4");
+
+        char param_cnt[10];
+        sprintf(param_cnt, "%d", ste_ptr_callfc->param_cnt); //int to string
+        ste_const_paramsNmInt.id = string_create(param_cnt);
+        //ste_const_paramsNmInt.id = string_create("4");
         ste_const_paramsNmInt.param_cnt = 0;
         insert(symtable, &ste_const_paramsNmInt);
         data_t *ste_ptr_const_paramsNmInt = search(symtable, ste_const_paramsNmInt.id);
