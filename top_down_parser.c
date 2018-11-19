@@ -478,8 +478,53 @@ int while_statement(table_item_t *symtable, bool main_body_while)
     //rule <while_statement> -> while <expression> do EOL <while_body>
     if (token->type == WHILE)
     {
+        // create items in symtable for while loop
+        data_t cons;
+        cons.id = string_create("true");
+        cons.type = CONST;
+        cons.value = BOOL;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *bool_true = search(symtable, cons.id);
+        string_free(cons.id);
+        cons.id = string_create("4");
+        cons.value = INTEGER;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *int_4 = search(symtable, cons.id);
+        string_free(cons.id);
+        cons.id = string_create("bool");
+        cons.value = STRING;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *string_bool = search(symtable, cons.id);
+        string_free(cons.id);
+        string_t str_hard_jump = insert_tmp(symtable, UNDEF);
+        string_t str_end = insert_tmp(symtable, UNDEF);
+        string_t str_type_match = insert_tmp(symtable, UNDEF);
+        string_t str_type = insert_tmp(symtable, VAR);
+        string_t str_condition = insert_tmp(symtable, VAR);
+        data_t *hard_jump = search(symtable, str_hard_jump);
+        data_t *end = search(symtable, str_end);
+        data_t *type_match = search(symtable, str_type_match);
+        data_t *type = search(symtable, str_type);
+        data_t *condition = search(symtable, str_condition);
+        
+        add_var(&type);
+        add_var(&condition);
+        add_text("############## BEGIN WHILE LOOP\n");
+        add_instruction(I_LABEL, &hard_jump, NULL, NULL);//LABEL $hard_jump
+        
         //expansion of non terminal symbol <expression>
         int analysis_result = parse_expression(symtable);
+        
+        add_instruction(I_POPS, &condition, NULL, NULL);//POPS $condition
+        add_instruction(I_TYPE, &type, &condition, NULL);
+        add_instruction(I_JUMPIFEQ, &type_match, &type, &string_bool);// JUMIFNEQ type_match LF@type string@bool
+        add_instruction(I_EXIT, &int_4, NULL, NULL);//EXIT int@4
+        add_instruction(I_LABEL, &type_match, NULL, NULL);//LABEL type_match
+        add_instruction(I_JUMPIFNEQ, &end, &condition, &bool_true);//JUMPIFNEQ $end LF&condition bool@true
+
         if (analysis_result != SUCCESS)
         {
             return analysis_result;
@@ -493,7 +538,11 @@ int while_statement(table_item_t *symtable, bool main_body_while)
                 if (token->type == EOL)
                 {
                     //expansion of non terminal symbol <while_body>
-                    return while_body(symtable, main_body_while);
+                    analysis_result = while_body(symtable, main_body_while);
+                    add_instruction(I_JUMP, &hard_jump, NULL, NULL);//JUMP $hard_jump
+                    add_instruction(I_LABEL, &end, NULL, NULL);//LABEL $end
+                    add_text("############## END WHILE LOOP\n");
+                    return analysis_result;
                 }
             }
         }
