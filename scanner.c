@@ -115,7 +115,7 @@ int controlKeyWords(char *testString, token_t *token){
             token->type=NOT; 
             return TRUE;
         }
-        else if (strcmp(testString,keyWords[i]) == 0 && i ==5 ){
+        else if (strcmp(testString,keyWords[i]) == 0 && i ==6 ){
             token->type=NIL; 
             return TRUE;
         }
