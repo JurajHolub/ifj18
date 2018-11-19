@@ -54,7 +54,7 @@ enum data_type_e {
 };
 
 enum states{
-
+    
     START_state=0,
     ID_state,
     INT_state,
@@ -70,8 +70,11 @@ enum states{
     FUNCTION_state,
     SIGN_state,
     N_state,
-    STRING_state
-    
+    STRING_state,
+    ESCAPE_state,
+    HEX_ESCAPE_state,
+    HEX_ESCAPE2_state
+
 };
 
 /**
@@ -112,6 +115,8 @@ void ret_token(token_t *token);
  */
 void free_scanner();
 
+
+void tokenLexOutput();
 
 
 #endif // _SCANER_H_IFJ_18_

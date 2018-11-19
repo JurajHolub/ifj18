@@ -264,7 +264,7 @@ int controlOperators(char c, token_t *token, char scndOperator){
 
 int controlSigns(char c){
 
-    char operators[]={' ','\n','\t','*','/','+','-','<','=','>','(',')',','};
+    char operators[]={' ','\n','\t','*','/','+','-','<','=','>','(',')',',','"','#'};
 
     for (int i = 0; i < strlen(operators); i++){
         if( c==operators[i]){
@@ -284,6 +284,10 @@ void charAppend(token_t *token,char c){
     append_char[0]=c;
 
     string_append_ch(token->attribute,append_char);
+}
+
+int hexConvertFoo(char hexConvert[]){
+    return (int)strtol(hexConvert, NULL, 16);
 }
 
 void free_scanner() {
@@ -354,15 +358,17 @@ token_t *get_token(){
     }
     //data will be achieved and inserted in token
 
+
+
     //token_t *tokens[1]=malloc(sizeof(token_t));
     char *str = NULL;
     string_t string=string_create(str);
     tokens[1]->attribute=string;
 
 
-    int commentSwitch=0;
+    //int commentSwitch=0;
 
-
+    char hexConvert[]="00";
     char testString[64]={0};
     
     char c;
@@ -418,12 +424,20 @@ token_t *get_token(){
         charCounter++;*/
 
     }
+    else if (nextchar=='"'){
+        state=STRING_state;
+        nextchar='\0';
+    }
     else if (nextchar>='0' && nextchar <= '9'){
         state=INT_state;
         charAppend(tokens[1],nextchar);
         /*
         testString[charCounter]=nextchar;
         charCounter++;*/
+    }
+    else if(nextchar=='#'){
+        state=COMMENT_state;
+        nextchar='\0';
     }
     else if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
         nextchar='\0';
@@ -440,6 +454,15 @@ token_t *get_token(){
 
                 if(controlOperators(nextchar,tokens[1],c)==TRUE){
                     nextchar='\0';
+                    PRINT_TOKENS
+                    return tokens[1];
+                }
+
+            }
+            else if(c=='"'){
+
+                if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
+                    nextchar=c;
                     PRINT_TOKENS
                     return tokens[1];
                 }
@@ -466,27 +489,116 @@ token_t *get_token(){
         }
 
 
-        if ( c=='#' || commentSwitch==1){
 
+        if ( state==COMMENT_state){
+
+            //printf("%c\n",c );
+            //printf("hello");
             if (c=='\n'){
-                commentSwitch=0;
-                //tokens[1].type=LINE_END;
-                //printf("get_token %s\n", tokens[1]->attribute->string);
+                
                 PRINT_TOKENS
-                 return tokens[1];
-                //TODO problem with '\n' and the comments
+                tokens[1]->type=EOL;
+                return tokens[1];
             }
-            else 
-                commentSwitch=1;
+
 
         }            
         else if (state==STRING_state){
             
-            if(c=='"'){
-                tokens[1]->type=STRING;
+
+            if(state2==ESCAPE_state){
+                if(c=='t'){
+                    c='\t';
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+                    //vrátitť sa a vynulovať stav
+                }
+                else if (c=='"'){
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+                }
+                else if (c=='n'){
+                
+                    c='\n';
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+                
+                }
+                else if (c=='s'){
+                    
+                    c=' ';
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+                
+                }
+                else if (c==92){
+
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+                
+                }
+                else if (c=='x'){
+
+                    state2=HEX_ESCAPE_state;
+                    //state2=N_state;
+                
+                }
+            }
+            //
+            else if(state2==HEX_ESCAPE_state){
+
+                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') ){
+                    hexConvert[1]=c;
+                    state2=HEX_ESCAPE2_state;
+                }
+                else{
+                    //ERROR
+                }
+                
+            }
+            else if(state2==HEX_ESCAPE2_state){
+
+                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') ){
+                    
+                    //swapping the order of the string
+                    hexConvert[0]=hexConvert[1];
+                    hexConvert[1]=c;
+                    
+                    c=hexConvertFoo(hexConvert);
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+
+                }
+                else{
+                    
+                    c=hexConvertFoo(hexConvert);
+                    charAppend(tokens[1],c);
+                    state2=N_state;
+
+                }
+
+            }
+            //
+            else if ( c== 92){//92=='\'
+
+                //printf("%c\n",c);// 47 is the value of 
+                //printf("hello\n");
+                state2=ESCAPE_state;
             }
 
-            charAppend(tokens[1],c);
+            else if( c == '"' ){
+                nextchar='\0';
+                tokens[1]->type=STRING;
+                return tokens[1];
+            }
+            
+            
+            else{
+                //printf("hello\n");
+                charAppend(tokens[1],c);
+            }
+
+            
             /*
             testString[charCounter]=c;
             charCounter++;*/
@@ -501,6 +613,11 @@ token_t *get_token(){
 
                 /*testString[charCounter]=c;
                 charCounter++;*/
+            }
+            else if(c=='#'){
+                //printf("hello\n");
+                state=COMMENT_state;
+            
             }
             else if(c>='0' && c <= '9'){
 
@@ -600,9 +717,25 @@ token_t *get_token(){
                 return tokens[1];
             }
             else if(c=='='){
-                testString[charCounter-1]='\0';
+
+
+                //testString[charCounter-1]='\0';
+                /*
+                int len=strlen(returnToken->attribute->string);
+                returnToken->attribute->string[len-1]='\0';
+                returnToken->type=VAR;*/
+
+
+                //FIXED
+                //I forgot some erasing the last char which is ? or !
+
                 tokenNext.type=NOT_EQUAL;
+                
+
+                int len=strlen(tokens[1]->attribute->string);
+                tokens[1]->attribute->string[len-1]='\0';
                 tokens[1]->type=VAR;
+
                 PRINT_TOKENS
                 return tokens[1];
 
@@ -804,5 +937,17 @@ void ret_token(token_t* token)
     //assert(tokens[1] == token);
 }
 
+
+void tokenLexOutput(){
+    token_t *token=get_token();
+    printf("%d\t%s\n",token->type,token->attribute->string);
+    //printf("hello\n");
+
+    while(token->type!=EOF){
+        token=get_token();
+        printf("%d\t%s\n",token->type,token->attribute->string);
+    }
+    
+}
 
 

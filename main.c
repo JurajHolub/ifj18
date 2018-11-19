@@ -21,6 +21,8 @@
 
 int main(int argc, char **argv)
 {
+
+    //tokenLexOutput();
     
     create_global_frame();
 
@@ -42,4 +44,8 @@ int main(int argc, char **argv)
     free_scanner();
 
     return ret;
+    
+
+    
+
 }
