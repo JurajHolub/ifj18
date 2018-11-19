@@ -661,8 +661,9 @@ int assignment(table_item_t *symtable, bool main_body_assig)
             //calling semantic analysis, which actualize entry in symbol table for L value, too
             if (analysis_result == SUCCESS)
             {
-                //data_t *ste_ptr_Rvalue = get_expr_type();
-                //ste_Lvalue.value = ste_ptr_Rvalue->value;
+                data_t *ste_ptr_Rvalue = get_expr_type();
+                ste_Lvalue.type = VAR;
+                ste_Lvalue.value = ste_ptr_Rvalue->value;
 
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
 
