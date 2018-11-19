@@ -190,7 +190,7 @@ int controlDouble(char *testString,token_t *token){
 }
 
 
-
+//nextchar, c
 
 int controlOperators(char c, token_t *token, char scndOperator){
     if (c=='=' && scndOperator=='\0'){
@@ -233,7 +233,7 @@ int controlOperators(char c, token_t *token, char scndOperator){
         token->type=GREATER_EQ;
         return TRUE;
     }
-    else if (c=='=' && scndOperator=='!'){
+    else if (c=='!' && scndOperator=='='){
         token->type=NOT_EQUAL;
         return TRUE;
     }
@@ -450,8 +450,9 @@ token_t *get_token(){
     while((c=getchar())!=EOF){
 
         if(state==SIGN_state){
-            if( c=='=' ){
 
+            if( c=='=' ){
+                //printf("%c,%c\n",nextchar,c);
                 if(controlOperators(nextchar,tokens[1],c)==TRUE){
                     nextchar='\0';
                     PRINT_TOKENS
@@ -470,18 +471,22 @@ token_t *get_token(){
             }
             else if((c>='a' && c <= 'z')  || c=='_'){
                 //treba už vracať token a pamätať si prvú vec čo je tuna
+
                 if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
                     PRINT_TOKENS
                     return tokens[1];
                 }
+
             }
             else if (c>='0' && c <= '9'){
+
                 if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
                     nextchar=c;
                     PRINT_TOKENS
                     return tokens[1];
                 }
+
             }
         }
         else if ( (c!=' '|| c!='\t') && state!=START_state && controlSigns(c)==TRUE){
@@ -634,6 +639,7 @@ token_t *get_token(){
 
             }
             else if(c=='=' || c =='!' || c=='<' || c == '>' ){
+
                 nextchar=c;
                 state=SIGN_state;
             }
