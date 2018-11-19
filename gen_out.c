@@ -641,10 +641,10 @@ void gen_instruction(inst_t *inst)
             printf("STRI2INTS\n");
             break;
         case I_JUMPIFEQS:
-            printf("JUMPIFEQS\n");
+            printf("JUMPIFEQS %s\n", inst->op1->id->string);
             break;
         case I_JUMPIFNEQS:
-            printf("JUMPIFNEQS\n");
+            printf("JUMPIFNEQS %s\n", inst->op1->id->string);
             break;
         case I_CONCAT:
             printf("CONCAT %s %s %s\n", op1->string, op2->string, op3->string);
