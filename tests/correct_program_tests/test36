@@ -1,0 +1,17 @@
+if 1 < 0 then
+    print("abc")
+else
+    print "alwie"
+
+    if 10 != 0 then
+        print("awôirnvô")
+
+        if 1.5 < 10 then
+            print("aôkwenskerômvakwje")
+        else
+            print "alwie"
+        end
+    else
+        print "alwie"
+    end
+end

@@ -376,8 +376,49 @@ int if_statement(table_item_t *symtable, bool main_body_if)
     //rule <if_statement> -> if <expression> then EOL <if_body>
     if (token->type == IF)
     {
+        add_text("####### IF ######\n");
         //expansion of non terminal symbol <expression>
         int analysis_result = parse_expression(symtable);
+        
+        data_t cons;
+        cons.id = string_create("true");
+        cons.type = CONST;
+        cons.value = BOOL;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *bool_true = search(symtable, cons.id);
+        string_free(cons.id);
+        cons.id = string_create("4");
+        cons.value = INTEGER;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *int_4 = search(symtable, cons.id);
+        string_free(cons.id);
+        cons.id = string_create("bool");
+        cons.value = STRING;
+        cons.param_cnt = 0;
+        insert(symtable, &cons);
+        data_t *string_bool = search(symtable, cons.id);
+        string_free(cons.id);
+        string_t str_else_label = insert_tmp(symtable, UNDEF);
+        string_t str_type_match = insert_tmp(symtable, UNDEF);
+        string_t str_condition = insert_tmp(symtable, VAR);
+        string_t str_type = insert_tmp(symtable, VAR);
+        data_t *else_label = search(symtable, str_else_label);
+        data_t *type_match = search(symtable, str_type_match);
+        data_t *condition = search(symtable, str_condition);
+        data_t *type = search(symtable, str_type);
+
+        add_var(&condition);//DEFVAR LF@condition
+        add_var(&type);//DEFVAR LF@type
+        add_instruction(I_POPS, &condition, NULL, NULL);//POPS LF@condition
+        add_instruction(I_TYPE, &type, &condition, NULL);//TYPE LF@type LF@condition
+        add_instruction(I_JUMPIFEQ, &type_match, &type, &string_bool);//JUMPIFEQ type_match LF@type string@bool
+        add_instruction(I_EXIT, &int_4, NULL, NULL);//EXIT int@4
+        add_instruction(I_LABEL, &type_match, NULL, NULL);//LABEL type_match
+        add_instruction(I_JUMPIFNEQ, &else_label, &condition, &bool_true);//JUMPIFNEQ else LF@condition bool@true
+        add_text("####### THEN ######\n");
+        
         if (analysis_result != SUCCESS)
         {
             return analysis_result;
@@ -391,7 +432,7 @@ int if_statement(table_item_t *symtable, bool main_body_if)
                 if (token->type == EOL)
                 {
                     //expansion of non terminal symbol <if_body>
-                    return if_body(symtable, main_body_if);
+                    return if_body(symtable, main_body_if, else_label);
                 }
             }
         }
@@ -402,9 +443,11 @@ int if_statement(table_item_t *symtable, bool main_body_if)
     return ERR_SYNTAX;
 }
 
-int if_body(table_item_t *symtable, bool main_body_if)
+int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label)
 {
     token_t *token = get_token();
+
+    int analysis_result;
 
     //rule <if_body> -> else EOL <else-body>
     if (token->type == ELSE)
@@ -412,8 +455,18 @@ int if_body(table_item_t *symtable, bool main_body_if)
         token = get_token();
         if (token->type == EOL)
         {
+            string_t str_end = insert_tmp(symtable, UNDEF);
+            data_t *end = search(symtable, str_end);
+            add_instruction(I_JUMP, &end, NULL, NULL);//JUMP end
+            add_text("####### ELSE ######\n");
+            add_instruction(I_LABEL, &else_label, NULL, NULL);//LABEL else
+            
             //expansion of non terminal symbol <else_body>
-            return else_body(symtable, main_body_if);
+            analysis_result = else_body(symtable, main_body_if);
+            
+            add_instruction(I_LABEL, &end, NULL, NULL);//LABEL end
+            add_text("####### END ######\n");
+            return analysis_result;
         }
     }
 
@@ -427,7 +480,7 @@ int if_body(table_item_t *symtable, bool main_body_if)
         if (analysis_result == SUCCESS)
         {
             //expansion of non terminal symbol <if_body>
-            analysis_result = if_body(symtable, main_body_if);
+            analysis_result = if_body(symtable, main_body_if, else_label);
         }
         return analysis_result;
     }
