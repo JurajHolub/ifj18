@@ -831,7 +831,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         insert(sym_tb, &d);
         data_t *const_string = search(sym_tb, d.id);
         string_free(d.id);
-        d.id = string_create("nil");
+        d.id = string_create("\\110\\105\\108");
         insert(sym_tb, &d);
         data_t *const_nil = search(sym_tb, d.id);
         string_free(d.id);
