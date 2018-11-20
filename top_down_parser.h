@@ -111,7 +111,7 @@ int function_body();
  * @param symtable symbol table used by definitions in statement
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int statement(table_item_t *symtable, bool main_body_st);
+int statement(table_item_t *symtable, bool main_body_st, bool force_undef);
 
 /**
  * @brief Nonterminal symbol if_statement and it's syntactic rules simulation
@@ -197,7 +197,7 @@ int while_body(table_item_t *symtable, bool main_body_while);
  * @param symtable symbol table used by definitions in statement
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int assignment(table_item_t *symtable, bool main_body_assig);
+int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef);
 
 /**
  * @brief Nonterminal symbol function_call and it's syntactic rules simulation
