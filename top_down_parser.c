@@ -84,7 +84,7 @@ int program_list(void) {
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
-        int analysis_result = statement(global_symtable, true);
+        int analysis_result = statement(global_symtable, true, false);
 
         if (analysis_result == SUCCESS)
         {
@@ -162,6 +162,18 @@ int generate_function_prologue(data_t *ste_newfc, data_t **ste_params, data_t **
     add_prolog_inst(I_CREATEFRAME, NULL, NULL, NULL);
     //generating push of stack frame
     add_prolog_inst(I_PUSHFRAME, NULL, NULL, NULL);
+
+    //push nil to stack as return value if there is no statement in function body
+    data_t ste_const_nil;
+    ste_const_nil.type = CONST;
+    ste_const_nil.id = string_create("nil");
+    ste_const_nil.value = NIL;
+    ste_const_nil.param_cnt = 0;
+    insert(get_fun_st(), &ste_const_nil);
+    data_t *ste_ptr_const_nil = search(get_fun_st(), ste_const_nil.id);
+    string_free(ste_const_nil.id);
+
+    add_instruction(I_PUSHS, &ste_ptr_const_nil, NULL, NULL);
 
     //generate parameters
     for (int i = 0; i < ste_newfc->param_cnt; i++)
@@ -319,7 +331,7 @@ int function_body()
         ret_token(token);
 
         //expansion of non terminal symbol <statement>
-        int analysis_result = statement(local_symtable, false);
+        int analysis_result = statement(local_symtable, false, false);
 
         if (analysis_result == SUCCESS)
         {
@@ -335,7 +347,7 @@ int function_body()
     return ERR_SYNTAX;
 }
 
-int statement(table_item_t *symtable, bool main_body_st)
+int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
 {
     token_t *token = get_token();
 
@@ -358,7 +370,7 @@ int statement(table_item_t *symtable, bool main_body_st)
     {
         //expansion of non terminal symbol <assignment>
         ret_token(token);
-        int analysis_result = assignment(symtable, main_body_st);
+        int analysis_result = assignment(symtable, main_body_st, force_undef);
 
         if (analysis_result == SUCCESS)
         {
@@ -475,7 +487,7 @@ int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
-        int analysis_result = statement(symtable, main_body_if);
+        int analysis_result = statement(symtable, main_body_if, true);
 
         if (analysis_result == SUCCESS)
         {
@@ -509,7 +521,7 @@ int else_body(table_item_t *symtable, bool main_body_else)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
-        int analysis_result = statement(symtable, main_body_else);
+        int analysis_result = statement(symtable, main_body_else, true);
 
         if (analysis_result == SUCCESS)
         {
@@ -625,7 +637,7 @@ int while_body(table_item_t *symtable, bool main_body_while)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
-        int analysis_result = statement(symtable, main_body_while);
+        int analysis_result = statement(symtable, main_body_while, true);
 
         if (analysis_result == SUCCESS)
         {
@@ -695,7 +707,7 @@ int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
     return SUCCESS;
 }
 
-int assignment(table_item_t *symtable, bool main_body_assig)
+int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
 {
     token_t *token = get_token();
     token_t *next_token = get_token();
@@ -771,9 +783,11 @@ int assignment(table_item_t *symtable, bool main_body_assig)
                 //calling semantic analysis, which actualize entry in symbol table for L value, too
                 if (analysis_result == SUCCESS)
                 {
-                    data_t *ste_ptr_Rvalue = get_expr_type();
-                    ste_Lvalue.type = VAR;
-                    ste_Lvalue.value = ste_ptr_Rvalue->value;
+                    if (!force_undef)
+                    {
+                        data_t *ste_ptr_Rvalue = get_expr_type();
+                        ste_Lvalue.value = ste_ptr_Rvalue->value;
+                    }
 
                     analysis_result = sem_action_assig(symtable, &ste_Lvalue);
 
@@ -831,9 +845,11 @@ int assignment(table_item_t *symtable, bool main_body_assig)
             //calling semantic analysis, which actualize entry in symbol table for L value, too
             if (analysis_result == SUCCESS)
             {
-                data_t *ste_ptr_Rvalue = get_expr_type();
-                ste_Lvalue.type = VAR;
-                ste_Lvalue.value = ste_ptr_Rvalue->value;
+                if (!force_undef)
+                {
+                    data_t *ste_ptr_Rvalue = get_expr_type();
+                    ste_Lvalue.value = ste_ptr_Rvalue->value;
+                }
 
                 analysis_result = sem_action_assig(symtable, &ste_Lvalue);
 
