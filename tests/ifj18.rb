@@ -21,8 +21,12 @@ def substr(s, i, n)
 end
 
 def ord(s, i)
-  s[i].ord
-end
+  if s[i] then
+    s[i].ord
+  else
+    nil
+  end
+end 
 
 def chr(i)
   i.chr

@@ -1,0 +1,11 @@
+str = "salalalalalalalallalajlajljaljalja"
+var1= ord str, 1
+var2= ord str, 0
+var3= ord str, 2
+var4= ord str, 10
+var5= ord str, 100
+print var1, "\n"
+print var2, "\n"
+print var3, "\n"
+print var4, "\n"
+print var5, "\n"
