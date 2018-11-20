@@ -286,8 +286,35 @@ void charAppend(token_t *token,char c){
     string_append_ch(token->attribute,append_char);
 }
 
-int hexConvertFoo(char hexConvert[]){
-    return (int)strtol(hexConvert, NULL, 16);
+void hexConvertFoo(char hexConvert[], char hexReturn[]){
+    int i=(int)strtol(hexConvert, NULL, 16);
+    char helpArr[3]={0};
+
+    
+    
+    if(i<10){
+    
+        strcpy(hexReturn, "\\00");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+
+    }
+    else if (i<100){
+    
+        strcpy(hexReturn, "\\0");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+    
+    }
+    else if (i>=100){
+    
+        strcpy(hexReturn, "\\");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+    
+    }
+
+
 }
 
 void free_scanner() {
@@ -372,9 +399,8 @@ token_t *get_token(){
 
     char hexConvert[]="00";
     char testString[64]={0};
-    
+    char hexReturn[4]={0};
     char c;
-
     int charCounter=0;
 
 
@@ -504,6 +530,7 @@ token_t *get_token(){
                 PRINT_TOKENS
                 tokens[1]->type=EOL;
                 return tokens[1];
+
             }
 
 
@@ -572,15 +599,17 @@ token_t *get_token(){
                     hexConvert[0]=hexConvert[1];
                     hexConvert[1]=c;
                     
-                    c=hexConvertFoo(hexConvert);
-                    charAppend(tokens[1],c);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    
+
+                    string_append_ch(tokens[1]->attribute,hexReturn);
                     state2=N_state;
 
                 }
                 else{
                     
-                    c=hexConvertFoo(hexConvert);
-                    charAppend(tokens[1],c);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    string_append_ch(tokens[1]->attribute,hexReturn);
                     state2=N_state;
 
                 }
