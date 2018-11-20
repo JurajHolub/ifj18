@@ -428,7 +428,7 @@ token_t *get_token(){
     }
 
     if(enterToken.type==EOL){
-
+        nextchar='\0';
         enterToken.type=NOT;
         state2=COMMENT_BEGIN_state;
     
