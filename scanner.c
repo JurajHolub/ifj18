@@ -287,7 +287,8 @@ void charAppend(token_t *token,char c){
 }
 
 void hexConvertFoo(char hexConvert[], char hexReturn[]){
-    int i=(int)strtol(hexConvert, NULL, 16);
+
+    int i=strtol(hexConvert, NULL, 16);
     char helpArr[3]={0};
 
     
@@ -432,6 +433,11 @@ token_t *get_token(){
         state2=COMMENT_BEGIN_state;
     
     }
+    else if(enterToken.type!=EOL){
+        enterToken.type=NOT;
+        state2=N_state;
+    }
+
     
         //printf(">%c<\n",nextchar);
        
@@ -548,7 +554,7 @@ token_t *get_token(){
                     //vrátitť sa a vynulovať stav
                 }
                 else if (c=='"'){
-                    charAppend(tokens[1],c);
+                    string_append_ch(tokens[1]->attribute,"\\034");
                     state2=N_state;
                 }
                 else if (c=='n'){
@@ -582,8 +588,8 @@ token_t *get_token(){
             //
             else if(state2==HEX_ESCAPE_state){
 
-                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') ){
-                    hexConvert[1]=c;
+                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') || (c>='a' && c <= 'f')  ){//TODO check wheter it should be capital or noncapital letters 
+                    hexConvert[0]=c;
                     state2=HEX_ESCAPE2_state;
                 }
                 else{
@@ -593,16 +599,15 @@ token_t *get_token(){
             }
             else if(state2==HEX_ESCAPE2_state){
 
-                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') ){
+                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') || (c>='a' && c <= 'f') ){
                     
                     //swapping the order of the string
-                    hexConvert[0]=hexConvert[1];
+                    //hexConvert[0]=hexConvert[1];
                     hexConvert[1]=c;
                     
                     hexConvertFoo(hexConvert,hexReturn);
-                    
-
                     string_append_ch(tokens[1]->attribute,hexReturn);
+
                     state2=N_state;
 
                 }
@@ -610,6 +615,7 @@ token_t *get_token(){
                     
                     hexConvertFoo(hexConvert,hexReturn);
                     string_append_ch(tokens[1]->attribute,hexReturn);
+
                     state2=N_state;
 
                 }
@@ -707,6 +713,8 @@ token_t *get_token(){
                 char beginTest[]="begin";
                 if(strcmp(testString,beginTest) == 0){
 
+
+                    //We "erase" the array and NULL the cnt
                     for (int i = 0; i < 64; i++)testString[i]='\0';
                     charCounter=0;
 
@@ -748,8 +756,15 @@ token_t *get_token(){
                     state=START_state;
                 }
                 else{
+
                     state=COMMENT_END_state;
                     //error
+                    //We "erase" the array and NULL the cnt
+                    for (int i = 0; i < 64; ++i)
+                        testString[i]='\0';
+                    
+                    charCounter=0;
+                
                 }
 
             }
