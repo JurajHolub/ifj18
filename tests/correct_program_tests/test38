@@ -1,0 +1,21 @@
+long_string="dlooooooooooooooooooooooooooooooooooooooooooohaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+len = length(long_string)
+print len, "\n"
+var1= ord long_string, 0
+var2= ord long_string, 1
+var3= ord long_string, 10
+var4= ord long_string, 20
+var5= ord long_string, 100
+print var1, "\n"
+print var2, "\n"
+print var3, "\n"
+print var4, "\n"
+print var5, "\n"
+ordinal1= ord long_string, var1
+ordinal2= ord long_string, var2
+ordinal3= ord long_string, var3
+#ordinal4= ord long_string, var4
+print ordinal1, "\n"
+print ordinal2, "\n"
+print ordinal3, "\n"
+#print ordinal4, "\n"

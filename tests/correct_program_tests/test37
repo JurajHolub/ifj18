@@ -1,0 +1,7 @@
+def fun(a, b, c)
+    print a
+    print b
+    print c
+end
+
+fun("a", "b", "c")

@@ -115,7 +115,7 @@ int controlKeyWords(char *testString, token_t *token){
             token->type=NOT; 
             return TRUE;
         }
-        else if (strcmp(testString,keyWords[i]) == 0 && i ==5 ){
+        else if (strcmp(testString,keyWords[i]) == 0 && i ==6 ){
             token->type=NIL; 
             return TRUE;
         }
@@ -286,8 +286,35 @@ void charAppend(token_t *token,char c){
     string_append_ch(token->attribute,append_char);
 }
 
-int hexConvertFoo(char hexConvert[]){
-    return (int)strtol(hexConvert, NULL, 16);
+void hexConvertFoo(char hexConvert[], char hexReturn[]){
+    int i=(int)strtol(hexConvert, NULL, 16);
+    char helpArr[3]={0};
+
+    
+    
+    if(i<10){
+    
+        strcpy(hexReturn, "\\00");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+
+    }
+    else if (i<100){
+    
+        strcpy(hexReturn, "\\0");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+    
+    }
+    else if (i>=100){
+    
+        strcpy(hexReturn, "\\");
+        sprintf(helpArr,"%d",i);
+        strcat(hexReturn,helpArr);
+    
+    }
+
+
 }
 
 void free_scanner() {
@@ -368,11 +395,12 @@ token_t *get_token(){
 
     //int commentSwitch=0;
 
+    //char escapeSeq[]="0000";
+
     char hexConvert[]="00";
     char testString[64]={0};
-    
+    char hexReturn[4]={0};
     char c;
-
     int charCounter=0;
 
 
@@ -380,8 +408,6 @@ token_t *get_token(){
     int state2=N_state;
 
 
-
-    
 
 
 
@@ -504,6 +530,7 @@ token_t *get_token(){
                 PRINT_TOKENS
                 tokens[1]->type=EOL;
                 return tokens[1];
+
             }
 
 
@@ -513,8 +540,10 @@ token_t *get_token(){
 
             if(state2==ESCAPE_state){
                 if(c=='t'){
-                    c='\t';
-                    charAppend(tokens[1],c);
+                    //c='\t';
+
+                    string_append_ch(tokens[1]->attribute,"\\009");
+                    //charAppend(tokens[1],c);
                     state2=N_state;
                     //vrátitť sa a vynulovať stav
                 }
@@ -524,21 +553,22 @@ token_t *get_token(){
                 }
                 else if (c=='n'){
                 
-                    c='\n';
-                    charAppend(tokens[1],c);
+                    //c='\n';
+
+                    string_append_ch(tokens[1]->attribute,"\\010");
                     state2=N_state;
                 
                 }
                 else if (c=='s'){
                     
-                    c=' ';
-                    charAppend(tokens[1],c);
+                    //c=' ';
+                    string_append_ch(tokens[1]->attribute,"\\032");
                     state2=N_state;
                 
                 }
                 else if (c==92){
-
-                    charAppend(tokens[1],c);
+                    string_append_ch(tokens[1]->attribute,"\\092");
+                    //charAppend(tokens[1],c);
                     state2=N_state;
                 
                 }
@@ -569,15 +599,17 @@ token_t *get_token(){
                     hexConvert[0]=hexConvert[1];
                     hexConvert[1]=c;
                     
-                    c=hexConvertFoo(hexConvert);
-                    charAppend(tokens[1],c);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    
+
+                    string_append_ch(tokens[1]->attribute,hexReturn);
                     state2=N_state;
 
                 }
                 else{
                     
-                    c=hexConvertFoo(hexConvert);
-                    charAppend(tokens[1],c);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    string_append_ch(tokens[1]->attribute,hexReturn);
                     state2=N_state;
 
                 }
@@ -589,6 +621,12 @@ token_t *get_token(){
                 //printf("%c\n",c);// 47 is the value of 
                 //printf("hello\n");
                 state2=ESCAPE_state;
+            }
+            else if( c==' '){
+                string_append_ch(tokens[1]->attribute,"\\032");
+            }
+            else if( c=='#'){
+                string_append_ch(tokens[1]->attribute,"\\035");
             }
 
             else if( c == '"' ){
@@ -946,12 +984,12 @@ void ret_token(token_t* token)
 
 void tokenLexOutput(){
     token_t *token=get_token();
-    printf("%d\t%s\n",token->type,token->attribute->string);
+    printf("%d\t|>%s<|\n",token->type,token->attribute->string);
     //printf("hello\n");
 
     while(token->type!=EOF){
         token=get_token();
-        printf("%d\t%s\n",token->type,token->attribute->string);
+        printf("%d\t|>%s<|\n",token->type,token->attribute->string);
     }
     
 }

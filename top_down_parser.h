@@ -138,7 +138,7 @@ int if_statement(table_item_t *symtable, bool main_body_if);
  * @param symtable symtable symbol table used by definitions in statement and by semantic analysis
  * @return 0 if parsed program is correct, else integer code according to error type
  */
-int if_body(table_item_t *symtable, bool main_body_if);
+int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label);
 
 /**
  * @brief Nonterminal symbol else_body and it's syntactic rules simulation
