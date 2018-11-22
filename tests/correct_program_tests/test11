@@ -9,4 +9,5 @@ def foo ( a, b )
     end
 end
 
-foo a, b
+x = foo a, b
+print x

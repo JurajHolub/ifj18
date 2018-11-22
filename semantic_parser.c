@@ -797,6 +797,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         string_t str_first_int = insert_tmp(sym_tb, VAR);
         string_t str_first_float = insert_tmp(sym_tb, VAR);
         string_t str_first_string = insert_tmp(sym_tb, VAR);
+        string_t str_first_nil = insert_tmp(sym_tb, VAR);
         string_t str_second_int = insert_tmp(sym_tb, VAR);
         string_t str_second_float = insert_tmp(sym_tb, VAR);
         string_t str_int_and_int = insert_tmp(sym_tb, VAR);
@@ -804,12 +805,14 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         string_t str_int_and_float = insert_tmp(sym_tb, VAR);
         string_t str_float_and_int = insert_tmp(sym_tb, VAR);
         string_t str_strings = insert_tmp(sym_tb, VAR);
+        string_t str_nils = insert_tmp(sym_tb, VAR);
         //LABELS
         string_t str_cmp_int_int = insert_tmp(sym_tb, UNDEF);
         string_t str_cmp_float_float = insert_tmp(sym_tb, UNDEF);
         string_t str_cmp_int_float = insert_tmp(sym_tb, UNDEF);
         string_t str_cmp_float_int = insert_tmp(sym_tb, UNDEF);
         string_t str_cmp_string = insert_tmp(sym_tb, UNDEF);
+        string_t str_cmp_nil_nil = insert_tmp(sym_tb, UNDEF);
         string_t str_end = insert_tmp(sym_tb, UNDEF);
 
         data_t d;
@@ -827,6 +830,10 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         d.id = string_create("string");
         insert(sym_tb, &d);
         data_t *const_string = search(sym_tb, d.id);
+        string_free(d.id);
+        d.id = string_create("\\110\\105\\108");
+        insert(sym_tb, &d);
+        data_t *const_nil = search(sym_tb, d.id);
         string_free(d.id);
         d.value = BOOL;
         d.id = string_create("true");
@@ -849,6 +856,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         data_t *first_int = search(sym_tb, str_first_int);
         data_t *first_float = search(sym_tb, str_first_float);
         data_t *first_string = search(sym_tb, str_first_string);
+        data_t *first_nil = search(sym_tb, str_first_nil);
         data_t *second_int = search(sym_tb, str_second_int);
         data_t *second_float = search(sym_tb, str_second_float);
         data_t *int_and_int = search(sym_tb, str_int_and_int);
@@ -856,11 +864,13 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         data_t *int_and_float = search(sym_tb, str_int_and_float);
         data_t *float_and_int = search(sym_tb, str_float_and_int);
         data_t *strings = search(sym_tb, str_strings);
+        data_t *nils = search(sym_tb, str_nils);
         data_t *cmp_int_int = search(sym_tb, str_cmp_int_int);
         data_t *cmp_float_float = search(sym_tb, str_cmp_float_float);
         data_t *cmp_int_float = search(sym_tb, str_cmp_int_float);
         data_t *cmp_float_int = search(sym_tb, str_cmp_float_int);
         data_t *cmp_string = search(sym_tb, str_cmp_string);
+        data_t *cmp_nil_nil = search(sym_tb, str_cmp_nil_nil);
         data_t *end = search(sym_tb, str_end);
 
         add_var(&type1);// DEFVAR LF@type1
@@ -869,6 +879,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_var(&first_int);// DEFVAR LF@first_int 
         add_var(&first_float);// DEFVAR LF@first_float
         add_var(&first_string);// DEFVAR LF@first_string
+        add_var(&first_nil);// DEFVAR LF@first_string
         add_var(&second_int);// DEFVAR LF@second_int 
         add_var(&second_float);// DEFVAR LF@second_float
         add_var(&int_and_int);// DEFVAR LF@int_and_int
@@ -876,6 +887,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_var(&int_and_float);// DEFVAR LF@int_and_float
         add_var(&float_and_int);// DEFVAR LF@float_and_int
         add_var(&strings);// DEFVAR LF@strings
+        add_var(&nils);// DEFVAR LF@strings
 
         add_instruction(I_TYPE, &type1, &op1, NULL);//TYPE LF@type1 LF@op1
         add_instruction(I_TYPE, &type2, &op2, NULL);//TYPE LF@type2 LF@op2
@@ -883,6 +895,7 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_instruction(I_EQ, &first_int, &type1, &const_int);// EQ LF@first_int LF@type1 string@int 
         add_instruction(I_EQ, &first_float, &type1, &const_float);// EQ LF@first_float LF@type1 string@float
         add_instruction(I_EQ, &first_string, &type1, &const_string);// EQ LF@first_string LF@type1 string@string
+        add_instruction(I_EQ, &first_nil, &type1, &const_nil);// EQ LF@first_string LF@type1 string@nil
         add_instruction(I_EQ, &second_int, &type2, &const_int);// EQ LF@second_int LF@type2 string@int 
         add_instruction(I_EQ, &second_float, &type2, &const_float);// EQ LF@second_float LF@type2 string@float
         add_instruction(I_AND, &int_and_int, &same, &first_int);// AND LF@int_and_int LF@same LF@first_int
@@ -890,11 +903,13 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         add_instruction(I_AND, &int_and_float, &first_int, &second_float);// AND LF@int_and_float LF@first_int LF@second_float
         add_instruction(I_AND, &float_and_int, &first_float, &second_int);// AND LF@float_and_int LF@first_float LF@second_int
         add_instruction(I_AND, &strings, &same, &first_string);// AND LF@strings LF@same LF@first_string
+        add_instruction(I_AND, &nils, &same, &first_nil);// AND LF@nils LF@same LF@first_nil
         add_instruction(I_JUMPIFEQ, &cmp_int_int, &int_and_int, &const_true);// JUMPIFEQ cmp_int_int LF@int_and_int bool@true
         add_instruction(I_JUMPIFEQ, &cmp_float_float, &float_and_float, &const_true);// JUMPIFEQ cmp_float_float LF@float_and_float bool@true
         add_instruction(I_JUMPIFEQ, &cmp_int_float, &int_and_float, &const_true);// JUMPIFEQ cmp_int_float LF@int_and_float bool@true
         add_instruction(I_JUMPIFEQ, &cmp_float_int, &float_and_int, &const_true);// JUMPIFEQ cmp_float_int LF@float_and_int bool@true
         add_instruction(I_JUMPIFEQ, &cmp_string, &strings, &const_true);// JUMPIFEQ cmp_string LF@strings bool@true
+        add_instruction(I_JUMPIFEQ, &cmp_nil_nil, &nils, &const_true);// JUMPIFEQ cmp_string LF@strings bool@true
         if (logic_op == EQUAL)
         {
             add_instruction(I_PUSHS, &const_false, NULL, NULL);// PUSHS bool@false
@@ -907,6 +922,20 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         }
         else
             add_instruction(I_EXIT, &const_4, NULL, NULL);// EXIT int@4
+        add_instruction(I_LABEL, &cmp_nil_nil, NULL, NULL);// LABEL cmp_nil_nil
+        if (logic_op == EQUAL)
+        {
+            add_instruction(I_PUSHS, &const_true, NULL, NULL);// PUSHS bool@true
+            add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
+        }
+        else if (logic_op == NOT_EQUAL)
+        {
+            add_instruction(I_PUSHS, &const_false, NULL, NULL);// PUSHS bool@false
+            add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
+        }
+        else
+            add_instruction(I_EXIT, &const_4, NULL, NULL);// EXIT int@4
+        add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
         add_instruction(I_LABEL, &cmp_int_int, NULL, NULL);// LABEL cmp_int_int
         cmp_instr(logic_op, op1, op2, tmp);
         add_instruction(I_JUMP, &end, NULL, NULL);// JUMP end
@@ -948,6 +977,13 @@ int sem_action_cmp(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int logic
         else if (symb1->value == STRING && symb2->value == STRING)
         {
             cmp_instr(logic_op, op1, op2, tmp);
+        }
+        else if (symb1->value == NIL && symb2->value == NIL)
+        {
+            if (logic_op == EQUAL || logic_op == NOT_EQUAL)
+                cmp_instr(logic_op, op1, op2, tmp);
+            else
+                return ERR_SEM_CPBLT;
         }
         else
         {

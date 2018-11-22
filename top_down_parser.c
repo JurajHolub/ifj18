@@ -173,14 +173,14 @@ int generate_function_prologue(data_t *ste_newfc, data_t **ste_params, data_t **
     data_t *ste_ptr_const_nil = search(get_fun_st(), ste_const_nil.id);
     string_free(ste_const_nil.id);
 
-    add_instruction(I_PUSHS, &ste_ptr_const_nil, NULL, NULL);
-
     //generate parameters
     for (int i = 0; i < ste_newfc->param_cnt; i++)
     {
         add_var(ste_params + i);
         add_instruction(I_POPS, ste_params + i, NULL, NULL);
     }
+
+    add_instruction(I_PUSHS, &ste_ptr_const_nil, NULL, NULL);
 
     return SUCCESS;
 }
