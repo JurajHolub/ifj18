@@ -31,7 +31,7 @@ run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 pack:
-	zip xlogin00.zip *.c *.h Makefile
+	zip xholub40.zip *.c *.h Makefile
 
 clean:
 	rm -rf *.o *.out $(EXECUTABLE)
