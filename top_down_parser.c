@@ -1,5 +1,6 @@
 /**
  * @author Matej Parobek (xparob00)
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @file top_down_parser.c
  * @date 2018-10-16
  * @brief Implementation of top-down parser

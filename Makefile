@@ -1,3 +1,6 @@
+# IFJ project 2018
+# @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
+
 CC = gcc
 CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = main.o \
@@ -31,7 +34,7 @@ run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 pack:
-	zip xlogin00.zip *.c *.h Makefile
+	zip xholub40.zip *.c *.h Makefile
 
 clean:
 	rm -rf *.o *.out $(EXECUTABLE)

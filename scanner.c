@@ -1,5 +1,6 @@
 /**
  * @file scanner.c
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration of scanner interface for parser.
  * @date November 2018
  * @author Samuel Krempsky
@@ -407,6 +408,7 @@ token_t *get_token(){
 
     int state=START_state;
     int state2=N_state;
+    //int errorState=N_state;
 
 
 
@@ -457,12 +459,23 @@ token_t *get_token(){
 
     }
     else if (nextchar=='"'){
+        
         state=STRING_state;
         nextchar='\0';
+
     }
-    else if (nextchar>='0' && nextchar <= '9'){
+    else if (nextchar=='0'){
+        
+        state=DOUBLE_PROB_state;
+        charAppend(tokens[1],nextchar);
+        nextchar='\0';
+    
+    }
+    else if (nextchar>='1' && nextchar <= '9'){
+
         state=INT_state;
         charAppend(tokens[1],nextchar);
+        nextchar='\0';
         /*
         testString[charCounter]=nextchar;
         charCounter++;*/
@@ -668,7 +681,13 @@ token_t *get_token(){
                 state=COMMENT_state;
             
             }
-            else if(c>='0' && c <= '9'){
+            else if(c=='0'){
+
+                state=DOUBLE_PROB_state;
+                charAppend(tokens[1],c);
+            
+            }
+            else if(c>='1' && c <= '9'){
 
                 state=INT_state;
                 charAppend(tokens[1],c);
@@ -681,6 +700,12 @@ token_t *get_token(){
                 state2=N_state;
                 state=COMMENT_BEGIN_state;
 
+            }
+            else if(c>='A' && c <= 'Z'){
+                //GOTO state error
+                tokens[1]->type=ERROR;
+                return tokens[1];
+                
             }
             else if(c=='=' || c =='!' || c=='<' || c == '>' ){
 
@@ -802,6 +827,9 @@ token_t *get_token(){
             }
             else{
                 //error
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
             }
         }
         else if(state==ID_state){
@@ -816,13 +844,18 @@ token_t *get_token(){
             }
             else if(c=='@'){
 
+                //constants are not supported in a source file
 
-                if(controlConstants(testString,tokens[1])==TRUE);
+                /*if(controlConstants(testString,tokens[1])==TRUE);
                 state=CONSTANT_state;
                 charAppend(tokens[1],c);
 
-                /*testString[charCounter]=c;
+                testString[charCounter]=c;
                 charCounter++;*/
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
 
             }
             else if(c=='?' || c== '!'){
@@ -874,6 +907,29 @@ token_t *get_token(){
 
             }
         }
+        else if(state==DOUBLE_PROB_state){
+            if (c=='.') {
+                state=DOUBLE_state;
+                charAppend(tokens[1],c);
+            }
+
+            else if (controlSigns(c)==TRUE){
+                
+                if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
+                    PRINT_TOKENS
+                    return tokens[1];
+                }
+            
+            }
+            else if ((c>='0' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
+                //error
+            
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+        }
         else if(state==DOUBLE_state){
             
             if (c>='0' && c <= '9'){
@@ -897,8 +953,12 @@ token_t *get_token(){
                     return tokens[1];
                 }
             }
-            else{
+            else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_'){
                 //error
+                /**/
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
             }
 
         }
@@ -925,6 +985,11 @@ token_t *get_token(){
             }
             else{
                 //error
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+
             }
         }
         else if(state==EXPONENT_sign_state){
@@ -944,6 +1009,9 @@ token_t *get_token(){
             }
             else{
                 //error
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
             }
 
         }
@@ -963,7 +1031,18 @@ token_t *get_token(){
             }
             else {
                 //error
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
             }
+        }
+        else {
+            //error
+            /*
+            tokens[1]->type=ERROR;
+            PRINT_TOKENS
+            return tokens[1];*/
+        
         }
         
 

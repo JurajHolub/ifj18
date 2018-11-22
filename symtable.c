@@ -1,5 +1,6 @@
 /**
  * @file symtable.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration symbol table implemented by hash table.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>

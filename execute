@@ -1,5 +1,0 @@
-#!/bin/bash
-
-make
-./main > cmp_mlaticka
-./ic18int cmp_mlaticka

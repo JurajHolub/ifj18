@@ -1,6 +1,6 @@
 /**
  * @file dynamic_string.h
- * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
+ * @project Compiler of language IFJ18. School project for subjects IFJ and IAL.
  * @brief Dynamic string for eazier handle of C strings.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>

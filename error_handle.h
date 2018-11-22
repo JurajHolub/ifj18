@@ -20,6 +20,9 @@
 #define ERR_DIV 9
 #define ERR_COMPILER 99
 
+/**
+ * @brief Print malloc fail message.
+ */
 void mem_error();
 
 #endif // _ERROR_H_IFJ_18_

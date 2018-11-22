@@ -5,6 +5,7 @@
 
 /**
  * @file scanner.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration of scanner interface for parser.
  * @date October 2018
  */
@@ -45,12 +46,13 @@ enum data_type_e {
     ASSIG,      ///< Term "=".
     FUN,        ///< Term "function()".
     DELIM,      ///< Term ",".
-    VAR,         ///< Term "variable".
+    VAR,        ///< Term "variable".
     BOOL,
     UNDEF,
     CONST,
     DEF_FUN,
-    UNDEF_FUN
+    UNDEF_FUN,
+    ERROR       ///< Lexical error.
 };
 
 enum states{
@@ -59,6 +61,7 @@ enum states{
     ID_state,
     INT_state,
     DOUBLE_state,
+    DOUBLE_PROB_state,
     EXPONENT_state,
     EXPONENT_sign_state,
     COMMENT_state,

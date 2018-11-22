@@ -10,6 +10,7 @@
 
 /**
  * @file expressions_parser.c
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Definition of Expression Parser of language IFJ18. Parser use
@@ -30,7 +31,7 @@ Start = {$}
 ******************************************************************************/
 
 // 1: E -> id
-int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int syntax_parse_id(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb = marked->data;
     if (symb->token->type != VAR && symb->token->type != INTEGER &&
@@ -46,7 +47,7 @@ int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     //return SUCCESS;
 }
 // 2: E -> ( E )
-int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int syntax_parse_brackets(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -82,7 +83,7 @@ int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
 }
 
 //   5: E -> E [-,+,/,*] E 
-int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int syntax_parse_arit(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -119,7 +120,7 @@ int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked
     //return SUCCESS;
 }
 //     6: E -> E [==, !=, <, >, <=, >=] E
-int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
+int syntax_parse_logic(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked)
 {
     syntax_t *symb1, *symb2, *symb3;
     symb1 = marked->data;
@@ -235,6 +236,8 @@ int parse_expression(table_item_t *hash_tb)
 {
     char prec_tab;
     token_t *token = get_token();
+    if (token->type == ERROR)
+        return ERR_LEX;
     stack_t *sem_stack = init_sem_stack();
     syntax_t *input_sym = alloc_syntax_item(token, hash_tb);
     stack_t *stack = init_syntax_stack();
@@ -254,6 +257,13 @@ int parse_expression(table_item_t *hash_tb)
             stack_push(stack, input_sym);
             //print_stack(stack);
             token = get_token();
+            if (token->type == ERROR)
+            {
+                free_syntax_item(input_sym);
+                free_syntax_stack(stack);
+                free_sem_stack(sem_stack);
+                return ERR_LEX;
+            }
             input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '<')
@@ -262,6 +272,13 @@ int parse_expression(table_item_t *hash_tb)
             stack_push(stack, input_sym);
             //print_stack(stack);
             token = get_token();
+            if (token->type == ERROR)
+            {
+                free_syntax_item(input_sym);
+                free_syntax_stack(stack);
+                free_sem_stack(sem_stack);
+                return ERR_LEX;
+            }
             input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '>')
@@ -372,13 +389,13 @@ int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack)
     int rule_exist = ERR_SYNTAX;
     int res;
 
-    if ((res = apply_rule_1(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
+    if ((res = syntax_parse_id(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
-    if ((res = apply_rule_2(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
+    if ((res = syntax_parse_brackets(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
-    if ((res = apply_rule_3(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
+    if ((res = syntax_parse_arit(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
-    if ((res = apply_rule_4(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
+    if ((res = syntax_parse_logic(hash_tb, sem_stack, mark)) != ERR_SYNTAX)
         rule_exist = res;
 
     if (rule_exist != ERR_SYNTAX)
