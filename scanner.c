@@ -1035,10 +1035,10 @@ token_t *get_token(){
         }
         else {
             //error
-        
+            /*
             tokens[1]->type=ERROR;
             PRINT_TOKENS
-            return tokens[1];
+            return tokens[1];*/
         
         }
         
