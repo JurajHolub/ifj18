@@ -50,7 +50,8 @@ enum data_type_e {
     UNDEF,
     CONST,
     DEF_FUN,
-    UNDEF_FUN
+    UNDEF_FUN,
+    ERROR       ///< Lexical error.
 };
 
 enum states{

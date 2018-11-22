@@ -1,0 +1,9 @@
+def foo ()
+
+    abadakedabra( 10, "ahoj")
+    x =10 + 10
+    print x, "\n"
+
+end
+
+foo()
