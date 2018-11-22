@@ -1,5 +1,6 @@
 /**
  * @file stack.c
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Stack used in sentactic and semantic analyses.

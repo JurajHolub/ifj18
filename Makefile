@@ -1,3 +1,6 @@
+# IFJ project 2018
+# @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
+
 CC = gcc
 CFLAGS = -I -std=c99 -g -Werror -Wall
 OBJ = main.o \

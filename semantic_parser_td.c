@@ -1,5 +1,6 @@
 /**
  * @author Matej Parobek (xparob00)
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @file semantic_parser_td.c
  * @date 2018-11-15
  * @brief Implementation of semantic actions used in top-down parsing

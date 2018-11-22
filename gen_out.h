@@ -1,8 +1,19 @@
+/**
+ * @file gen_out.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
+ * @date November 2018
+ * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
+ * @brief Generator of 3AD code.
+ */
+
 #ifndef _GEN_OUT_H_IFJ_18_
 #define _GEN_OUT_H_IFJ_18_
 
 #include "symtable.h"
 
+/**
+ * @brief Enum of all instruction which can be generated.
+ */
 enum instruction_e {
     I_IFJCODE18, // .IFJcode18
     I_MOVE,
@@ -65,14 +76,21 @@ enum instruction_e {
     I_UNDEF
 };
 
+/**
+ * @brief One instruction in list of all instruction fo program. List will be
+ * generated linear as is.
+ */
 typedef struct inst_s {
-    int instruction;
-    data_t *op1;
-    data_t *op2;
-    data_t *op3;
-    char *text;
+    int instruction; ///< Type of instruction.
+    data_t *op1; ///< Data from symbol table for operand of instruction.
+    data_t *op2; ///< Data from symbol table for operand of instruction.
+    data_t *op3; ///< Data from symbol table for operand of instruction.
+    char *text; ///< Special message to generate (typicaly used for comments).
 } inst_t;
 
+/**
+ * @brief Create dynamicly one instruction for generator and initialize it.
+ */
 inst_t* inst_create();
 
 void inst_free(inst_t *inst);

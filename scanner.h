@@ -5,6 +5,7 @@
 
 /**
  * @file scanner.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration of scanner interface for parser.
  * @date October 2018
  */

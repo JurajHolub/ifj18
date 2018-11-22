@@ -1,8 +1,10 @@
 /**
  * @file main.c
+ * @project Compiler of language IFJ18. School project for subjects IFJ and IAL.
  * @author(s) Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @date September 2018
- * @brief Dummy hello world of project.
+ * @brief Program main, execute syntax directed analyse and free all dynamic
+ * allocated sources.
  */
 
 #include <stdio.h>
@@ -12,7 +14,6 @@
 #include <stdlib.h>
 #include "semantic_parser.h"
 #include "dynamic_string.h"
-#include "test.h"
 #include "gen_out.h"
 #include "list.h"
 #include "global_interface.h"
@@ -21,8 +22,6 @@
 
 int main(int argc, char **argv)
 {
-
-    //tokenLexOutput();
     
     create_global_frame();
 
@@ -44,8 +43,4 @@ int main(int argc, char **argv)
     free_scanner();
 
     return ret;
-    
-
-    
-
 }

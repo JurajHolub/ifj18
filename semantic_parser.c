@@ -1,5 +1,6 @@
 /**
  * @file semantic_parser.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Declaration of Semantic Analyse Parser of language IFJ18.

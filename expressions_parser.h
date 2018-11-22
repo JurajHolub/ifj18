@@ -1,5 +1,6 @@
 /**
  * @file expression_parser.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @date October 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Declaration of Expression Parser of language IFJ18. Parser use
@@ -14,6 +15,10 @@
 #include "symtable.h"
 #include "stack.h"
 
+/**
+ * @brief Enum type for precedence table, constant maps tokens to precedence
+ * table syntax tokens.
+ */
 enum prec_tab_idx_e {
     PT_NOT = 0,
     PT_SUB,
@@ -27,17 +32,46 @@ enum prec_tab_idx_e {
     PT_ERR
 };
 
-void destroy_stack_item(stack_item_t *item);
-int apply_rule_1(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
-int apply_rule_2(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
-int apply_rule_3(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
-int apply_rule_4(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
+/**
+ * @brief Check if there is identificator necessary by syntax rules.
+ * @param hash_tb Symbol table for actual frame of program used in semantic analyse.
+ * @param sem_stack Stack used in semantical analyse of this part of code.
+ * @param marked Marked token by precedence table saved in stack.
+ * @return Result of syntax analyse if it's failed else it return result of
+ * semantic analyse of this syntactical part of code.
+ */
+int syntax_parse_id(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
+/**
+ * @brief Check if brackets in expresion has correct syntax and reduce them.
+ * @param hash_tb Symbol table for actual frame of program used in semantic analyse.
+ * @param sem_stack Stack used in semantical analyse of this part of code.
+ * @param marked Marked token by precedence table saved in stack.
+ * @return Result of syntax analyse if it's failed else it return result of
+ * semantic analyse of this syntactical part of code.
+ */
+int syntax_parse_brackets(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
+/**
+ * @brief Check if aritmetical expression has correct syntax.
+ * @param hash_tb Symbol table for actual frame of program used in semantic analyse.
+ * @param sem_stack Stack used in semantical analyse of this part of code.
+ * @param marked Marked token by precedence table saved in stack.
+ * @return Result of syntax analyse if it's failed else it return result of
+ * semantic analyse of this syntactical part of code.
+ */
+int syntax_parse_arit(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
+/**
+ * @brief Check if logical expression has correct syntax.
+ * @param hash_tb Symbol table for actual frame of program used in semantic analyse.
+ * @param sem_stack Stack used in semantical analyse of this part of code.
+ * @param marked Marked token by precedence table saved in stack.
+ * @return Result of syntax analyse if it's failed else it return result of
+ * semantic analyse of this syntactical part of code.
+ */
+int syntax_parse_logic(table_item_t *hash_tb, stack_t *sem_stack, stack_item_t *marked);
 /**
  * @brief Debug print of stack.
  */
 void print_stack(stack_t *stack);
-
-
 /**
  * @brief Parsing of arithmetic and logic expressions. Called by Recursive
  * Top-down parser after it recognize possible arit./log. expression. Top-down
@@ -50,7 +84,6 @@ void print_stack(stack_t *stack);
  * @return True if parsed arithmetic or logic expression is correct, else false.
  */
 int parse_expression(table_item_t *hash_tb);
-
 /**
  * @brief Precedence Table of arithmetic and logic expression parser.
  * @param top Actual top of stack, it is always value of enum type
@@ -61,7 +94,6 @@ int parse_expression(table_item_t *hash_tb);
  * input term (token).
  */
 char prec_table(int top, int token);
-
 /**
  * @brief Find fitting rule for actual marked part of stack and apply.
  * @param stack Stack for witch marked part is part of expression witch will
@@ -69,14 +101,19 @@ char prec_table(int top, int token);
  * @return True if found fitting rule else false.
  */
 int find_rule(table_item_t *hash_tb, stack_t *syntax_stack, stack_t *sem_stack);
+/**
+ * @brief Convert token type to expression special enum for precedence table analyse.
+ * @param idx Value of data_type_e enum.
+ * @return Converted enum to precedece table enum.
+ */
 int map_index(int idx);
-    
-stack_item_t* create_stack_item(table_item_t *hash_tb, token_t *token);
-
 /**
  * @brief Debug convert enum type data_type_e to string representation.
  */
 char *get_real_type(int type);
+/**
+ * @brief Debug convert enum type syntax_type_e to string representation.
+ */
 char *get_syntax_type(int type);
     
 #endif // _EXPRESSIONS_PARSER_H_IFJ_18_

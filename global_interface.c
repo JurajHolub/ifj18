@@ -1,5 +1,6 @@
 /**
  * @file global_interface.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Global interface of symtables used for parser and generator.
  * @date November 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
@@ -11,10 +12,11 @@
 #include <stdlib.h>
 
 /***************************** GLOBAL SYMBOL TABLES **************************/
-table_item_t* glob_main_st = NULL;
-table_item_t* glob_fun_st = NULL;
-stack_t glob_local_st;
-data_t *expr_type = NULL;
+table_item_t* glob_main_st = NULL; // sym tab for main body of program
+table_item_t* glob_fun_st = NULL; // sym tab for all functions declarations and calls
+// stack of sym tabs for local frames (function body), top of stack is last function
+stack_t glob_local_st; 
+data_t *expr_type = NULL; // ptr to result of expression saved in some sym tab
 
 
 table_item_t* get_main_st()

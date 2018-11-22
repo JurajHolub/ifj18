@@ -1,5 +1,6 @@
 /**
  * @file global_interface.h
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Global interface of symtables used for parser and generator.
  * @date November 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>

@@ -1,5 +1,6 @@
 /**
  * @file scanner.c
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration of scanner interface for parser.
  * @date November 2018
  * @author Samuel Krempsky

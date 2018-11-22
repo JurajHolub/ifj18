@@ -1,5 +1,6 @@
 /**
  * @file gen_out.c
+ * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @date November 2018
  * @author Juraj Holub <xholub40@stud.fit.vutbr.cz>
  * @brief Generator of 3AD code.
@@ -12,7 +13,9 @@
 #include "error_handle.h"
 #include "scanner.h"
 
+// list of global fram instructions
 gen_list_t *global_frame = NULL;
+// list of actual local frame instructions
 gen_list_t *local_frame = NULL;
 
 /***************************** LIBRARY FUNCTION ******************************/
