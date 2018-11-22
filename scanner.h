@@ -50,7 +50,8 @@ enum data_type_e {
     UNDEF,
     CONST,
     DEF_FUN,
-    UNDEF_FUN
+    UNDEF_FUN,
+    ERROR
 };
 
 enum states{
@@ -59,6 +60,7 @@ enum states{
     ID_state,
     INT_state,
     DOUBLE_state,
+    DOUBLE_PROB_state,
     EXPONENT_state,
     EXPONENT_sign_state,
     COMMENT_state,
