@@ -1,9 +1,0 @@
-#include <stdio.h>
-
-int main()
-{
-    char a;
-    //while ((a=getchar()) != EOF)
-    a=getchar();
-        printf("\"%d\"", a);
-}
