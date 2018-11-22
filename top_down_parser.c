@@ -231,7 +231,7 @@ int params(data_t *ste_newfc, string_t str_params)
                     }
                 }
             }
-            free (*ste_ptrptr_params_array);
+            free (ste_ptrptr_params_array);
             return analysis_result;
         }
     }
@@ -286,7 +286,7 @@ int param_list(data_t *ste_newfc, string_t str_params)
                     }
                 }
             }
-            free (*ste_ptrptr_params_array);
+            free (ste_ptrptr_params_array);
             return analysis_result;
         }
     }
