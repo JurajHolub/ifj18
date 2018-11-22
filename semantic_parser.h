@@ -21,6 +21,7 @@ int parse_operand(table_item_t *sym_tb, stack_t* sem_stack, token_t *op);
 int sem_action_assig(table_item_t *vars_symtable, data_t *l_value_entry);
 int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params_array);
 int sem_action_callfc(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params, bool accept_undef);
+int sem_action_find_undef_function(table_item_t *f_symtable);
 
 int sem_action_add(table_item_t *sym_tb, data_t *symb1, data_t *symb2);
 int sem_action_sub_mul(table_item_t *sym_tb, data_t *symb1, data_t *symb2, int arit_op);

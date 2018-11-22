@@ -48,6 +48,10 @@ int parse(void)
         {
             analysis_result = ERR_SYNTAX;
         }
+        else
+        {
+            analysis_result = sem_action_find_undef_function(get_fun_st());
+        }
     }
     return analysis_result;
 }

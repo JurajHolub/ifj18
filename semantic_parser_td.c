@@ -159,3 +159,20 @@ int sem_action_callfc(table_item_t *symtable, data_t *ste_ptr_callfc, params_t p
     return SUCCESS;
 }
 
+int sem_action_find_undef_function(table_item_t *f_symtable)
+{
+    for (int i = 0; i <HASH_SIZE; i++)
+    {
+        list_t *synonyms = f_symtable[i].head;
+        while (synonyms != NULL)
+        {
+            if (synonyms->data->type == UNDEF_FUN)
+            {
+                return ERR_SEM_DEF;
+            }
+            synonyms = synonyms->next;
+        }
+    }
+    return SUCCESS;
+}
+
