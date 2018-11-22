@@ -101,6 +101,7 @@ int sem_action_fcdef(data_t *ste_ptr_newfc, string_t str_params, data_t **params
             assert(i < ste_ptr_newfc->param_cnt);
             params_array[i] = search(get_local_st(), ste_newparam.id);
 
+            string_free(ste_newparam.id);
             param = strtok(NULL, " ");
             i++;
         }
