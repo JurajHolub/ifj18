@@ -921,11 +921,13 @@ token_t *get_token(){
                 }
             
             }
-            else if (c>='0' && c <= '9'){
+            else if ((c>='0' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
                 //error
+            
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
+            
             }
         }
         else if(state==DOUBLE_state){
