@@ -1,6 +1,5 @@
 /**
  * @file scanner.c
- * @project Compiler of language IFJ18. School project from subjects IFJ and IAL.
  * @brief Declaration of scanner interface for parser.
  * @date November 2018
  * @author Samuel Krempsky
@@ -425,7 +424,7 @@ token_t *get_token(){
         tokenNext.type=NOT;
         tokens[1]->type=NOT_EQUAL;
         PRINT_TOKENS
-	    return tokens[1];
+        return tokens[1];
 
     }
 
@@ -485,6 +484,7 @@ token_t *get_token(){
         nextchar='\0';
     }
     else if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
+        //printf("hello\n");
         nextchar='\0';
         PRINT_TOKENS
         return tokens[1];
@@ -653,7 +653,11 @@ token_t *get_token(){
                 tokens[1]->type=STRING;
                 return tokens[1];
             }
-            
+            else if(c =='\n' || c==EOF){
+                //printf("hello\n");
+                tokens[1]->type=ERROR;
+                return tokens[1];
+            }
             
             else{
                 //printf("hello\n");
@@ -906,6 +910,13 @@ token_t *get_token(){
                 }
 
             }
+            else if((c>='a' && c <= 'z')|| (c>='A' && c <= 'Z')){
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+                
+            }
         }
         else if(state==DOUBLE_PROB_state){
             if (c=='.') {
@@ -929,6 +940,15 @@ token_t *get_token(){
                 return tokens[1];
             
             }
+            else if (c=='@'){
+                //error
+            
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+
         }
         else if(state==DOUBLE_state){
             
@@ -1078,10 +1098,18 @@ void ret_token(token_t* token)
 
 void tokenLexOutput(){
     token_t *token=get_token();
+    if(token->type==ERROR){
+        printf("\n!!!ERROR!!!\n");
+    }
+
     printf("%d\t|>%s<|\n",token->type,token->attribute->string);
     //printf("hello\n");
 
     while(token->type!=EOF){
+
+        if(token->type==ERROR){
+        printf("\n!!!ERROR!!!\n");
+        }
         token=get_token();
         printf("%d\t|>%s<|\n",token->type,token->attribute->string);
     }
