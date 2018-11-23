@@ -1,6 +1,17 @@
 #!/bin/bash
 
-cd ../ && make -f Makefile
+if [ "`pwd | grep -oE '[^/]+/[^/]+$'`" = "ifj18/tests" ]
+then
+	rm ../*.o 2> /dev/null
+	rm ../main 2> /dev/null
+	rm ./main 2> /dev/null
+else
+	echo "Change directory to ifj18/tests"
+	exit 1
+fi
+
+(cd ../ && make) || { printf '\033[1;4;31m\n\nUnable to compile program!\033[0m\n' ; exit 1; }
+
 cd tests/
 cp ../main .
 
