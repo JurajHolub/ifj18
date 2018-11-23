@@ -61,8 +61,12 @@ int program_list(void) {
     token_t *token = get_token();
     table_item_t *global_symtable = get_main_st();      //TODO doc
 
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
     //rule <program_list> -> EOF
-    if (token->type == EOF) //TODO
+    else if (token->type == EOF) //TODO
     {
         ret_token(token);
         return SUCCESS;
@@ -142,9 +146,16 @@ int function_def(void) {
         }
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 //#ifdef SEMANTIC
@@ -253,9 +264,16 @@ int params(data_t *ste_newfc, string_t str_params)
         return param_list(ste_newfc, str_params);
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int param_list(data_t *ste_newfc, string_t str_params)
@@ -312,9 +330,16 @@ int param_list(data_t *ste_newfc, string_t str_params)
         }
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int function_body()
@@ -333,7 +358,7 @@ int function_body()
     }
 
     //rule <function-body> -> <stat> <function_body>
-    else
+    else if(token->type != ERROR)
     {
         ret_token(token);
 
@@ -349,9 +374,16 @@ int function_body()
         return analysis_result;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
@@ -373,7 +405,7 @@ int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
     }
 
     //rule <statement> -> <assignment> EOL
-    else
+    else if (token->type != ERROR)
     {
         //expansion of non terminal symbol <assignment>
         ret_token(token);
@@ -385,6 +417,10 @@ int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
             analysis_result = token->type == EOL ? 0 : ERR_SYNTAX;
         }
         return analysis_result;
+    }
+    else if (token->type == ERROR)
+    {
+        return ERR_LEX;
     }
 }
 
@@ -457,9 +493,16 @@ int if_statement(table_item_t *symtable, bool main_body_if)
         }
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label)
@@ -490,7 +533,7 @@ int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label)
     }
 
     //rule <if_body> -> <stat> <if_body>
-    else
+    else if (token->type != ERROR)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
@@ -504,9 +547,16 @@ int if_body(table_item_t *symtable, bool main_body_if, data_t *else_label)
         return analysis_result;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int else_body(table_item_t *symtable, bool main_body_else)
@@ -524,7 +574,7 @@ int else_body(table_item_t *symtable, bool main_body_else)
     }
 
     //rule <else_body> -> <stat> <else_body>
-    else
+    else if (token->type != ERROR)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
@@ -538,9 +588,16 @@ int else_body(table_item_t *symtable, bool main_body_else)
         return analysis_result;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int while_statement(table_item_t *symtable, bool main_body_while)
@@ -620,9 +677,16 @@ int while_statement(table_item_t *symtable, bool main_body_while)
         }
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int while_body(table_item_t *symtable, bool main_body_while)
@@ -640,7 +704,7 @@ int while_body(table_item_t *symtable, bool main_body_while)
     }
 
     //rule <while_body> -> <stat> <while_body>
-    else
+    else if (token->type != ERROR)
     {
         //expansion of non terminal symbol <statement>
         ret_token(token);
@@ -654,9 +718,16 @@ int while_body(table_item_t *symtable, bool main_body_while)
         return analysis_result;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int generate_assignment(table_item_t *symtable, data_t *ste_ptr_Lvalue)
@@ -718,10 +789,6 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
 {
     token_t *token = get_token();
     token_t *next_token = get_token();
-    if (token == NULL)
-    {
-        return ERR_LEX;
-    }
 
     /*-***************************************
          rules:
@@ -841,7 +908,7 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
         }
 
         //rule <assignment> -> ID = <expression>
-        else if(token->type != FUN) //TODO
+        else if(token->type != FUN && token->type != ERROR) //TODO
         {
             //expansion of non terminal symbol <expression>
             ret_token(next_token);
@@ -884,7 +951,7 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
       <assignment> -> <function_call>
       <assignment> -> <expression>
     ******************************************/
-    else
+    else if (token->type != ERROR)
     {
         //rule <assignment> -> <function_call>
         if ((token->type == VAR || token->type == FUN) &&
@@ -920,7 +987,7 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
         }
 
         //rule <assignment> -> <expression>
-        else if(token->type != FUN) //TODO
+        else if(token->type != FUN && token->type != ERROR) //TODO
         {
             //expansion of non terminal symbol <expression>
             ret_token(next_token);
@@ -930,9 +997,16 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
         }
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int generate_function_call (table_item_t *symtable, data_t *ste_ptr_callfc, params_t params)
@@ -1021,9 +1095,16 @@ int function_call(table_item_t *symtable, bool accept_undef)
         return analysis_result;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int call_params(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params)
@@ -1050,15 +1131,22 @@ int call_params(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params)
     }
 
     //rule <call_params> -> <call_param>
-    else
+    else if (token->type != ERROR)
     {
         ret_token(token);
         return call_param(symtable, ste_ptr_callfc, params);
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int call_param(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params)
@@ -1097,9 +1185,16 @@ int call_param(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params)
         return SUCCESS;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
 
 int call_param_list(table_item_t *symtable, data_t *ste_ptr_callfc, params_t params) {
@@ -1140,7 +1235,14 @@ int call_param_list(table_item_t *symtable, data_t *ste_ptr_callfc, params_t par
         return SUCCESS;
     }
 
-    //rule failed, bad syntax
-    syntax_error(token->type);
-    return ERR_SYNTAX;
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+    else
+    {
+        //rule failed, bad syntax
+        syntax_error(token->type);
+        return ERR_SYNTAX;
+    }
 }
