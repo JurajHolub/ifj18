@@ -390,8 +390,14 @@ int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
 {
     token_t *token = get_token();
 
+
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
+
     //rule <statement> -> <if_statement>
-    if (token->type == IF)
+    else if (token->type == IF)
     {
         ret_token(token);
         return if_statement(symtable, main_body_st);
@@ -405,7 +411,7 @@ int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
     }
 
     //rule <statement> -> <assignment> EOL
-    else if (token->type != ERROR)
+    else
     {
         //expansion of non terminal symbol <assignment>
         ret_token(token);
@@ -417,10 +423,6 @@ int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
             analysis_result = token->type == EOL ? 0 : ERR_SYNTAX;
         }
         return analysis_result;
-    }
-    else if (token->type == ERROR)
-    {
-        return ERR_LEX;
     }
 }
 
