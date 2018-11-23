@@ -388,7 +388,13 @@ int function_body()
 
 int statement(table_item_t *symtable, bool main_body_st, bool force_undef)
 {
-    token_t *token = get_token();
+    token_t *token = get_token()
+
+
+    if (token->type == ERROR)
+    {
+        return ERR_LEX;
+    }
 
 
     if (token->type == ERROR)
