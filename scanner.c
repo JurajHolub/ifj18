@@ -489,6 +489,13 @@ token_t *get_token(){
         PRINT_TOKENS
         return tokens[1];
     }
+    else if(nextchar=='@'){
+
+        tokens[1]->type=ERROR;
+        PRINT_TOKENS
+        return tokens[1];
+    
+    }
    
     /**/
 
@@ -726,6 +733,14 @@ token_t *get_token(){
             else if( c==' ' || c=='\t'){
                 state=START_state;
             }
+            else if ( c=='@' ){
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+                
 
  
 
