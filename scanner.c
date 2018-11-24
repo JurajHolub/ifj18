@@ -753,6 +753,10 @@ token_t *get_token(){
                 tokens[1]->type=ERROR;
                 return tokens[1];
             }
+            else if(c<32){
+                tokens[1]->type=ERROR;
+                return tokens[1];
+            }
             
             else{
                 //printf("hello\n");
