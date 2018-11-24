@@ -1,0 +1,5 @@
+var1 = "5343"
+var2 = "3131"
+var3 = var1 + var2
+
+print var3, "\n"
