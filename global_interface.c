@@ -37,38 +37,42 @@ table_item_t* get_fun_st()
         data_t inputs;
         inputs.type = DEF_FUN;
         inputs.id = string_create("inputs");
-        inputs.value = STRING;
+        inputs.data_type = STRING;
         inputs.param_cnt = 0;
+        inputs.value = NULL;
         insert(glob_fun_st, &inputs);
         string_free(inputs.id);
 
         data_t inputi;
         inputi.type = DEF_FUN;
         inputi.id = string_create("inputi");
-        inputi.value = INTEGER;
+        inputi.data_type = INTEGER;
         inputi.param_cnt = 0;
+        inputi.value = NULL;
         insert(glob_fun_st, &inputi);
         string_free(inputi.id);
 
         data_t inputf;
         inputf.type = DEF_FUN;
         inputf.id = string_create("inputf");
-        inputf.value = FLOAT;
+        inputf.data_type = FLOAT;
         inputf.param_cnt = 0;
+        inputf.value = NULL;
         insert(glob_fun_st, &inputf);
         string_free(inputf.id);
 
         data_t print;
         print.type = DEF_FUN;
         print.id = string_create("print");
-        print.value = NIL;
+        print.data_type = NIL;
+        print.value = NULL;
         insert(glob_fun_st, &print);
         string_free(print.id);
 
         data_t length;
         length.type = DEF_FUN;
         length.id = string_create("length");
-        length.value = INTEGER;
+        length.data_type = INTEGER;
         length.param_cnt = 1;
         insert(glob_fun_st, &length);
         string_free(length.id);
@@ -76,24 +80,27 @@ table_item_t* get_fun_st()
         data_t substr;
         substr.type = DEF_FUN;
         substr.id = string_create("substr");
-        substr.value = STRING;
+        substr.data_type = STRING;
         substr.param_cnt = 3;
+        substr.value = NULL;
         insert(glob_fun_st, &substr);
         string_free(substr.id);
         
         data_t ord;
         ord.type = DEF_FUN;
         ord.id = string_create("ord");
-        ord.value = INTEGER;
+        ord.data_type = INTEGER;
         ord.param_cnt = 2;
+        ord.value = NULL;
         insert(glob_fun_st, &ord);
         string_free(ord.id);
 
         data_t chr;
         chr.type = DEF_FUN;
         chr.id = string_create("chr");
-        chr.value = STRING;
+        chr.data_type = STRING;
         chr.param_cnt = 1;
+        chr.value = NULL;
         insert(glob_fun_st, &chr);
         string_free(chr.id);
     }
