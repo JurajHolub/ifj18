@@ -81,6 +81,10 @@ int returned_token = 0;
 int get= 1;
 
 
+int globalEOF=FALSE;
+int globalEOL=FALSE;
+
+
 int controlKeyWords(char *testString, token_t *token){
 
 
@@ -177,6 +181,16 @@ int controlWords(char *testString, token_t *token){
 
 int controlInt(char *testString,token_t *token){
 
+    char *emptyString='\0';
+    //emptyString[0]='\0';
+    
+    strtol(testString,&emptyString,10);
+
+
+    if (emptyString[0]!='\0'){
+        return FALSE;
+    }
+
     token->type=INTEGER;
     return TRUE;
 
@@ -184,6 +198,16 @@ int controlInt(char *testString,token_t *token){
 
 int controlDouble(char *testString,token_t *token){
 
+    for (int i = 0; i < strlen(testString); i++){
+
+        if( (testString[i]>='0' && testString[i]<='9') || testString[i]=='e' 
+            || testString[i]=='E' || testString[i]=='+' || testString[i]=='-' || testString[i]=='*' || testString[i]=='.');
+        else
+            return FALSE;
+        
+    }
+
+    
     token->type=FLOAT;
     return TRUE;
 
@@ -411,6 +435,18 @@ token_t *get_token(){
 
 
 
+    if(globalEOL==TRUE){
+
+        globalEOL=FALSE;
+        globalEOF=TRUE;
+        tokens[1]->type = EOL;
+        return tokens[1];
+    }
+    else if (globalEOF==TRUE){
+        tokens[1]->type = EOF;
+        return tokens[1];
+    }
+
 
 
 
@@ -499,8 +535,60 @@ token_t *get_token(){
    
     /**/
 
-    while((c=getchar())!=EOF){
+    /*while((c=getchar())!=EOF){*/
+    while( (c=getchar()) ){
 
+
+        //Control of EOL before EOF
+        if(c==EOF){
+            
+
+            if(state2==COMMENT_BEGIN_state){
+                tokens[1]->type = EOF;
+                return tokens[1];
+            }
+
+
+            if (controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE){
+
+                globalEOL=TRUE;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+            else if(controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE){
+            
+                globalEOL=TRUE;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+            else if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
+                //nextchar=c;
+                //printf("hello\n");
+                globalEOL=TRUE;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }  
+            else if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
+                //nextchar=c;
+                globalEOL=TRUE;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }  
+
+    
+            
+
+            tokens[1]->type = EOF;
+            return tokens[1];
+        }
+
+
+
+        //control of '==','<=','!=','>=' comparators
         if(state==SIGN_state){
 
             if( c=='=' ){
@@ -1014,11 +1102,12 @@ token_t *get_token(){
                 charCounter++;*/
             }
             else if (controlSigns(c)==TRUE) {
+
                 tokens[1]->type=FLOAT;
                 PRINT_TOKENS
                 return tokens[1];
             }
-            else{
+            else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_' || c==';' || c=='@'){
                 //error
 
                 tokens[1]->type=ERROR;
@@ -1042,7 +1131,7 @@ token_t *get_token(){
                 PRINT_TOKENS
                 return tokens[1];
             }
-            else{
+            else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_' || c==';' || c=='@'){
                 //error
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -1086,6 +1175,39 @@ token_t *get_token(){
         
     }
 
+
+
+
+    //printf("%s\n",tokens[1]->attribute->string );
+
+
+    /*
+    if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
+        //nextchar=c;
+        globalEOL=TRUE;
+        PRINT_TOKENS
+        return tokens[1];
+    }  
+    else if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
+        //nextchar=c;
+        globalEOL=TRUE;
+        PRINT_TOKENS
+        return tokens[1];
+    } 
+    
+    if(globalEOL==TRUE){
+        globalEOL=FALSE;
+        globalEOF=TRUE;
+        tokens[1]->type = EOL;
+        return tokens[1];
+
+    }
+    else if (globalEOF==TRUE){
+        tokens[1]->type = EOF;
+        return tokens[1];
+    }
+
+    */
     tokens[1]->type = EOF;
     return tokens[1];
 
