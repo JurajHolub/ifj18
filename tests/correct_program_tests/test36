@@ -4,10 +4,10 @@ else
     print "alwie"
 
     if 10 != 0 then
-        print("awôirnvô")
+        print("awirnv")
 
         if 1.5 < 10 then
-            print("aôkwenskerômvakwje")
+            print("akwenskermvakwje")
         else
             print "alwie"
         end

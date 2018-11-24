@@ -9,5 +9,5 @@ else
         vysl = vysl * a
         a = a - 1
     end
-    print "\nVysledek␣je:", vysl, "\n"
+    print "\nVysledek je:", vysl, "\n"
 end
