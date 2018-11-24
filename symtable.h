@@ -23,26 +23,29 @@
  */
 typedef struct data_s {
     /**
-     * Data type of symbol. Could be {VAR, CONST} in symtable of some frame
+     * Type of symbol. Could be {VAR, CONST} in symtable of some frame
      * or {DEF_FUN, UNDEF_FUN} in symtable of functions.
      */
-    int type;  
+    int type;
     /** 
-     * True type of variable or function. It could be {INTEGER, FLOAT, STRING,
-     * NIL, BOOL}. If it is symtable of frame it is true type of variable (if 
+     * Data type of variable or function. It could be {INTEGER, FLOAT, STRING,
+     * NIL, BOOL}. If it is symtable of frame it is data type of variable (if
      * is is CONST than it is not defined) else if it is symtable of function
      * then it is return value of function.
      */
-    int value;  
-    string_t id;       
+    int data_type;
     /**
-     * Name of identificator for variable, function or constant (if it is
-     * constant then id is value of constant it self).
+     * Name or identifier of variable, function or constant.
      */
-    int param_cnt;  
+    string_t id;
     /**
      *  Number of function parameters, if it is symtab of frame then it is undefined.
      */
+    int param_cnt;
+    /**
+     * Value of constant coverted to char
+     */
+    string_t value;
 } data_t;
 
 /**
@@ -89,7 +92,7 @@ void insert(table_item_t *table, data_t *data);
  * @param data Data witch will be initailized.
  * @param type Type of temporary symbol initialized in data.
  */
-string_t insert_tmp(table_item_t *table, int type);
+string_t insert_tmp(table_item_t *table, int type, string_t value);
 
 /******************************************************************************
 ***************************** INSIDE LOGIC ************************************

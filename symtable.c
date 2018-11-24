@@ -65,9 +65,11 @@ void list_destroy_first(list_t **list)
 
 void data_destroy(data_t *data)
 {
-    if (data->id != NULL)
+    if (data->id != NULL) {
         string_free(data->id);
-    
+        string_free(data->value);
+    }
+
     free(data);
 }
 
@@ -90,11 +92,13 @@ void insert(table_item_t *table, data_t *data)
     if (exist)
     {
         string_free(exist->id);
+        string_free(exist->value);
 
         exist->type = data->type;
-        exist->value = data->value;
+        exist->data_type = data->data_type;
         exist->id = string_create(data->id->string);
         exist->param_cnt = data->param_cnt;
+        exist->value = data->value;
         return;
     }
 
@@ -107,7 +111,7 @@ void insert(table_item_t *table, data_t *data)
         table[idx].head = list_insert(table[idx].head, data);
 }
 
-string_t insert_tmp(table_item_t *table, int type)
+string_t insert_tmp(table_item_t *table, int type, string_t value)
 {
     static int tmp_count = 0; // one counter for all tmp variables => not colisions
     
@@ -118,8 +122,9 @@ string_t insert_tmp(table_item_t *table, int type)
     data_t data;
     data.type = type;
     data.id = string_create(id);
-    data.value = UNDEF;
+    data.data_type = UNDEF;
     data.param_cnt = 0;
+    data.value = value;
 
     insert(table, &data);
 
@@ -190,12 +195,14 @@ data_t* data_copy(data_t *src)
     if (dst == NULL)
     {
         mem_error();
+        return NULL;
     }
 
     dst->type = src->type;
-    dst->value = src->value;
+    dst->data_type = src->data_type;
     dst->id = string_create(src->id->string);
     dst->param_cnt = src->param_cnt;
+    dst->value = string_create(src->value->string);
 
     return dst;
 }
