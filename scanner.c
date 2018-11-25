@@ -84,6 +84,8 @@ int get= 1;
 int globalEOF=FALSE;
 int globalEOL=FALSE;
 
+int beginVar=TRUE;
+
 
 int controlKeyWords(char *testString, token_t *token){
 
@@ -422,6 +424,15 @@ token_t *get_token(){
 
     //char escapeSeq[]="0000";
 
+    if(beginVar==TRUE ){
+
+        beginVar=FALSE;
+        enterToken.type=EOL;
+        tokens[1]->type = EOL;
+        return tokens[1];
+    }
+
+
     char hexConvert[]="00";
     char testString[64]={0};
     char hexReturn[4]={0};
@@ -453,6 +464,9 @@ token_t *get_token(){
 
     //char *testString_IFJ;
     //string_t stringTest=string_create(testString_IFJ);
+
+
+
 
     if(tokenNext.type==NOT_EQUAL){
 
@@ -538,6 +552,9 @@ token_t *get_token(){
     /*while((c=getchar())!=EOF){*/
     while( (c=getchar()) ){
 
+
+
+        
 
         //Control of EOL before EOF
         if(c==EOF){

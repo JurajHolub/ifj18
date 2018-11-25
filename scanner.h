@@ -15,7 +15,6 @@
  * possition of enum items please (possition is important for parser), if you
  * want add more symbols add it at the end of enum.
  */
-
 enum data_type_e {
 //  EOF = -1    Scanner make token also from end of file symbol.
     NOT = 0,    ///< Term "not".
