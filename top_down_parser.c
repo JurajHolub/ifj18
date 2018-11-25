@@ -880,6 +880,27 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
                     }
                 }
             }
+            else if (FUN != token->type && 0 == strcmp(token->attribute->string, ste_Lvalue.id->string))
+            {
+                //calling semantic analysis, which actualize entry in symbol table for L value, too
+                if (!force_undef)
+                {
+                    ste_Lvalue.value = NIL;
+                }
+
+                analysis_result = sem_action_assig(symtable, &ste_Lvalue);
+
+                //generating assignment
+                if (analysis_result == SUCCESS)
+                {
+                    if (!main_body_assig) {
+                        //getting symbol table entry of L value from symbol table
+                        data_t *ste_ptr_Lvalue = search(symtable, ste_Lvalue.id);
+                        add_instruction(I_PUSHS, &ste_ptr_Lvalue, NULL, NULL);
+                    }
+                }
+                ret_token(next_token);
+            }
             else
             {
                 //expansion of non terminal symbol <function_call>
