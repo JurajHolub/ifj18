@@ -74,6 +74,7 @@ table_item_t* get_fun_st()
         length.id = string_create("length");
         length.data_type = INTEGER;
         length.param_cnt = 1;
+        length.value = NULL;
         insert(glob_fun_st, &length);
         string_free(length.id);
 

@@ -67,7 +67,9 @@ void data_destroy(data_t *data)
 {
     if (data->id != NULL) {
         string_free(data->id);
-        string_free(data->value);
+        if (data->value != NULL) {
+            string_free(data->value);
+        }
     }
 
     free(data);
@@ -92,13 +94,20 @@ void insert(table_item_t *table, data_t *data)
     if (exist)
     {
         string_free(exist->id);
-        string_free(exist->value);
+        if (exist->value) {
+            string_free(exist->value);
+        }
 
         exist->type = data->type;
         exist->data_type = data->data_type;
         exist->id = string_create(data->id->string);
         exist->param_cnt = data->param_cnt;
-        exist->value = data->value;
+        if (data->value) {
+            exist->value = string_create(data->value->string);
+        }
+        else {
+            exist->value = NULL;
+        }
         return;
     }
 
@@ -202,7 +211,12 @@ data_t* data_copy(data_t *src)
     dst->data_type = src->data_type;
     dst->id = string_create(src->id->string);
     dst->param_cnt = src->param_cnt;
-    dst->value = string_create(src->value->string);
+    if (src->value) {
+        dst->value = string_create(src->value->string);
+    }
+    else {
+        dst->value = NULL;
+    }
 
     return dst;
 }
