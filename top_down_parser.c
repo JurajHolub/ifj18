@@ -792,6 +792,10 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
     token_t *token = get_token();
     token_t *next_token = get_token();
 
+    //creating symbol table entry for L value
+    data_t ste_Lvalue;
+    ste_Lvalue.id = NULL;
+
     /*-***************************************
          rules:
           <assignment> -> ID = <function_call>
@@ -799,8 +803,6 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
     ******************************************/
     if (token->type == VAR && next_token->type == ASSIG)
     {
-        //creating symbol table entry for L value
-        data_t ste_Lvalue;
         //inserting data from token to symbol table entry
         ste_Lvalue.type = VAR;
         ste_Lvalue.value = UNDEF;
@@ -927,6 +929,8 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
                     }
                 }
             }
+            //clear memory
+            string_free(ste_Lvalue.id);
             return analysis_result;
         }
 
@@ -1020,6 +1024,10 @@ int assignment(table_item_t *symtable, bool main_body_assig, bool force_undef)
         }
     }
 
+    if (ste_Lvalue.id)
+    {
+        string_free(ste_Lvalue.id);
+    }
     if (token->type == ERROR)
     {
         return ERR_LEX;
