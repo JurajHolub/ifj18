@@ -1,0 +1,6 @@
+a = a
+if (a == nil) then
+    print "true\n"
+else 
+    print "false\n"
+end
