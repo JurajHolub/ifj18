@@ -62,7 +62,7 @@ char *lib_fun_inputf =
 "CREATEFRAME\n"
 "PUSHFRAME\n"
 "DEFVAR LF@$inputf$ret\n"
-"READ LF@$inputf$ret int\n"
+"READ LF@$inputf$ret float\n"
 "PUSHS LF@$inputf$ret\n"
 "POPFRAME\n"
 "RETURN\n"
