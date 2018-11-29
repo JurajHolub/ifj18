@@ -1,1 +1,7 @@
-99859893E0
+<<<<<<< Updated upstream
+859893E19
+=======
+str = "abcdefgh"
+len = length(str)
+s = substr(str, len, 5)
+>>>>>>> Stashed changes
