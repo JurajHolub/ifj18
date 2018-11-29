@@ -257,6 +257,7 @@ int parse_expression(table_item_t *hash_tb)
             stack_push(stack, input_sym);
             //print_stack(stack);
             token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
             if (token->type == ERROR)
             {
                 free_syntax_item(input_sym);
@@ -264,7 +265,6 @@ int parse_expression(table_item_t *hash_tb)
                 free_sem_stack(sem_stack);
                 return ERR_LEX;
             }
-            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '<')
         {
@@ -272,6 +272,7 @@ int parse_expression(table_item_t *hash_tb)
             stack_push(stack, input_sym);
             //print_stack(stack);
             token = get_token();
+            input_sym = alloc_syntax_item(token, hash_tb);
             if (token->type == ERROR)
             {
                 free_syntax_item(input_sym);
@@ -279,7 +280,6 @@ int parse_expression(table_item_t *hash_tb)
                 free_sem_stack(sem_stack);
                 return ERR_LEX;
             }
-            input_sym = alloc_syntax_item(token, hash_tb);
         }
         else if (prec_tab == '>')
         {
