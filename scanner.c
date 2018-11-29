@@ -186,10 +186,15 @@ int controlInt(char *testString,token_t *token){
     char *emptyString='\0';
     //emptyString[0]='\0';
     
-    strtol(testString,&emptyString,10);
+    int i=-1;
 
+    i=strtol(testString,&emptyString,10);
+    //printf("%d\n",i );
 
     if (emptyString[0]!='\0'){
+        return FALSE;
+    }
+    else if(emptyString[0]=='\0' && i==0){
         return FALSE;
     }
 
@@ -210,6 +215,10 @@ int controlDouble(char *testString,token_t *token){
     }
 
     
+    if(testString[0]=='\0'){
+        return FALSE;
+    }
+
     token->type=FLOAT;
     return TRUE;
 
@@ -287,6 +296,20 @@ int controlOperators(char c, token_t *token, char scndOperator){
 
     return FALSE;
 }
+
+//controls the chars that are not allowed in the IFJ18
+int controlIncorrectChars(char c){
+    char operators[]={';','}','{',':','[',']','^','_','`','@','.','|','$','%','&','?','~','\\'};
+
+    for (int i = 0; i < strlen(operators); i++){
+        if( c==operators[i]){
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 
 int controlSigns(char c){
 
@@ -539,7 +562,7 @@ token_t *get_token(){
         PRINT_TOKENS
         return tokens[1];
     }
-    else if(nextchar=='@'){
+    else if(controlIncorrectChars(nextchar)==TRUE){
 
         tokens[1]->type=ERROR;
         PRINT_TOKENS
@@ -566,21 +589,45 @@ token_t *get_token(){
             }
 
 
-            if (controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE){
+            if(state==STRING_state){
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            } 
+            else if (state==INT_state && controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE){
+                //printf("hello\n");
+                globalEOL=TRUE;
+                PRINT_TOKENS
+                return tokens[1];
+            
+            }
+            else if(state==DOUBLE_PROB_state){
 
                 globalEOL=TRUE;
                 PRINT_TOKENS
+                tokens[1]->type=INTEGER;
                 return tokens[1];
             
             }
-            else if(controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE){
+            else if(state==SIGN_state){
+                
+                //it is a bad state but parser should detect it
+                globalEOL=TRUE;
+                if(controlOperators(nextchar,tokens[1],'\0') == TRUE){
+                    PRINT_TOKENS
+                    return tokens[1]; 
+                }
+                
+            
+            }
+            else if((state==EXPONENT_sign_state || state==DOUBLE_state || state== EXPONENT_state) && controlDouble(tokens[1]->attribute->string, tokens[1]) == TRUE){
             
                 globalEOL=TRUE;
                 PRINT_TOKENS
                 return tokens[1];
             
             }
-            else if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
+            else if((state==FUNCTION_state || state==ID_state) && controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
                 //nextchar=c;
                 //printf("hello\n");
                 globalEOL=TRUE;
@@ -588,19 +635,32 @@ token_t *get_token(){
                 return tokens[1];
             
             }  
-            else if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
+            else if((state==FUNCTION_state || state==ID_state) && controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
                 //nextchar=c;
                 globalEOL=TRUE;
                 PRINT_TOKENS
                 return tokens[1];
             
-            }  
+            }
+            else if(state==START_state){
+                globalEOL=TRUE;
+                tokens[1]->type=EOL;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+            else if(state==DOUBLE_DOT_state || state==EXPONENT_INTER_state || state==EXPONENT_INTER_sign_state){
+                globalEOL=TRUE;
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
 
     
             
 
             tokens[1]->type = EOF;
             return tokens[1];
+            
         }
 
 
@@ -644,6 +704,11 @@ token_t *get_token(){
                     return tokens[1];
                 }
 
+            }
+            else if(controlIncorrectChars(c)==TRUE){
+                PRINT_TOKENS
+                tokens[1]->type=ERROR;
+                return tokens[1];
             }
         }
         else if ( (c!=' '|| c!='\t') && state!=START_state && controlSigns(c)==TRUE){
@@ -841,8 +906,9 @@ token_t *get_token(){
             }
             else if( c==' ' || c=='\t'){
                 state=START_state;
+                state2=NOT;
             }
-            else if ( c=='@' ){
+            else if ( controlIncorrectChars(c)==TRUE ){
 
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -874,7 +940,9 @@ token_t *get_token(){
                     state=COMMENT_END_state;
                 }
                 else{
-                    //error
+                    tokens[1]->type=ERROR;
+                    PRINT_TOKENS
+                    return tokens[1];
                 }
 
             }
@@ -911,7 +979,7 @@ token_t *get_token(){
                 else{
 
                     state=COMMENT_END_state;
-                    //error
+                    //not good
                     //We "erase" the array and NULL the cnt
                     for (int i = 0; i < 64; ++i)
                         testString[i]='\0';
@@ -970,22 +1038,7 @@ token_t *get_token(){
                 charCounter++;*/
 
             }
-            else if(c=='@'){
-
-                //constants are not supported in a source file
-
-                /*if(controlConstants(testString,tokens[1])==TRUE);
-                state=CONSTANT_state;
-                charAppend(tokens[1],c);
-
-                testString[charCounter]=c;
-                charCounter++;*/
-
-                tokens[1]->type=ERROR;
-                PRINT_TOKENS
-                return tokens[1];
-
-            }
+            
             else if(c=='?' || c== '!'){
                 state=FUNCTION_state;
 
@@ -1009,6 +1062,24 @@ token_t *get_token(){
                 } 
 
             }
+            else if(controlIncorrectChars(c)==TRUE){
+
+                //constants are not supported in a source file
+
+                /*if(controlConstants(testString,tokens[1])==TRUE);
+                state=CONSTANT_state;
+                charAppend(tokens[1],c);
+
+                testString[charCounter]=c;
+                charCounter++;*/
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+
+            }
+
+
         }
         else if(state==INT_state){
             if (c>='0' && c <= '9'){
@@ -1021,7 +1092,7 @@ token_t *get_token(){
 
             }
             else if( c== '.'){
-                state=DOUBLE_state;
+                state=DOUBLE_DOT_state;
                 charAppend(tokens[1],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
@@ -1041,22 +1112,48 @@ token_t *get_token(){
                 return tokens[1];
                 
             }
+            else if(controlIncorrectChars(c)==TRUE){
+
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+
+            }
+        }
+        else if(state==DOUBLE_DOT_state){
+            if( c>='0' && c <= '9' ){
+                state=DOUBLE_state;
+                charAppend(tokens[1],c);
+            }
+            else{
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+
         }
         else if(state==DOUBLE_PROB_state){
+            //printf("hello\n");
             if (c=='.') {
-                state=DOUBLE_state;
+                state=DOUBLE_DOT_state;
                 charAppend(tokens[1],c);
             }
 
             else if (controlSigns(c)==TRUE){
-                
-                if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
+                //printf("hello\n");
+                /*if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
+
                     PRINT_TOKENS
+                    tokens[1]->type=INTEGER;
                     return tokens[1];
-                }
+                }*/
+
+                PRINT_TOKENS
+                tokens[1]->type=INTEGER;
+                return tokens[1];
             
             }
-            else if ((c>='0' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
+            else if ((c>='1' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
                 //error
             
                 tokens[1]->type=ERROR;
@@ -1064,13 +1161,12 @@ token_t *get_token(){
                 return tokens[1];
             
             }
-            else if (c=='@'){
+            else if(controlIncorrectChars(c)==TRUE){
                 //error
-            
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
-            
+
             }
 
         }
@@ -1085,7 +1181,7 @@ token_t *get_token(){
             else if(c=='e'|| c=='E'){
                 //probably some error
                 //TODO chyták
-                state=EXPONENT_state;
+                state=EXPONENT_INTER_state;
                 charAppend(tokens[1],c);
                 /*testString[charCounter]=c;
                 charCounter++;*/
@@ -1104,7 +1200,46 @@ token_t *get_token(){
                 PRINT_TOKENS
                 return tokens[1];
             }
+            else if(controlIncorrectChars(c)==TRUE){
 
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+
+            }
+
+        }
+        else if(state==EXPONENT_INTER_state){
+            if (c>='0' && c <= '9'){
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
+                state=EXPONENT_state;
+            
+            }
+            else if(c=='-' || c == '+'){
+                charAppend(tokens[1],c);
+                state=EXPONENT_INTER_sign_state;
+            }
+            else{
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+        }
+        else if (state==EXPONENT_INTER_sign_state){
+            if (c>='0' && c <= '9'){
+                charAppend(tokens[1],c);
+                /*testString[charCounter]=c;
+                charCounter++;*/
+                state=EXPONENT_sign_state;
+            
+            }
+            else {
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
         }
         else if (state==EXPONENT_state){
 
@@ -1115,13 +1250,13 @@ token_t *get_token(){
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
-            else if(c=='+' || c == '-'){
+            /*else if(c=='+' || c == '-'){
                 state=EXPONENT_sign_state;
                 charAppend(tokens[1],c);
-                /*
+                
                 testString[charCounter]=c;
-                charCounter++;*/
-            }
+                charCounter++;
+            }*/
             else if (controlSigns(c)==TRUE) {
 
                 tokens[1]->type=FLOAT;
@@ -1136,6 +1271,15 @@ token_t *get_token(){
                 return tokens[1];
 
             }
+            else if (controlIncorrectChars(c)==TRUE){
+
+                //error
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+
+            }
+
         }
         else if(state==EXPONENT_sign_state){
             if(c>='0' && c <= '9'){
@@ -1154,6 +1298,11 @@ token_t *get_token(){
             }
             else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_' || c==';' || c=='@'){
                 //error
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+            else if (controlIncorrectChars(c)==TRUE){
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
