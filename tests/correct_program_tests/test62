@@ -1,0 +1,12 @@
+_var = "eva ma mamu, mama ma evu"
+
+def otaznik?(a)
+    print a
+end
+
+def vykricnik!(a)
+    print a
+end
+
+otaznik? _var
+vykricnik! _var
