@@ -1,7 +1,8 @@
 s="abcde"
-i = 0;
+i = 0
 while (i < 5) do
     b = substr s, 2, 4
     print b, "\n"
     i = i + 1
 end
+

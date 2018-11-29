@@ -705,6 +705,11 @@ token_t *get_token(){
                 }
 
             }
+            else if(c=='<' || c=='!' || c=='>'){
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
             else if(controlIncorrectChars(c)==TRUE){
                 PRINT_TOKENS
                 tokens[1]->type=ERROR;
@@ -1097,6 +1102,12 @@ token_t *get_token(){
                 /*testString[charCounter]=c;
                 charCounter++;*/
             }
+            else if(c=='e' || c=='E'){
+
+                state=EXPONENT_INTER_state;
+                charAppend(tokens[1],c);
+            
+            }
             else if(controlSigns(c)==TRUE){
                 
                 if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
@@ -1210,6 +1221,7 @@ token_t *get_token(){
 
         }
         else if(state==EXPONENT_INTER_state){
+            //printf("hello\n");
             if (c>='0' && c <= '9'){
                 charAppend(tokens[1],c);
                 /*testString[charCounter]=c;
