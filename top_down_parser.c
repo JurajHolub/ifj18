@@ -1081,7 +1081,7 @@ int function_call(table_item_t *symtable, bool accept_undef)
     token_t *token = get_token();
 
     //rule <function_call> -> ID <call_params> EOL
-    if (token->type == VAR)
+    if (token->type == VAR || token->type == FUN)
     {
         //creating symbol table entry
         data_t ste_callfc;
