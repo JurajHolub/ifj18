@@ -1,0 +1,5 @@
+#this test should generate the lex error
+a="long  string"
+=begi
+
+=end
