@@ -1,0 +1,2 @@
+#bad escape sequence
+a="hello this is \ "
