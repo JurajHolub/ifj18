@@ -705,6 +705,13 @@ token_t *get_token(){
                 }
 
             }
+            else if(c=='(' || c== ')' || c=='+' || c=='-' || c== '*' || c == '/' ){
+                if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
+                    nextchar=c;
+                    PRINT_TOKENS
+                    return tokens[1];
+                }
+            }
             else if(c=='<' || c=='!' || c=='>'){
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
