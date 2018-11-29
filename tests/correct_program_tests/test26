@@ -4,3 +4,5 @@ end
 
 res = add(10, 20)
 print res
+res = add("awliehnc", "ajwbean")
+print res

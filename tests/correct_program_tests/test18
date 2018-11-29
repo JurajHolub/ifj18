@@ -2,4 +2,7 @@
 def function(a)
 #    a=10
     a=10.0
+    print a
 end
+
+function 0

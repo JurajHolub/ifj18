@@ -1,5 +1,6 @@
 while 2 == 1 do
     x = 10
+    print "chnochno"
 end
 
 if x == nil then

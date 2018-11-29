@@ -1,4 +1,5 @@
 def foo(a, i, ghe)
+    print a, i, ghe
 end
 
 foo(1,1,1)

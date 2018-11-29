@@ -1,6 +1,7 @@
 var1=10
 var2=10
 if var1+5 < var2 then
+    print "then"
 else
+    print "else"
 end
-

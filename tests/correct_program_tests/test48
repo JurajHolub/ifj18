@@ -1,1 +1,2 @@
-chr(300)
+a = chr(300)
+print a

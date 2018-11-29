@@ -58,3 +58,13 @@ tests/tst12
 tests/output/
 
 xholub40\.zip
+
+*.aux
+
+doc/dokumentace\.log
+
+doc/dokumentace\.pdf
+
+*.gz
+
+*.toc

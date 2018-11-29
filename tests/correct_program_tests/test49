@@ -1,1 +1,2 @@
-ord(5, 5)
+x = ord(5, 5)
+print x

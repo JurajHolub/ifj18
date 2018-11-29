@@ -1,8 +1,17 @@
 
 def foo (a, b)
-    x = 10
+    x = a + b
 end
 
 a=10
 b=20
-foo a, b
+int = foo a, b
+float1 = foo 12.12654, b
+float2 = foo a, 3741.35
+float3 = foo 5741.257, 23574.3874
+str = foo "asdfghjklpoiuztrdcvbnm", "dfghjkmnbvcdxfghjkjhbgvcvbnm"
+print int, "\n"
+print float1, "\n"
+print float2, "\n"
+print float3, "\n"
+print str, "\n"
