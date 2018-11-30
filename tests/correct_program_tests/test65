@@ -1,0 +1,8 @@
+=begin
+hello this is comment
+=end
+=begin
+hello this is also a comment
+=end
+
+a="this is some string"
