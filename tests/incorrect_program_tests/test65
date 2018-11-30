@@ -1,0 +1,9 @@
+def function()
+    abc = 10
+end
+
+def abc()
+    print "err"
+end
+
+function

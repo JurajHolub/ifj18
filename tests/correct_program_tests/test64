@@ -1,2 +1,16 @@
-a=5.53
-=a
+def add(a, b)
+    res = a + b
+end
+
+def double(x)
+    x * x
+end
+
+
+x = add(10, 55.342)
+y = double(25)
+z = y / (x + 7)
+
+print x, "\n"
+print y, "\n"
+print z, "\n"

@@ -1,0 +1,9 @@
+def fun1(a, b, c, d, e, f)
+    x = a +b +c+ +d +e+ f
+    res = fun2
+    res = res + "jozefinka"
+end
+
+res = fun1("a", "b", "c", "d", "e", "f")
+
+print res, "\n"
