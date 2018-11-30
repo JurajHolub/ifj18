@@ -29,7 +29,7 @@ $(EXECUTABLE): $(OBJ)
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
-.PHONY: run doc pack clean
+.PHONY: run doc pack clean test
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
@@ -38,3 +38,5 @@ pack:
 
 clean:
 	rm -rf *.o *.out $(EXECUTABLE)
+test:
+	cd tests && bash test_outputs.bash
