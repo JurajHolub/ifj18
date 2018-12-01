@@ -90,8 +90,8 @@ Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 	\item{\textbf{MD}: Operátor násobenia alebo delenia (\texttt{\textbf{*}}, \texttt{\textbf{/}}).}
 	\item{\textbf{EQ}: Relačný operátor (\texttt{\textbf{==}},\texttt{\textbf{!=}},\texttt{\textbf{<}},\texttt{\textbf{<=}},\texttt{\textbf{>}},\texttt{\textbf{>=}}).}
 	\item{\textbf{ID}: Operand.}
-	\item{\textbf{(}: Ľavá zátvorka vo výraze (\texttt{\textbf{(not)}}) .}
-	\item{\textbf{)}: Pravá zátvorka vo výraze (\texttt{\textbf{(not)}}) .}
+	\item{\textbf{(}: Ľavá zátvorka vo výraze.}
+	\item{\textbf{)}: Pravá zátvorka vo výraze.}
 	\item{\textbf{\$}: Koniec výrazu (\texttt{\textbf{do}} , \texttt{\textbf{then}} , \texttt{\textbf{EOL}} , \texttt{\textbf{EOF}}) .}
 \end{itemize}
 
@@ -117,7 +117,7 @@ Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 \section{Sémantická anylýza}
 Juraj a Mato
 \section{Generátor kódu}
-Juraj a Mato
+Generovaný kód sme ukládali do listu, kde jedna položka listu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. V liste sme aplikovali logické preusporiadanie vždy po ukončení vyhodnocovania aktuálneho rámca a to tak aby všetky premenné boli definované a inicializovane na hodnotu \texttt{nil} na začiatku daného rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý list na štandartný výstup.
 \section{Tabuľka symbolov}
 Tabuľku symbolov sme implementovali ako \textbf{Tabuľku s rozptýlenými položkami} (\textbf{TRP}). Využili sme TRP s \textbf{explicitním} zreťazením synoným. TRP sme implementovali ako pole synoným o veľkosti 53 položiek. Veľkosť mapovacieho poľa sme zvolili ako prvočíslo a krok s veľkosťou jedna. Takúto veľkosť poľa synoným sme zvolili vzhľadom na jej výhodné chovanie, ktoré sme preberali v predmete IAL (nedochádza k vytváraniu zhlukov). Každá položka v mapovaciom poli obsahuje lineárny zoznam synoným. Keďže tabuľku využívame ako úložisko lexém programovacieho jazyka tak sme ako vyhľadávací kľúč použili názov identifikátoru premennej, ktorý musí byť unikátny. Pre vhodné mapovanie sme použili hashovaciu funkciu, ktorá poskytuje dobré výsledký pre reťazcové kľúče. Ako hash funkciu sme zvolili algoritmus \textbf{djb2}\footnote{Zdroj hash funkcie dbj2: 
 	\urlstyle{rm}
