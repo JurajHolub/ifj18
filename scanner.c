@@ -1214,7 +1214,7 @@ token_t *get_token(){
 
             }
         }
-        else if(state==DOUBLE_DOT_state){
+        else if(state==DOUBLE_DOT_state){//basically this state process the '0'
             if( c>='0' && c <= '9' ){
                 state=DOUBLE_state;
                 charAppend(tokens[1],c);
@@ -1245,7 +1245,11 @@ token_t *get_token(){
                 PRINT_TOKENS
                 tokens[1]->type=INTEGER;
                 return tokens[1];
-            
+
+            }
+            else if(c=='e' || c=='E'){
+                state=EXPONENT_INTER_state;
+                charAppend(tokens[1],c);
             }
             else if ((c>='1' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
                 //error
