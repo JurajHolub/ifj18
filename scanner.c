@@ -648,7 +648,19 @@ token_t *get_token(){
                 PRINT_TOKENS
                 return tokens[1];
             }
-            else if(state==DOUBLE_DOT_state || state==EXPONENT_INTER_state || state==EXPONENT_INTER_sign_state){
+            else if(state==COMMENT_state){
+                globalEOL=TRUE;
+                tokens[1]->type=EOL;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+            else if( state==DOUBLE_DOT_state || state==EXPONENT_INTER_state || state==EXPONENT_INTER_sign_state){
+                globalEOL=TRUE;
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
+            else if ( state==COMMENT_BEGIN_state){
                 globalEOL=TRUE;
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -786,6 +798,12 @@ token_t *get_token(){
                     //state2=N_state;
                 
                 }
+                else {
+                    tokens[1]->type=ERROR;
+                    PRINT_TOKENS
+                    return tokens[1];
+                }
+
             }
             //
             else if(state2==HEX_ESCAPE_state){
@@ -796,6 +814,9 @@ token_t *get_token(){
                 }
                 else{
                     //ERROR
+                    tokens[1]->type=ERROR;
+                    PRINT_TOKENS
+                    return tokens[1];
                 }
                 
             }
@@ -813,8 +834,41 @@ token_t *get_token(){
                     state2=N_state;
 
                 }
-                else{
+                else if(c=='\\'){
+
+                    hexConvert[1]=hexConvert[0];
+                    hexConvert[0]='0';
+
+                    //printf("%s\n",hexConvert);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    string_append_ch(tokens[1]->attribute,hexReturn);
+
+                    state2=ESCAPE_state;
+
+                    nextchar='\0';
                     
+                }
+                else if(c=='"') {
+                     //printf("%s\n",hexConvert);
+                    hexConvert[1]=hexConvert[0];
+                    hexConvert[0]='0';
+
+                    //printf("%s\n",hexConvert);
+                    hexConvertFoo(hexConvert,hexReturn);
+                    string_append_ch(tokens[1]->attribute,hexReturn);
+
+                    state2=N_state;
+
+                    nextchar='\0';
+                    tokens[1]->type=STRING;
+                    return tokens[1];
+                }
+                else{
+                    //printf("%s\n",hexConvert);
+                    hexConvert[1]=hexConvert[0];
+                    hexConvert[0]='0';
+
+                    //printf("%s\n",hexConvert);
                     hexConvertFoo(hexConvert,hexReturn);
                     string_append_ch(tokens[1]->attribute,hexReturn);
 
@@ -940,9 +994,23 @@ token_t *get_token(){
             testString[charCounter]=c;
             charCounter++;
 
-            if(charCounter==5){//error by one
-                char beginTest[]="begin";
-                if(strcmp(testString,beginTest) == 0){
+            if(charCounter==6){
+
+                //watch out for the whitespaces
+                char beginTest1[]="begin ";
+                char beginTest2[]="begin\t";
+                char beginTest3[]="begin\n";
+
+
+                if(strcmp(testString,beginTest3) == 0){
+
+
+                    for (int i = 0; i < 64; i++)testString[i]='\0';
+                    charCounter=0;
+
+                    state=COMMENT_END_ENTER_state;
+                }
+                else if(strcmp(testString,beginTest1) == 0 || strcmp(testString,beginTest2) == 0){
 
 
                     //We "erase" the array and NULL the cnt
@@ -982,11 +1050,19 @@ token_t *get_token(){
             charCounter++;
             
 
-            if(charCounter==3){
-                char endTest[]="end";
+            if(charCounter==4){
+
+                char endTest1[]="end ";
+                char endTest2[]="end\t";
+                char endTest3[]="end\n";
                 
-                if(strcmp(testString,endTest) == 0){
+                if(strcmp(testString,endTest1) == 0 || strcmp(testString,endTest2) == 0 ){
                     state=START_state;
+                }
+                else if(strcmp(testString,endTest3) == 0){
+                    tokens[1]->type=EOL;
+                    PRINT_TOKENS
+                    return tokens[1];
                 }
                 else{
 

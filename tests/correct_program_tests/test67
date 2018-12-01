@@ -1,0 +1,5 @@
+=begin hello this is some comment
+=end
+=begin hello this is some comment
+=end
+a="\x9\xA"
