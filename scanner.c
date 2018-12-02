@@ -299,7 +299,7 @@ int controlOperators(char c, token_t *token, char scndOperator){
 
 //controls the chars that are not allowed in the IFJ18
 int controlIncorrectChars(char c){
-    if(c>128){
+    if(c>128 || c<-1){
         return FALSE;
     }
 
@@ -1063,7 +1063,7 @@ token_t *get_token(){
                 char endTest3[]="end\n";
                 
                 if(strcmp(testString,endTest1) == 0 || strcmp(testString,endTest2) == 0 ){
-                    state=START_state;
+                    state=COMMENT_END_ENTER2_tillEnd_state;
                 }
                 else if(strcmp(testString,endTest3) == 0){
                     tokens[1]->type=EOL;
@@ -1082,6 +1082,11 @@ token_t *get_token(){
                 
                 }
 
+            }
+        }
+        else if(state==COMMENT_END_ENTER2_tillEnd_state){
+            if(c=='\n'){
+                state=START_state;
             }
         }
         else if(state==FUNCTION_state){

@@ -1,0 +1,9 @@
+def _!()
+ print "helo"
+end
+=begin hello
+=en
+
+hello
+=end toto je ešte koment
+a="toto uz nie"
