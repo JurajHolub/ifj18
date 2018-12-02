@@ -71,6 +71,7 @@ enum states{
     COMMENT_END_state,
     COMMENT_END_ENTER_state,
     COMMENT_END_ENTER2_state,
+    COMMENT_END_ENTER2_tillEnd_state,
     CONSTANT_state,
     FUNCTION_state,
     SIGN_state,
