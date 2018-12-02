@@ -299,6 +299,10 @@ int controlOperators(char c, token_t *token, char scndOperator){
 
 //controls the chars that are not allowed in the IFJ18
 int controlIncorrectChars(char c){
+    if(c>128){
+        return FALSE;
+    }
+
     char operators[]={';','}','{',':','[',']','^','_','`','@','.','|','$','%','&','?','~','\\'};
 
     for (int i = 0; i < strlen(operators); i++){
@@ -306,6 +310,8 @@ int controlIncorrectChars(char c){
             return TRUE;
         }
     }
+
+
 
     return FALSE;
 }
