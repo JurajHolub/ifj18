@@ -23,6 +23,9 @@
 \usepackage{tikz}
 \usepackage{lipsum}
 \usepackage{tabularx,booktabs}
+\usepackage{setspace}
+\usepackage{longtable}
+\usepackage{threeparttable}
 
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 
@@ -93,7 +96,82 @@ Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fs
 
 
 \section{Syntaktická analýza zhora nadol}
-Matej
+
+\textbf{LL gramatika:}
+
+\begin{longtable}[l]{l l c l}
+		1: & \textless program\textgreater & $\rightarrow$ & EOF \\
+		2: & \textless program\textgreater & $\rightarrow$ & \textless program\textunderscore list\textgreater  EOF \\
+		3: & \textless program\textunderscore list\textgreater & $\rightarrow$ & \textless function\textunderscore def\textgreater  \textless program\textunderscore list\textgreater \\
+		4: & \textless program\textunderscore list\textgreater & $\rightarrow$ & \textless statement\textgreater  \textless program\textunderscore list\textgreater \\
+		5: & \textless function\textunderscore def\textgreater & $\rightarrow$ & def ID/FUN ( \textless params\textgreater \\
+		6: & \textless params\textgreater & $\rightarrow$ &  ) EOL \textless function\textunderscore body\textgreater \\
+		7: & \textless params\textgreater & $\rightarrow$ & ID \textless param\textunderscore list\textgreater \\
+		8: & \textless param\textunderscore list\textgreater & $\rightarrow$ &  ) EOL \textless function\textunderscore body\textgreater \\
+		9: & \textless param\textunderscore list\textgreater & $\rightarrow$ &  , ID \textless param\textunderscore list\textgreater \\
+		10: & \textless function-body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless fun\textunderscore body\textgreater \\
+		11: & \textless function-body\textgreater & $\rightarrow$ & end EOL \\
+		12: & \textless statement\textgreater & $\rightarrow$ & \textless if\textunderscore statement\textgreater \\
+		13: & \textless statement\textgreater & $\rightarrow$ & \textless while\textunderscore statement\textgreater \\
+		14: & \textless statement\textgreater & $\rightarrow$ & \textless assignment\textgreater  EOL \\
+		15: & \textless if\textunderscore statement\textgreater & $\rightarrow$ &  if \textless expression\textgreater  then EOL \textless if\textunderscore body\textgreater \\
+		16: & \textless if\textunderscore body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless if\textunderscore body\textgreater \\
+		17: & \textless if\textunderscore body\textgreater & $\rightarrow$ & else EOL \textless else\textunderscore body\textgreater \\
+		18: & \textless else\textunderscore body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless else\textunderscore body\textgreater \\
+		19: & \textless else\textunderscore body\textgreater & $\rightarrow$ & end EOL \\
+		20: & \textless while\textunderscore statement\textgreater & $\rightarrow$ & while \textless expression\textgreater  do EOL \textless while\textunderscore body\textgreater \\
+		21: & \textless while\textunderscore body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless while\textunderscore body\textgreater \\
+		22: & \textless while\textunderscore body\textgreater & $\rightarrow$ & end EOL \\
+		23: & \textless assignment\textgreater & $\rightarrow$ & ID = \textless function\textunderscore call\textgreater \\ 
+		24: & \textless assignment\textgreater & $\rightarrow$ & ID = \textless expression\textgreater \\ 
+		25: & \textless assignment\textgreater & $\rightarrow$ & \textless function\textunderscore call\textgreater \\ 
+		26: & \textless assignment\textgreater & $\rightarrow$ & \textless expression\textgreater \\
+		27: & \textless function\textunderscore call\textgreater & $\rightarrow$ & ID/FUN \textless call\textunderscore params\textgreater  EOL \\
+		28: & \textless call\textunderscore params\textgreater & $\rightarrow$ & (\textless call\textunderscore param\textgreater ) \\
+		29: & \textless call\textunderscore params\textgreater & $\rightarrow$ & \textless call\textunderscore param\textgreater \\
+		30: & \textless call\textunderscore param\textgreater & $\rightarrow$ & $\varepsilon$ \\
+		31: & \textless call\textunderscore param\textgreater & $\rightarrow$ & ID/CONST \textless call\textunderscore param\textunderscore list\textgreater \\
+		32: & \textless call\textunderscore param\textunderscore list\textgreater & $\rightarrow$ & $\varepsilon$ \\
+		33: & \textless call\textunderscore param\textunderscore list\textgreater & $\rightarrow$ & , ID/CONST \textless call\textunderscore param\textunderscore list\textgreater \\
+\end{longtable}
+
+\textbf{LL tabulka:}
+
+\begin{table*}[ht]
+\begin{threeparttable}
+\centering
+\makebox[\textwidth]{
+\begin{tabular}{| l | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+		\hline
+		 & \bf EOF & \bf EOL & \bf ID & \bf FN \tnote{a} & \bf def & \bf , & \bf end & \bf if & \bf else & \bf while & \bf = & \bf ( & \bf ) & \bf EXP \tnote{b} & \bf CONS \tnote{c} \\ \hline
+		\bf \textless program\textgreater & 1 & 2 & 2 & 2 & 2 &   &   & 2 &   & 2 &   & 2 &   & 2 & 2 \\ \hline
+		\bf \textless program\textunderscore list\textgreater &   & 4 & 4 & 4 & 3 &   &   & 4 &   & 4 &   & 4 &   & 4 & 4 \\ \hline
+		\bf \textless function\textunderscore def\textgreater &   &   &   &   & 5  &   &   &   &   &   &   &   &   &   &   \\ \hline
+		\bf \textless params\textgreater &   &   & 7 &   &   &   &   &   &   &   &   &   & 6 &   &   \\ \hline
+		\bf \textless param\textunderscore list\textgreater &   &   &   &   &   & 9 &   &   &   &   &   & 8 &   &   &   \\ \hline
+		\bf \textless function-body\textgreater &   &   & 10 & 10 &   &   & 11 & 10 &   & 10 &   & 10 &   & 10 &   \\ \hline
+		\bf \textless statement\textgreater &   & 14 & 14 & 14 &   &   &   & 12 &   & 13  &   & 14 &   & 14 &   \\ \hline
+		\bf \textless if\textunderscore statement\textgreater &   &   &   &   &   &   &   &   & 15 &   &   &   &   &   &   \\ \hline
+		\bf \textless if\textunderscore body\textgreater &   &   & 16 & 16 &   &   &   & 16  & 17 &   & 16 &   & 16 & 16 & 16 \\ \hline
+		\bf \textless else\textunderscore body\textgreater &   &   & 18 & 18 &   &   & 19 & 18 &   & 18 &   & 18 &   & 19 & 18 \\ \hline
+		\bf \textless while\textunderscore statement\textgreater &   &   &   &   &   &   &   &   &   &   & 20 &  &   &   &   \\ \hline
+		\bf \textless while\textunderscore body\textgreater &   &   & 21 & 21 &   &   & 22 & 21 &   & 21 &   & 21 &   & 21 & 21 \\ \hline
+		\bf \textless assignment\textgreater &   & 26 & 23, 24, 25, 26 & 25 &   &   &   &   &   &   &   & 26 &   & 26 & 26 \\ \hline
+		\bf \textless function\textunderscore call\textgreater &   &   & 27 & 27 &   &   &   &   &   &   &   &   &   &   &   \\ \hline
+		\bf \textless call\textunderscore params\textgreater &   &   & 29 &   &   &   &   &   &   &   &   & 28 &   &   & 29 \\ \hline
+		\bf \textless call\textunderscore param\textgreater &   & 30 & 31 &   &   &   &   &   &   &   &   &   & 30 &   & 31 \\ \hline
+		\bf \textless call\textunderscore param\textunderscore list\textgreater &   & 32 &   &   &   &   & 33 &   &   &   &   &   & 32 &   &  \\ \hline
+\end{tabular}
+}
+\begin{tablenotes}
+	\footnotesize
+	\item [a] \textbf{FN:} \underline{\textit{identifikátor obsahujúci nepovinný ! alebo ? na konci}}
+	\item [b] \textbf{EXP:} \underline{\textit{not, -, +, *, /, ==, !=, \textless , \textless  =, \textgreater , \textgreater = }}
+	\item [c] \textbf{CONS:} \underline{\textit{boolovská, celočíselná, desatinná a reťazcová konštanta}}
+\end{tablenotes}
+\end{threeparttable}
+\end{table*}
+
 \section{Precedenčná syntaktická analýza}
 Pre precedenčnú syntaktickú analýzu sme použili tabuľku \ref{prec_tab}. Symboly '$<$', '$>$', ' ' majú rovnaký význam ako značenie používané v predmete IFJ.
 Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
