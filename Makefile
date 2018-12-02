@@ -34,7 +34,7 @@ run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 pack:
-	zip xholub40.zip *.c *.h Makefile
+	cp doc/dokumentace.pdf . && zip xholub40.zip *.c *.h Makefile rozdeleni dokumentace.pdf
 
 clean:
 	rm -rf *.o *.out $(EXECUTABLE)
