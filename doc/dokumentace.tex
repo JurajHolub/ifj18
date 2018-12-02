@@ -76,7 +76,11 @@ Prácu na projekte sme rozdelili následovne:
 	\item{\textbf{Sémantickú analýzu} aplikovanú pri syntaktickej analýze zhora nadol vytvoril Matej Parobek (\texttt{xparob00}) a pre precedenčnú analýzu Juraj Holub (\texttt{xholub40}).}
 \end{itemize}
 \section{Lexikálna analýza}
-Urobí Samo. \\
+Hlavnými funkciami Lexikálnej analýzy sú \texttt{get\_token()} a \texttt{ret\_token()}.   Funkcia \texttt{get\_token()} je implementovaná ako konečný automat. Vstup do tejto funkcie zaisťuje funkcia \texttt{getchar()}, ktorá číta znaky zo štandardného vstupu a Konečnému automatu sú predávané tieto znaky. Konečný automat e implementovaný pomocou podmienok využitia konštánt, ktoré sa nachádzajú v \texttt{enum states}. Ak sa Konečný automat dostane do konečného stavu tak vracia tzv. token.Niekedy však táto funkcia musí načítať aj jeden znak z ďalšieho tokenu, aby vedela,že je v konečnom stave.Tento znak je predávaný globálnou premennou \texttt{nextchar}. Token reprezentuje štruktúra majúca dva prvky \texttt{int type}, kde predávame typ daného tokenu pomocou konštánt a \texttt{string\_t attribute}, čo je premenná dátového typu \texttt{string\_t} pre prácu s dynamickými reťazcami, kde predávame názov premennej, alebo text dátového typu string v jazyku IFJ18. S takýmto vytovreným tokenom následne pracujú ďalšie časti prekladača.
+
+Funkcia \texttt{ret\_token()} vracia token z parseru scanneru. Po tom, čo je táto funkcia spustená, tak pri ďalšom volaní je vrátený predošlý token. Táto funkcia je volaná parserom a môže požiadať až o dve predošlé tokeny, takže lexer musí mať stále uložené dva predošlé tokeny.
+
+Ak scanner narazil na nesprávny znak, ktorý nie je povolený, je nesprávne zapísaný blokový komentár, alebo narazil na ostatné lexikálne chyby, tak parseru vracia token typu ERROR. Takýto spôsob riešenia chýb sme si vybrali kvôli správnemu uvoľňovaniu pamäte, aby sa správne najprv uvoľnila pamäť a až potom sa program ukončil.
 Diagram konečného automatu, který specifikuje lexikální analyzátor.
 \section{Syntaktická analýza zhora nadol}
 Matej
