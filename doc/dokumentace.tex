@@ -81,7 +81,17 @@ Hlavnými funkciami Lexikálnej analýzy sú \texttt{get\_token()} a \texttt{ret
 Funkcia \texttt{ret\_token()} vracia token z parseru scanneru. Po tom, čo je táto funkcia spustená, tak pri ďalšom volaní je vrátený predošlý token. Táto funkcia je volaná parserom a môže požiadať až o dve predošlé tokeny, takže lexer musí mať stále uložené dva predošlé tokeny.
 
 Ak scanner narazil na nesprávny znak, ktorý nie je povolený, je nesprávne zapísaný blokový komentár, alebo narazil na ostatné lexikálne chyby, tak parseru vracia token typu ERROR. Takýto spôsob riešenia chýb sme si vybrali kvôli správnemu uvoľňovaniu pamäte, aby sa správne najprv uvoľnila pamäť a až potom sa program ukončil.
-Diagram konečného automatu, který specifikuje lexikální analyzátor.
+
+Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fsm}.
+
+\begin{figure*}[!]
+	\centering
+	\includegraphics[width=\linewidth,height=8in]{fsm_scanner.pdf}\\[1pt]
+	\caption{Diagram konečného automatu, který specifikuje lexikální analyzátor.}
+	\label{fsm}
+\end{figure*}
+
+
 \section{Syntaktická analýza zhora nadol}
 Matej
 \section{Precedenčná syntaktická analýza}
