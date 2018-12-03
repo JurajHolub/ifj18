@@ -79,11 +79,11 @@ Prácu na projekte sme rozdelili následovne:
 	\item{\textbf{Sémantickú analýzu} aplikovanú pri syntaktickej analýze zhora nadol vytvoril Matej Parobek (\texttt{xparob00}) a pre precedenčnú analýzu Juraj Holub (\texttt{xholub40}).}
 \end{itemize}
 \section{Lexikálna analýza}
-Hlavnými funkciami Lexikálnej analýzy sú \texttt{get\_token()} a \texttt{ret\_token()}.   Funkcia \texttt{get\_token()} je implementovaná ako konečný automat. Vstup do tejto funkcie zaisťuje funkcia \texttt{getchar()}, ktorá číta znaky zo štandardného vstupu a Konečnému automatu sú predávané tieto znaky. Konečný automat e implementovaný pomocou podmienok využitia konštánt, ktoré sa nachádzajú v \texttt{enum states}. Ak sa Konečný automat dostane do konečného stavu tak vracia tzv. token.Niekedy však táto funkcia musí načítať aj jeden znak z ďalšieho tokenu, aby vedela,že je v konečnom stave.Tento znak je predávaný globálnou premennou \texttt{nextchar}. Token reprezentuje štruktúra majúca dva prvky \texttt{int type}, kde predávame typ daného tokenu pomocou konštánt a \texttt{string\_t attribute}, čo je premenná dátového typu \texttt{string\_t} pre prácu s dynamickými reťazcami, kde predávame názov premennej, alebo text dátového typu string v jazyku IFJ18. S takýmto vytovreným tokenom následne pracujú ďalšie časti prekladača.
+Hlavnými funkciami Lexikálnej analýzy sú \texttt{get\_token()} a \texttt{ret\_token()}.   Funkcia \texttt{get\_token()} je implementovaná ako konečný automat. Vstup do tejto funkcie zaisťuje funkcia \texttt{getchar()}, ktorá číta znaky zo štandardného vstupu a Konečnému automatu sú predávané tieto znaky. Konečný automat e implementovaný pomocou podmienok využitia konštánt, ktoré sa nachádzajú v \texttt{enum states}. Ak sa Konečný automat dostane do konečného stavu tak vracia tzv. token. Niekedy však táto funkcia musí načítať aj jeden znak z ďalšieho tokenu, aby vedela,že je v konečnom stave.Tento znak je predávaný globálnou premennou \texttt{nextchar}. Token reprezentuje štruktúra majúca dva prvky \texttt{int type}, kde predávame typ daného tokenu pomocou konštánt a \texttt{string\_t attribute}, čo je premenná dátového typu \texttt{string\_t} pre prácu s dynamickými reťazcami, kde predávame názov premennej, alebo text dátového typu string v jazyku IFJ18. S takýmto vytvoreným tokenom následne pracujú ďalšie časti prekladača.
 
 Funkcia \texttt{ret\_token()} vracia token z parseru scanneru. Po tom, čo je táto funkcia spustená, tak pri ďalšom volaní je vrátený predošlý token. Táto funkcia je volaná parserom a môže požiadať až o dve predošlé tokeny, takže lexer musí mať stále uložené dva predošlé tokeny.
 
-Ak scanner narazil na nesprávny znak, ktorý nie je povolený, je nesprávne zapísaný blokový komentár, alebo narazil na ostatné lexikálne chyby, tak parseru vracia token typu ERROR. Takýto spôsob riešenia chýb sme si vybrali kvôli správnemu uvoľňovaniu pamäte, aby sa správne najprv uvoľnila pamäť a až potom sa program ukončil.
+Ak scanner narazil na nesprávny znak, ktorý nie je povolený, je nesprávne zapísaný blokový komentár, alebo narazil na ostatné lexikálne chyby, tak parseru vracia token typu ERROR. Takýto spôsob riešenia chýb sme si vybrali kvôli správnemu uvoľňovaniu pamäte, aby sa správne najprv uvoľnila pamäť a až potom sa program ukončil
 
 Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fsm}.
 
@@ -95,6 +95,31 @@ Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fs
 \end{figure*}
 
 \newpage
+{\Large{Legenda:}} 
+
+\begin{itemize}
+\item $\sum = \{ASCII\}$
+\item EOL - vracia token konca riadku (ukončenia príkazu)
+\item EOF - vracia token typu EOF (koniec zdrojového kódu)
+\item ProcessMath - stav v ktorom sa pomocou pomocnej funkcie naďalej rozhoduje o aký typ tokenu sa jedná
+\item NotEqF - vracia token nerovnosti 
+\item LESS - vracia token ako relačný operátor menšie ako
+\item LESS\_EQ - vracia token ako relačný operátor rovnosti
+\item Greater - vracia token ako relačný operátor väčšie
+\item GreaterEq - vracia token ako relačný operátor väčšie rovná sa
+\item ASSIGN - vracia token priradenia
+\item EQUAL - vracia token ako relačný operátor rovná sa
+\item ID Keyword - stav v ktorom sa vyhodnocuje, či je daný reťazec znakov kľúčové slovo alebo identifikátor
+\item Function - vracia sa token funkcie
+\item IntZero - vracia token celého čísla nula
+\item Int - vracia token celého čísla 
+\item FLOAT - vracia token desatinného čísla
+\item Exponent - vracia token čísla s exponentom
+\item stringFinal - vracia token reťazca znakov
+
+\end{itemize}
+\newpage
+
 \section{Syntaktická analýza zhora nadol}
 Tabuľka \ref{ll_gram} popisuje LL gramatiku použitú pre syntaktickú analýzu zhora nadol. Tabuľka \ref{ll_tab} popisuje LL tabuľku pre danú LL gramatiku.
 
