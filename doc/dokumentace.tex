@@ -94,11 +94,11 @@ Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fs
 	\label{fsm}
 \end{figure*}
 
-
+\newpage
 \section{Syntaktická analýza zhora nadol}
+Tabuľka \ref{ll_gram} popisuje LL gramatiku použitú pre syntaktickú analýzu zhora nadol. Tabuľka \ref{ll_tab} popisuje LL tabuľku pre danú LL gramatiku.
 
-\textbf{LL gramatika:}
-
+\begin{table*}[ht]
 \begin{longtable}[l]{l l c l}
 		1: & \textless program\textgreater & $\rightarrow$ & EOF \\
 		2: & \textless program\textgreater & $\rightarrow$ & \textless program\textunderscore list\textgreater  EOF \\
@@ -134,13 +134,14 @@ Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fs
 		32: & \textless call\textunderscore param\textunderscore list\textgreater & $\rightarrow$ & $\varepsilon$ \\
 		33: & \textless call\textunderscore param\textunderscore list\textgreater & $\rightarrow$ & , ID/CONST \textless call\textunderscore param\textunderscore list\textgreater \\
 \end{longtable}
-
-\textbf{LL tabulka:}
+\caption{LL gramatika.}
+\label{ll_gram}
+\end{table*}
 
 \begin{table*}[ht]
 \begin{threeparttable}
 \centering
-\makebox[\textwidth]{
+\resizebox{\linewidth}{!}{
 \begin{tabular}{| l | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
 		\hline
 		 & \bf EOF & \bf EOL & \bf ID & \bf FN \tnote{a} & \bf def & \bf , & \bf end & \bf if & \bf else & \bf while & \bf = & \bf ( & \bf ) & \bf EXP \tnote{b} & \bf CONS \tnote{c} \\ \hline
@@ -170,8 +171,11 @@ Diagram konečného automatu, který specifikuje lexikální analyzátor \ref{fs
 	\item [c] \textbf{CONS:} \underline{\textit{boolovská, celočíselná, desatinná a reťazcová konštanta}}
 \end{tablenotes}
 \end{threeparttable}
+\caption{LL tabuľka.}
+\label{ll_tab}
 \end{table*}
 
+\newpage
 \section{Precedenčná syntaktická analýza}
 Pre precedenčnú syntaktickú analýzu sme použili tabuľku \ref{prec_tab}. Symboly '$<$', '$>$', ' ' majú rovnaký význam ako značenie používané v predmete IFJ.
 Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
@@ -207,7 +211,8 @@ Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 \end{table}
 
 \section{Sémantická anylýza}
-Juraj a Mato
+Semantické kontrolu sme vykonávali vždy po syntaktickej kontrole jedného pravidla LL gramatiky alebo precedenčnej tabuľky. Pre dané pravidlo v LL tabuľke alebo akciu v precedenčnej tabuľke sme vykonali príslušné sémantické kontroly a v prípadne úspechu sme vygenerovali príslušný kód v cieľovom jazyku IFJcode18.
+
 \section{Generátor kódu}
 Generovaný kód sme ukládali do listu, kde jedna položka listu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. V liste sme aplikovali logické preusporiadanie vždy po ukončení vyhodnocovania aktuálneho rámca a to tak aby všetky premenné boli definované a inicializovane na hodnotu \texttt{nil} na začiatku daného rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý list na štandartný výstup.
 \section{Tabuľka symbolov}
@@ -216,14 +221,7 @@ Tabuľku symbolov sme implementovali ako \textbf{Tabuľku s rozptýlenými polo�
 	\url{http://www.cse.yorku.ca/~oz/hash.html}}
 , ktorý má dobré výsledky práve pre reťazcové kľúče.
 \section{Zhodnotenie}
-Život je krásny.
-
-%\begin{figure}[h]
-%\centering
-%\scalebox{0.4}\includegraphics{etiopan}
-%\caption{Malý Etiopánek a jeho bratříček}
-%	\label{obr1}
-%\end{figure}
+Spolupráca v týme bola dostatočná. Komunikovali sme najviac elektronicky ale prebiehali aj pravidelné osobné stretnutia. Na začiatku sme si určili predbežné rozdelenie úloh, ktoré sa podľa potreby upravovalo. Taktiež sme si stanovili komunikačné kanály, možné termíny pre osobné stretnutia a \texttt{house style} zdrojového kódu. Na verzovanie sme použili verzovací systém \texttt{git}.
 
 
 \end{document}
