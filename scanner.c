@@ -70,7 +70,7 @@ static char *lexemes[] = {"not", "-", "+", "*", "/", "!=", "<", "int", "str", "n
 
 #endif
 
-
+//Global vars
 token_t enterToken;
 token_t tokenNext;
 char nextchar;//='\0';
@@ -86,6 +86,9 @@ int globalEOL=FALSE;
 
 int beginVar=TRUE;
 
+/**
+ * @brief Function controling wheter a string is a keyword
+ */
 
 int controlKeyWords(char *testString, token_t *token){
 
@@ -139,38 +142,10 @@ int controlKeyWords(char *testString, token_t *token){
     
 }
 
-int controlConstants(char *testString,token_t *token){
-     char keyWords[5][10]={
-        "int","bool","float","string","nil"
-    };
-    for(int i = 0; i < 5; i++){
-       if (strcmp(testString,keyWords[i]) == 0 && i ==0 ){
-            token->type=INTEGER; 
-            return TRUE;
-        }
-        else if(strcmp(testString,keyWords[i]) == 0 && i ==1 ){
-            token->type=BOOL; 
-            return TRUE;
-        }
-        else if(strcmp(testString,keyWords[i]) == 0 && i ==2 ){
-            token->type=FLOAT; 
-            return TRUE;
-        }
-        else if(strcmp(testString,keyWords[i]) == 0 && i ==3 ){
-            token->type=STRING; 
-            return TRUE;
-        }
-        else if(strcmp(testString,keyWords[i]) == 0 && i ==4 ){
-            token->type=NIL; 
-            return TRUE;
-        }
+/**
+ * @brief control wheter it is correctly passed word 
+ */
 
-    }
-    return FALSE;
-
-
-
-}
 
 int controlWords(char *testString, token_t *token){
 
@@ -180,6 +155,11 @@ int controlWords(char *testString, token_t *token){
 
     return TRUE;
 }
+
+
+/**
+ * @brief Control wheter string is a INT
+ */
 
 int controlInt(char *testString,token_t *token){
 
@@ -203,6 +183,10 @@ int controlInt(char *testString,token_t *token){
 
 }
 
+/**
+ * @brief Control wheter string is a float/double
+ */
+
 int controlDouble(char *testString,token_t *token){
 
     for (int i = 0; i < strlen(testString); i++){
@@ -225,7 +209,10 @@ int controlDouble(char *testString,token_t *token){
 }
 
 
-//nextchar, c
+
+/**
+ * @brief Control and assing type of operators to the token
+ */
 
 int controlOperators(char c, token_t *token, char scndOperator){
     if (c=='=' && scndOperator=='\0'){
@@ -297,7 +284,9 @@ int controlOperators(char c, token_t *token, char scndOperator){
     return FALSE;
 }
 
-//controls the chars that are not allowed in the IFJ18
+/**
+ * @brief controls the chars that are not allowed in the IFJ18
+ */
 int controlIncorrectChars(char c){
     if(c>128 || c<-1){
         return FALSE;
@@ -317,6 +306,10 @@ int controlIncorrectChars(char c){
 }
 
 
+/**
+ * @brief controls the deliminators
+ */
+
 int controlSigns(char c){
 
     char operators[]={' ','\n','\t','*','/','+','-','<','=','>','(',')',',','"','#'};
@@ -331,7 +324,9 @@ int controlSigns(char c){
 
 }
 
-
+/**
+ * @brief Appends single char to a string
+ */
 void charAppend(token_t *token,char c){
 
     
@@ -340,6 +335,10 @@ void charAppend(token_t *token,char c){
 
     string_append_ch(token->attribute,append_char);
 }
+
+/**
+ * @brief used in the HEX escape string sequance
+ */
 
 void hexConvertFoo(char hexConvert[], char hexReturn[]){
 
@@ -449,10 +448,8 @@ token_t *get_token(){
     tokens[1]->attribute=string;
 
 
-    //int commentSwitch=0;
-
-    //char escapeSeq[]="0000";
-
+    
+    //This condition is here because I will always have to return the first token as EOL token
     if(beginVar==TRUE ){
 
         beginVar=FALSE;
@@ -471,9 +468,8 @@ token_t *get_token(){
 
     int state=START_state;
     int state2=N_state;
-    //int errorState=N_state;
 
-
+    //This condition is used to give EOL token as a before EOF token 
 
     if(globalEOL==TRUE){
 
@@ -490,12 +486,7 @@ token_t *get_token(){
 
 
 
-
-    //char *testString_IFJ;
-    //string_t stringTest=string_create(testString_IFJ);
-
-
-
+    //used for case of '!=' operator, because it needs to decide wheter it is a function or operator
 
     if(tokenNext.type==NOT_EQUAL){
 
@@ -519,7 +510,7 @@ token_t *get_token(){
     }
 
     
-        //printf(">%c<\n",nextchar);
+    //Control of nextchar aka next character that needs to be remembered
        
     if( nextchar=='=' || nextchar =='!' || nextchar=='<' || nextchar == '>' ){
 
@@ -530,10 +521,6 @@ token_t *get_token(){
 
         charAppend(tokens[1],nextchar);
         
-
-        /*
-        testString[charCounter]=nextchar;
-        charCounter++;*/
 
     }
     else if (nextchar=='"'){
@@ -554,16 +541,14 @@ token_t *get_token(){
         state=INT_state;
         charAppend(tokens[1],nextchar);
         nextchar='\0';
-        /*
-        testString[charCounter]=nextchar;
-        charCounter++;*/
+        
     }
     else if(nextchar=='#'){
         state=COMMENT_state;
         nextchar='\0';
     }
     else if(controlOperators(nextchar,tokens[1],'\0')==TRUE){
-        //printf("hello\n");
+        
         nextchar='\0';
         PRINT_TOKENS
         return tokens[1];
@@ -576,9 +561,9 @@ token_t *get_token(){
     
     }
    
-    /**/
+    
 
-    /*while((c=getchar())!=EOF){*/
+
     while( (c=getchar()) ){
 
 
@@ -586,6 +571,7 @@ token_t *get_token(){
         
 
         //Control of EOL before EOF
+        //special case for EOF
         if(c==EOF){
             
 
@@ -600,8 +586,14 @@ token_t *get_token(){
                 PRINT_TOKENS
                 return tokens[1];
             } 
+            else if ( state==COMMENT_BEGIN_state || state== COMMENT_END_state){
+                globalEOL=TRUE;
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
             else if (state==INT_state && controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE){
-                //printf("hello\n");
+                
                 globalEOL=TRUE;
                 PRINT_TOKENS
                 return tokens[1];
@@ -634,15 +626,14 @@ token_t *get_token(){
             
             }
             else if((state==FUNCTION_state || state==ID_state) && controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
-                //nextchar=c;
-                //printf("hello\n");
+                
                 globalEOL=TRUE;
                 PRINT_TOKENS
                 return tokens[1];
             
             }  
             else if((state==FUNCTION_state || state==ID_state) && controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
-                //nextchar=c;
+                
                 globalEOL=TRUE;
                 PRINT_TOKENS
                 return tokens[1];
@@ -666,12 +657,7 @@ token_t *get_token(){
                 PRINT_TOKENS
                 return tokens[1];
             }
-            else if ( state==COMMENT_BEGIN_state){
-                globalEOL=TRUE;
-                tokens[1]->type=ERROR;
-                PRINT_TOKENS
-                return tokens[1];
-            }
+            
 
     
             
@@ -687,7 +673,7 @@ token_t *get_token(){
         if(state==SIGN_state){
 
             if( c=='=' ){
-                //printf("%c,%c\n",nextchar,c);
+                
                 if(controlOperators(nextchar,tokens[1],c)==TRUE){
                     nextchar='\0';
                     PRINT_TOKENS
@@ -749,8 +735,7 @@ token_t *get_token(){
 
         if ( state==COMMENT_state){
 
-            //printf("%c\n",c );
-            //printf("hello");
+            
             if (c=='\n'){
                 
                 PRINT_TOKENS
@@ -762,6 +747,13 @@ token_t *get_token(){
 
         }            
         else if (state==STRING_state){
+
+            //ERROR
+            if(c>255){
+                tokens[1]->type=ERROR;
+                PRINT_TOKENS
+                return tokens[1];
+            }
             
 
             if(state2==ESCAPE_state){
@@ -769,9 +761,10 @@ token_t *get_token(){
                     //c='\t';
 
                     string_append_ch(tokens[1]->attribute,"\\009");
-                    //charAppend(tokens[1],c);
+                    
                     state2=N_state;
                     //vrátitť sa a vynulovať stav
+                    //it returns and "NULL" the state 
                 }
                 else if (c=='"'){
                     string_append_ch(tokens[1]->attribute,"\\034");
@@ -779,7 +772,7 @@ token_t *get_token(){
                 }
                 else if (c=='n'){
                 
-                    //c='\n';
+                    
 
                     string_append_ch(tokens[1]->attribute,"\\010");
                     state2=N_state;
@@ -787,21 +780,21 @@ token_t *get_token(){
                 }
                 else if (c=='s'){
                     
-                    //c=' ';
+                    
                     string_append_ch(tokens[1]->attribute,"\\032");
                     state2=N_state;
                 
                 }
                 else if (c==92){
                     string_append_ch(tokens[1]->attribute,"\\092");
-                    //charAppend(tokens[1],c);
+                    
                     state2=N_state;
                 
                 }
                 else if (c=='x'){
 
                     state2=HEX_ESCAPE_state;
-                    //state2=N_state;
+                    
                 
                 }
                 else {
@@ -814,7 +807,7 @@ token_t *get_token(){
             //
             else if(state2==HEX_ESCAPE_state){
 
-                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') || (c>='a' && c <= 'f')  ){//TODO check wheter it should be capital or noncapital letters 
+                if( (c>='0' && c <= '9') || (c>='A' && c <= 'F') || (c>='a' && c <= 'f')  ){//TODO check wheter it should be capital or noncapital letters //it has been DONE
                     hexConvert[0]=c;
                     state2=HEX_ESCAPE2_state;
                 }
@@ -845,7 +838,7 @@ token_t *get_token(){
                     hexConvert[1]=hexConvert[0];
                     hexConvert[0]='0';
 
-                    //printf("%s\n",hexConvert);
+                   
                     hexConvertFoo(hexConvert,hexReturn);
                     string_append_ch(tokens[1]->attribute,hexReturn);
 
@@ -855,11 +848,11 @@ token_t *get_token(){
                     
                 }
                 else if(c=='"') {
-                     //printf("%s\n",hexConvert);
+                    
                     hexConvert[1]=hexConvert[0];
                     hexConvert[0]='0';
 
-                    //printf("%s\n",hexConvert);
+                    
                     hexConvertFoo(hexConvert,hexReturn);
                     string_append_ch(tokens[1]->attribute,hexReturn);
 
@@ -870,11 +863,11 @@ token_t *get_token(){
                     return tokens[1];
                 }
                 else{
-                    //printf("%s\n",hexConvert);
+                    
                     hexConvert[1]=hexConvert[0];
                     hexConvert[0]='0';
 
-                    //printf("%s\n",hexConvert);
+                    
                     hexConvertFoo(hexConvert,hexReturn);
                     string_append_ch(tokens[1]->attribute,hexReturn);
 
@@ -883,11 +876,10 @@ token_t *get_token(){
                 }
 
             }
-            //
-            else if ( c== 92){//92=='\'
+            ////92=='\'
+            else if ( c== 92){
 
-                //printf("%c\n",c);// 47 is the value of 
-                //printf("hello\n");
+                
                 state2=ESCAPE_state;
             }
             else if( c==' '){
@@ -902,8 +894,8 @@ token_t *get_token(){
                 tokens[1]->type=STRING;
                 return tokens[1];
             }
-            else if(c =='\n' || c==EOF){
-                //printf("hello\n");
+            else if(c =='\n' || c==EOF || c>255){
+                
                 tokens[1]->type=ERROR;
                 return tokens[1];
             }
@@ -913,28 +905,25 @@ token_t *get_token(){
             }
             
             else{
-                //printf("hello\n");
+                
                 charAppend(tokens[1],c);
             }
 
             
-            /*
-            testString[charCounter]=c;
-            charCounter++;*/
+            
         }
         else if (state==START_state){
-            
+            //this is the start state
             
             if ( (c>='a' && c <= 'z') || c=='_'){
 
                 state=ID_state;
                 charAppend(tokens[1],c);
 
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             }
             else if(c=='#'){
-                //printf("hello\n");
+                
                 state=COMMENT_state;
             
             }
@@ -948,8 +937,7 @@ token_t *get_token(){
 
                 state=INT_state;
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
                 
             }
             else if(c=='=' && state2==COMMENT_BEGIN_state){
@@ -959,7 +947,7 @@ token_t *get_token(){
 
             }
             else if(c>='A' && c <= 'Z'){
-                //GOTO state error
+                //ERROR
                 tokens[1]->type=ERROR;
                 return tokens[1];
                 
@@ -1056,6 +1044,13 @@ token_t *get_token(){
             charCounter++;
             
 
+            if(charCounter==3){
+                char endTestEOF[]="end";
+                if(strcmp(testString,endTestEOF) == 0 ){
+                    state2=COMMENT_END_ENTER2_tillEnd_state;
+                }
+            }
+
             if(charCounter==4){
 
                 char endTest1[]="end ";
@@ -1064,8 +1059,10 @@ token_t *get_token(){
                 
                 if(strcmp(testString,endTest1) == 0 || strcmp(testString,endTest2) == 0 ){
                     state=COMMENT_END_ENTER2_tillEnd_state;
+                    state2=NOT;
                 }
                 else if(strcmp(testString,endTest3) == 0){
+                    state2=NOT;
                     tokens[1]->type=EOL;
                     PRINT_TOKENS
                     return tokens[1];
@@ -1098,11 +1095,7 @@ token_t *get_token(){
             else if(c=='='){
 
 
-                //testString[charCounter-1]='\0';
-                /*
-                int len=strlen(returnToken->attribute->string);
-                returnToken->attribute->string[len-1]='\0';
-                returnToken->type=VAR;*/
+                
 
 
                 //FIXED
@@ -1121,7 +1114,7 @@ token_t *get_token(){
 
             }
             else{
-                //error
+                //ERROR
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
@@ -1133,8 +1126,6 @@ token_t *get_token(){
 
                 charAppend(tokens[1],c);
 
-                /*testString[charCounter]=c;
-                charCounter++;*/
 
             }
             
@@ -1142,8 +1133,7 @@ token_t *get_token(){
                 state=FUNCTION_state;
 
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             }
             else if(controlSigns(c)==TRUE){
 
@@ -1165,12 +1155,7 @@ token_t *get_token(){
 
                 //constants are not supported in a source file
 
-                /*if(controlConstants(testString,tokens[1])==TRUE);
-                state=CONSTANT_state;
-                charAppend(tokens[1],c);
-
-                testString[charCounter]=c;
-                charCounter++;*/
+                
 
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -1186,15 +1171,13 @@ token_t *get_token(){
                 state=INT_state;
 
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
 
             }
             else if( c== '.'){
                 state=DOUBLE_DOT_state;
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             }
             else if(c=='e' || c=='E'){
 
@@ -1238,20 +1221,14 @@ token_t *get_token(){
 
         }
         else if(state==DOUBLE_PROB_state){
-            //printf("hello\n");
+            
             if (c=='.') {
                 state=DOUBLE_DOT_state;
                 charAppend(tokens[1],c);
             }
 
             else if (controlSigns(c)==TRUE){
-                //printf("hello\n");
-                /*if(controlInt(tokens[1]->attribute->string, tokens[1]) == TRUE) {
-
-                    PRINT_TOKENS
-                    tokens[1]->type=INTEGER;
-                    return tokens[1];
-                }*/
+                
 
                 PRINT_TOKENS
                 tokens[1]->type=INTEGER;
@@ -1263,7 +1240,7 @@ token_t *get_token(){
                 charAppend(tokens[1],c);
             }
             else if ((c>='1' && c <= '9') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='_'){
-                //error
+                //ERROR
             
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -1271,7 +1248,7 @@ token_t *get_token(){
             
             }
             else if(controlIncorrectChars(c)==TRUE){
-                //error
+                //ERROR
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
@@ -1283,17 +1260,15 @@ token_t *get_token(){
             
             if (c>='0' && c <= '9'){
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             
             }
             else if(c=='e'|| c=='E'){
                 //probably some error
-                //TODO chyták
+                //TODO chyták //DONE
                 state=EXPONENT_INTER_state;
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             }
             else if (controlSigns(c) == TRUE){
                 
@@ -1303,11 +1278,12 @@ token_t *get_token(){
                 }
             }
             else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_'){
-                //error
-                /**/
+                //ERROR
+
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
+
             }
             else if(controlIncorrectChars(c)==TRUE){
 
@@ -1319,11 +1295,10 @@ token_t *get_token(){
 
         }
         else if(state==EXPONENT_INTER_state){
-            //printf("hello\n");
+            
             if (c>='0' && c <= '9'){
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
                 state=EXPONENT_state;
             
             }
@@ -1340,8 +1315,7 @@ token_t *get_token(){
         else if (state==EXPONENT_INTER_sign_state){
             if (c>='0' && c <= '9'){
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
                 state=EXPONENT_sign_state;
             
             }
@@ -1357,16 +1331,9 @@ token_t *get_token(){
 
                 state=EXPONENT_state;
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
-            }
-            /*else if(c=='+' || c == '-'){
-                state=EXPONENT_sign_state;
-                charAppend(tokens[1],c);
                 
-                testString[charCounter]=c;
-                charCounter++;
-            }*/
+            }
+            
             else if (controlSigns(c)==TRUE) {
 
                 tokens[1]->type=FLOAT;
@@ -1374,7 +1341,7 @@ token_t *get_token(){
                 return tokens[1];
             }
             else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_' || c==';' || c=='@'){
-                //error
+                //ERROR
 
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
@@ -1383,7 +1350,7 @@ token_t *get_token(){
             }
             else if (controlIncorrectChars(c)==TRUE){
 
-                //error
+                //ERROR
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
@@ -1396,18 +1363,17 @@ token_t *get_token(){
 
                 state=EXPONENT_sign_state;
                 charAppend(tokens[1],c);
-                /*testString[charCounter]=c;
-                charCounter++;*/
+                
             
             }
             else if (controlSigns(c)==TRUE)  {
-                //printf("%s\n", testString);
+                
                 tokens[1]->type=FLOAT;
                 PRINT_TOKENS
                 return tokens[1];
             }
             else if ((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') ||  c=='_' || c==';' || c=='@'){
-                //error
+                //ERROR
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
@@ -1419,75 +1385,16 @@ token_t *get_token(){
             }
 
         }
-        else if(state ==CONSTANT_state){
-            if((c>='a' && c <= 'z') || (c>='A' && c <= 'Z') || (c>='0' && c <= '9') || c=='-' || c=='+'){
-                state=CONSTANT_state;
-                charAppend(tokens[1],c);
-                /*
-                testString[charCounter]=c;
-                charCounter++;*/
-
-            }
-            else if (controlSigns(c)==TRUE){
-                // TODO control of constant
-                PRINT_TOKENS
-                return tokens[1];
-            }
-            else {
-                //error
-                tokens[1]->type=ERROR;
-                PRINT_TOKENS
-                return tokens[1];
-            }
-        }
+        
         else {
-            //error
-            /*
-            tokens[1]->type=ERROR;
-            PRINT_TOKENS
-            return tokens[1];*/
-        
+            //DEAD "branch" did some bugs so I defined errors in different functions
+            
         }
         
-
-        
-        
         
     }
 
 
-
-
-    //printf("%s\n",tokens[1]->attribute->string );
-
-
-    /*
-    if(controlKeyWords(tokens[1]->attribute->string, tokens[1]) == TRUE){
-        //nextchar=c;
-        globalEOL=TRUE;
-        PRINT_TOKENS
-        return tokens[1];
-    }  
-    else if(controlWords(tokens[1]->attribute->string,tokens[1])==TRUE){
-        //nextchar=c;
-        globalEOL=TRUE;
-        PRINT_TOKENS
-        return tokens[1];
-    } 
-    
-    if(globalEOL==TRUE){
-        globalEOL=FALSE;
-        globalEOF=TRUE;
-        tokens[1]->type = EOL;
-        return tokens[1];
-
-    }
-    else if (globalEOF==TRUE){
-        tokens[1]->type = EOF;
-        return tokens[1];
-    }
-
-    */
     tokens[1]->type = EOF;
     return tokens[1];
 
@@ -1512,7 +1419,7 @@ void ret_token(token_t* token)
     //assert(tokens[1] == token);
 }
 
-
+//dummy function to write out all the tokens from source file
 void tokenLexOutput(){
     token_t *token=get_token();
     if(token->type==ERROR){
@@ -1532,5 +1439,3 @@ void tokenLexOutput(){
     }
     
 }
-
-
