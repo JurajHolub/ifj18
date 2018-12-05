@@ -221,7 +221,7 @@ V ostatných prípadoch sa použije pravidlo 24, resp. 25.
 
 \newpage
 \section{Precedenčná syntaktická analýza}
-Pre precedenčnú syntaktickú analýzu sme použili tabuľku \ref{prec_tab}. Symboly '$<$', '$>$', ' ' majú rovnaký význam ako značenie používané v predmete IFJ.
+Pre precedenčnú syntaktickú analýzu sme použili tabuľku \ref{prec_tab}.  Symboly '$<$', '$>$', ' ' majú rovnaký význam ako značenie používané v predmete IFJ. Riadok tabuľky určuje symbol na vrchole zásobníku. Stĺpec určuje symbol na vstupe.
 Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 \begin{itemize}
 	\item{\textbf{NEG}: Operátor negácie boolovského výrazu (\texttt{\textbf{not}}) .}
@@ -267,6 +267,8 @@ Pri volaní nedefinovanej funkcie vo funkcii sme uložili funkciu do tabuľky sy
 prebiehala kontrola kolízie identifikátoru s identifikátorom premennej a kontrola zhody počtu parametrov v prípade, že
 bola funkcia volaná pred jej definíciou. Na konci programu sú v tabuľke symbolov vyhľadávané nedefinované funkcie.
 Kontrola priradenia premennej spočíva v kontrole kolízie identifikátorov. Typová kontrola je vykonávaná za behu.
+
+Pre precedenčnú analýzu, sémantická kontrola overuje kompatibilitu typov pri operandoch so známimi datovými typmi. Pri operandoch s neznámimi datovými typmi sa generuje behová datová kontrola.
 \section{Generátor kódu}
 Generovaný kód sme ukládali do jednosmerne viazaného zoznamu, kde jedna položka zoznamu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. Do zoznamu sa jednotlivé inštrukcie ukladali v poradí ako nasledujú v programe s výnimkou definície premennej. Premenné sú vložené do zoznamu tak aby boli definované a inicializovane na hodnotu \texttt{nil} na začiatku aktuálneho rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý zoznam na štandartný výstup.
 \section{Tabuľka symbolov}
