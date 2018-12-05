@@ -749,7 +749,7 @@ token_t *get_token(){
         else if (state==STRING_state){
 
             //ERROR
-            if(c>255){
+            if(c>255 || c<-2){
                 tokens[1]->type=ERROR;
                 PRINT_TOKENS
                 return tokens[1];
