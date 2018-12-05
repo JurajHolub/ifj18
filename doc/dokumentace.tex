@@ -238,17 +238,30 @@ Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 \end{table}
 
 \section{Sémantická anylýza}
-Semantické kontrolu sme vykonávali vždy po syntaktickej kontrole jedného pravidla LL gramatiky alebo precedenčnej tabuľky. Pre dané pravidlo v LL tabuľke alebo akciu v precedenčnej tabuľke sme vykonali príslušné sémantické kontroly a v prípadne úspechu sme vygenerovali príslušný kód v cieľovom jazyku IFJcode18.
+Semantické kontrolu sme vykonávali vždy po syntaktickej kontrole jedného pravidla LL gramatiky alebo precedenčnej tabuľky. Pre dané pravidlo v LL tabuľke alebo akciu v precedenčnej tabuľke sme vykonali príslušné sémantické kontroly a v prípadne úspechu sme vygenerovali príslušný kód v cieľovom jazyku IFJcode18. Pre sémantické kontroly sme používali viacero tabuliek symbolov:
+\begin{itemize}
+	\item Tabuľku symbolov pre hlavné telo programu.
+	\item Zvlášť tabuľku symbolov pre telo každej funkcie.
+	\item Tabuľku symbolov pre deklarácie uživateľských a knihovných funkcií.
+\end{itemize}
 
 \section{Generátor kódu}
-Generovaný kód sme ukládali do listu, kde jedna položka listu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. V liste sme aplikovali logické preusporiadanie vždy po ukončení vyhodnocovania aktuálneho rámca a to tak aby všetky premenné boli definované a inicializovane na hodnotu \texttt{nil} na začiatku daného rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý list na štandartný výstup.
+Generovaný kód sme ukládali do jednosmerne viazaného zoznamu, kde jedna položka zoznamu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. Do zoznamu sa jednotlivé inštrukcie ukladali v poradí ako nasledujú v programe s výnimkou definície premennej. Premenné sú vložené do zoznamu tak aby boli definované a inicializovane na hodnotu \texttt{nil} na začiatku aktuálneho rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý zoznam na štandartný výstup.
 \section{Tabuľka symbolov}
-Tabuľku symbolov sme implementovali ako \textbf{Tabuľku s rozptýlenými položkami} (\textbf{TRP}). Využili sme TRP s \textbf{explicitním} zreťazením synoným. TRP sme implementovali ako pole synoným o veľkosti 53 položiek. Veľkosť mapovacieho poľa sme zvolili ako prvočíslo a krok s veľkosťou jedna. Takúto veľkosť poľa synoným sme zvolili vzhľadom na jej výhodné chovanie, ktoré sme preberali v predmete IAL (nedochádza k vytváraniu zhlukov). Každá položka v mapovaciom poli obsahuje lineárny zoznam synoným. Keďže tabuľku využívame ako úložisko lexém programovacieho jazyka tak sme ako vyhľadávací kľúč použili názov identifikátoru premennej, ktorý musí byť unikátny. Pre vhodné mapovanie sme použili hashovaciu funkciu, ktorá poskytuje dobré výsledký pre reťazcové kľúče. Ako hash funkciu sme zvolili algoritmus \textbf{djb2}\footnote{Zdroj hash funkcie dbj2: 
+Tabuľku symbolov sme implementovali ako \textbf{Tabuľku s rozptýlenými položkami} (\textbf{TRP}). Využili sme TRP s \textbf{explicitním} zreťazením synoným. TRP sme implementovali ako pole o veľkosti 53 položiek. Veľkosť mapovacieho poľa sme zvolili ako prvočíslo a krok s veľkosťou jedna. Takúto veľkosť sme zvolili vzhľadom na výhodné chovanie hashovacej funkcie pre pole o veľkosti prvočísla a konrétnu provčíselnú veľkosť poľa sme určili experimentálnym meraním využitia tabuľky symbolov pre rôzne programy. Každá položka v mapovaciom poli obsahuje lineárny zoznam synoným. Keďže tabuľku využívame ako úložisko lexém programovacieho jazyka tak sme ako vyhľadávací kľúč použili názov identifikátoru premennej, ktorý musí byť unikátny. Pre vhodné mapovanie sme použili hashovaciu funkciu, ktorá poskytuje dobré výsledký pre reťazcové kľúče. Ako hash funkciu sme zvolili algoritmus \textbf{djb2}\footnote{Zdroj hash funkcie dbj2: 
 	\urlstyle{rm}
 	\url{http://www.cse.yorku.ca/~oz/hash.html}}
 , ktorý má dobré výsledky práve pre reťazcové kľúče.
+
+Obsah položky tabuľky symbolov:
+\begin{itemize}
+	\item Typ symbolu (premenná, konštanta, funkcia).
+	\item Datový typ symbolu (neznámy, integer, string, bool, float, nil)
+	\item Identifikátor (kľúč TRP) premennej, funkcie alebo konštanty.
+	\item Pre funkcie počet parametrov.
+\end{itemize}
 \section{Testovanie}
-Pre testovanie sme vytvorili sadu programov v jazyku IFJ18, ktorá bola rozdelená na 2 skupiny (korektné a nekorektné programy). Vytvorlili sme testovací skript, ktorý porovnával štandardný výstup daného programu s výstupom programu vygenerovaného našim prekladačom.
+Pre testovanie sme vytvorili sadu programov v jazyku IFJ18, ktorá bola rozdelená na 2 skupiny (korektné a nekorektné programy). Vytvorlili sme testovací skript, ktorý porovnával štandardný výstup daného programu s výstupom programu vygenerovaného našim prekladačom a taktiež ich návratové hodnoty. 
 \section{Zhodnotenie}
 Spolupráca v týme bola dostatočná. Komunikovali sme najviac elektronicky ale prebiehali aj pravidelné osobné stretnutia. Na začiatku sme si určili predbežné rozdelenie úloh, ktoré sa podľa potreby upravovalo. Taktiež sme si stanovili komunikačné kanály, možné termíny pre osobné stretnutia a \texttt{house style} zdrojového kódu. Na verzovanie sme použili verzovací systém \texttt{git}.
 

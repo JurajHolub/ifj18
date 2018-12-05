@@ -49,10 +49,42 @@ projekt}
 
 \begin{frame}
 	\frametitle{Práca v týme}
+	\begin{itemize}
+		\item rozdelenie úloh
+		\begin{itemize}
+			\item lexikálna analýza
+			\item precedenčná syntaktická analýza a sémantická anylýza
+			\item syntaktická analýza zhora nadol a sémantická anylýza
+			\item tabuľka symbolov
+			\item generátor kódu
+		\end{itemize}
+		\item verzovací systém GIT
+		\item dohonuté komunikačné kanály
+		\item house style kódu
+		\begin{itemize}
+			\item doxygen komentáre
+			\item jeden jazyk (ANJ) pre všetky zdrojové kódy
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Tabuľka symbolov}
+	Tabuľka s rozptýlenými položkami (TRP) s explicitným zreťazením synoným.
+	\begin{itemize}
+		\item veľkosť TRP
+		\item reťazec ako kľúč TRP
+		\item hash funkcia \textbf{dbj2}\footnote{Zdroj dbj2: 
+			\urlstyle{rm}
+			\url{http://www.cse.yorku.ca/~oz/hash.html}}
+	\end{itemize}
+	Obsah položky tabuľky symbolov:
+	\begin{itemize}
+		\item typ symbolu (premenná, konštanta, funkcia)
+		\item datový typ symbolu (neznámy, integer, string...)
+		\item identifikátor (kľúč TRP)
+		\item pre funkcie počet parametrov
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -62,32 +94,42 @@ projekt}
 %	
 \begin{frame}
 	\frametitle{Syntaktická analýza}
+	Metoda rekurzívneho zostupu:
 	\begin{itemize}
-		\item{Metoda rekurzívneho zostupu}
-			\begin{itemize}
-				\item definície funkcií
-			 	\item volanie funkcií
-				\item cykly
-				\item podmienky
-				\item priradenia
-			\end{itemize}
-		\item{Precedenčná syntaktická analýza}
+		\item definície funkcií
+	 	\item volanie funkcií
+		\item cykly
+		\item podmienky
+		\item priradenia
+	\end{itemize}
+	Precedenčná syntaktická analýza:
+	\begin{itemize}
+		\item logické výrazy
+		\item aritmetické výrazy
+	\end{itemize}
+	Predávanie riadenia:
+	\begin{itemize}
+		\item \texttt{ret\_token()}
+	\end{itemize}
+\end{frame}
+%
+\begin{frame}
+	\frametitle{Sémantická anylýza a generovanie IFJcode18}
+	Sémantická analýza:
+	\begin{itemize}
+		\item zvlášť pre každé pravidlo v LL gramatike a precedenčnej tabuľky
+		\item tabuľka symbolov zvlášť pre
 		\begin{itemize}
-			\item logické výrazy
-			\item aritmetické výrazy
+			\item hlavné telo programu
+			\item každé telo funkcie
+			\item deklarácie uživateľských a knihovných funkcií
 		\end{itemize}
 	\end{itemize}
-
-\end{frame}
-%
-\begin{frame}
-	\frametitle{Sémantická anylýza}
-
-\end{frame}
-%
-\begin{frame}
-	\frametitle{Generátor kódu}
-
+	Generátor kódu:
+	\begin{itemize}
+		\item jednosmerne viazaný zoznam inštukcií IFJcode18
+		\item premenné definované vždy na začiatku lokálneho rámca
+	\end{itemize}
 \end{frame}
 
 \end{document}
