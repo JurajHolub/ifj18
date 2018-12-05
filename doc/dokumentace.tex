@@ -124,6 +124,16 @@ Diagram konečného automatu, který špecifikuje lexikálny analyzátor \ref{fs
 
 \section{Syntaktická analýza zhora nadol}
 Tabuľka \ref{ll_gram} popisuje LL gramatiku použitú pre syntaktickú analýzu zhora nadol. Tabuľka \ref{ll_tab} popisuje LL tabuľku pre danú LL gramatiku.
+LL(1) gramatika je prebraná zo zdrojového kódu, ktorý bol na zákalde dohody napísaný v angličtine, preto sú názvy neterminálnych
+symbolov v angličtine.
+
+LL(1) gramatika nie je použitá v prípade pravidiel 23, 24, 25, 26. Pre oddelenie pravidiel 23, 24 od 25, 26 je použité
+načítanie 2 tokenov. V prípade načítania identifikátoru a symbolu '=' sa gramatika rozhodne pre pravidlo 24 a 25 a v opačnom
+prípade pre pravidlo 25, 26. Ďalej potrebujeme rozlíšiť volanie funkcie od výrazu, čiže pravidlo 23 a 24, resp. 25 a 26.
+To sa deje na základe načítania ďalších dvoch tokenov. V prípade načítania identifikátoru a následne indentifikátoru, alebo
+konštanty alebo '(' sa rozhodneme pre pravidlo 23, resp. 25. V prípade načítania identifikátoru a konca riadku sa môže
+jednať o premenneú alebo volanie funkcie bez parametrov. V tomto prípade sa musíme rozhodnúť na základe tabuľky symbolov.
+V ostatných prípadoch sa použije pravidlo 24, resp. 25.
 
 \begin{table*}[ht]
 \begin{longtable}[l]{l l c l}
@@ -131,7 +141,7 @@ Tabuľka \ref{ll_gram} popisuje LL gramatiku použitú pre syntaktickú analýzu
 		2: & \textless program\textgreater & $\rightarrow$ & \textless program\textunderscore list\textgreater  EOF \\
 		3: & \textless program\textunderscore list\textgreater & $\rightarrow$ & \textless function\textunderscore def\textgreater  \textless program\textunderscore list\textgreater \\
 		4: & \textless program\textunderscore list\textgreater & $\rightarrow$ & \textless statement\textgreater  \textless program\textunderscore list\textgreater \\
-		5: & \textless function\textunderscore def\textgreater & $\rightarrow$ & def ID/FUN ( \textless params\textgreater \\
+		5: & \textless function\textunderscore def\textgreater & $\rightarrow$ & def ID/FUN\footnote{textebf{ID}: indentifikátor, ktorý neobsahuje ! alebo ? na konci/textebf{FUN}: indentifikátor, ktorý obsahuje ! alebo ? na konci} ( \textless params\textgreater \\
 		6: & \textless params\textgreater & $\rightarrow$ &  ) EOL \textless function\textunderscore body\textgreater \\
 		7: & \textless params\textgreater & $\rightarrow$ & ID \textless param\textunderscore list\textgreater \\
 		8: & \textless param\textunderscore list\textgreater & $\rightarrow$ &  ) EOL \textless function\textunderscore body\textgreater \\
@@ -172,30 +182,30 @@ Tabuľka \ref{ll_gram} popisuje LL gramatiku použitú pre syntaktickú analýzu
 \begin{tabular}{| l | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
 		\hline
 		 & \bf EOF & \bf EOL & \bf ID & \bf FN \tnote{a} & \bf def & \bf , & \bf end & \bf if & \bf else & \bf while & \bf = & \bf ( & \bf ) & \bf EXP \tnote{b} & \bf CONS \tnote{c} \\ \hline
-		\bf \textless program\textgreater & 1 & 2 & 2 & 2 & 2 &   &   & 2 &   & 2 &   & 2 &   & 2 & 2 \\ \hline
-		\bf \textless program\textunderscore list\textgreater &   & 4 & 4 & 4 & 3 &   &   & 4 &   & 4 &   & 4 &   & 4 & 4 \\ \hline
+		\bf \textless program\textgreater & 1 &   & 2 & 2 & 2 &   &   & 2 &   & 2 &   & 2 &   &   & 2 \\ \hline
+		\bf \textless program\textunderscore list\textgreater &   &   & 4 & 4 & 3 &   &   & 4 &   & 4 &   & 4 &   &   & 4 \\ \hline
 		\bf \textless function\textunderscore def\textgreater &   &   &   &   & 5  &   &   &   &   &   &   &   &   &   &   \\ \hline
-		\bf \textless params\textgreater &   &   & 7 &   &   &   &   &   &   &   &   &   & 6 &   &   \\ \hline
+		\bf \textless params\textgreater &   &   & 7 &   &   &   &   &   &   &   &   & 6 &   &   &   \\ \hline
 		\bf \textless param\textunderscore list\textgreater &   &   &   &   &   & 9 &   &   &   &   &   & 8 &   &   &   \\ \hline
-		\bf \textless function-body\textgreater &   &   & 10 & 10 &   &   & 11 & 10 &   & 10 &   & 10 &   & 10 &   \\ \hline
-		\bf \textless statement\textgreater &   & 14 & 14 & 14 &   &   &   & 12 &   & 13  &   & 14 &   & 14 &   \\ \hline
-		\bf \textless if\textunderscore statement\textgreater &   &   &   &   &   &   &   &   & 15 &   &   &   &   &   &   \\ \hline
-		\bf \textless if\textunderscore body\textgreater &   &   & 16 & 16 &   &   &   & 16  & 17 &   & 16 &   & 16 & 16 & 16 \\ \hline
-		\bf \textless else\textunderscore body\textgreater &   &   & 18 & 18 &   &   & 19 & 18 &   & 18 &   & 18 &   & 19 & 18 \\ \hline
-		\bf \textless while\textunderscore statement\textgreater &   &   &   &   &   &   &   &   &   &   & 20 &  &   &   &   \\ \hline
-		\bf \textless while\textunderscore body\textgreater &   &   & 21 & 21 &   &   & 22 & 21 &   & 21 &   & 21 &   & 21 & 21 \\ \hline
-		\bf \textless assignment\textgreater &   & 26 & 23, 24, 25, 26 & 25 &   &   &   &   &   &   &   & 26 &   & 26 & 26 \\ \hline
+		\bf \textless function-body\textgreater &   &   & 10 & 10 &   &   & 11 & 10 &   & 10 &   & 10 &   &   &   \\ \hline
+		\bf \textless statement\textgreater &   &   & 14 & 14 &   &   &   & 12 &   & 13  &   & 14 &   &   & 14 \\ \hline
+		\bf \textless if\textunderscore statement\textgreater &   &   &   &   &   &   &   & 15 &   &   &   &   &   &   &   \\ \hline
+		\bf \textless if\textunderscore body\textgreater &   &   & 16 & 16 &   &   &   & 16  & 17 & 16 &   & 16 &   &   & 16 \\ \hline
+		\bf \textless else\textunderscore body\textgreater &   &   & 18 & 18 &   &   & 19 & 18 &   & 18 &   & 18 &   &   & 18 \\ \hline
+		\bf \textless while\textunderscore statement\textgreater &   &   &   &   &   &   &   &   &   & 20 &   &  &   &   &   \\ \hline
+		\bf \textless while\textunderscore body\textgreater &   &   & 21 & 21 &   &   & 22 & 21 &   & 21 &   & 21 &   &   & 21 \\ \hline
+		\bf \textless assignment\textgreater &   &   & 23, 24, 25, 26 & 25 &   &   &   &   &   &   &   & 26 &   &   & 26 \\ \hline
 		\bf \textless function\textunderscore call\textgreater &   &   & 27 & 27 &   &   &   &   &   &   &   &   &   &   &   \\ \hline
 		\bf \textless call\textunderscore params\textgreater &   &   & 29 &   &   &   &   &   &   &   &   & 28 &   &   & 29 \\ \hline
 		\bf \textless call\textunderscore param\textgreater &   & 30 & 31 &   &   &   &   &   &   &   &   &   & 30 &   & 31 \\ \hline
-		\bf \textless call\textunderscore param\textunderscore list\textgreater &   & 32 &   &   &   &   & 33 &   &   &   &   &   & 32 &   &  \\ \hline
+		\bf \textless call\textunderscore param\textunderscore list\textgreater &   & 32 &   &   &   & 33 &   &   &   &   &   &   & 32  &   &  \\ \hline
 \end{tabular}
 }
 \begin{tablenotes}
 	\footnotesize
 	\item [a] \textbf{FN:} \underline{\textit{identifikátor obsahujúci nepovinný ! alebo ? na konci}}
-	\item [b] \textbf{EXP:} \underline{\textit{not, -, +, *, /, ==, !=, \textless , \textless  =, \textgreater , \textgreater = }}
-	\item [c] \textbf{CONS:} \underline{\textit{boolovská, celočíselná, desatinná a reťazcová konštanta}}
+	\item [b] \textbf{EXP:} \underline{\textit{-, +, *, /, ==, !=, \textless , \textless  =, \textgreater , \textgreater = }}
+	\item [c] \textbf{CONS:} \underline{\textit{celočíselná, desatinná a reťazcová konštanta}}
 \end{tablenotes}
 \end{threeparttable}
 \caption{LL tabuľka.}
@@ -240,6 +250,11 @@ Legenda vstupných symbolov pre precedenčnú tabuľku \ref{prec_tab}:
 \section{Sémantická anylýza}
 Semantické kontrolu sme vykonávali vždy po syntaktickej kontrole jedného pravidla LL gramatiky alebo precedenčnej tabuľky. Pre dané pravidlo v LL tabuľke alebo akciu v precedenčnej tabuľke sme vykonali príslušné sémantické kontroly a v prípadne úspechu sme vygenerovali príslušný kód v cieľovom jazyku IFJcode18.
 
+V prípade analýzy z hora nadol, sémantická kontrola spočívala v kontrole volania a definície funkcií a kontrole priraďovania premennej.
+Pri volaní nedefinovanej funkcie vo funkcii sme uložili funkciu do tabuľky symbolov ako nedefinovanú. Pri definícii funkcie
+prebiehala kontrola kolízie identifikátoru s identifikátorom premennej a kontrola zhody počtu parametrov v prípade, že
+bola funkcia volaná pred jej definíciou. Na konci programu sú v tabuľke symbolov vyhľadávané nedefinované funkcie.
+Kontrola priradenia premennej spočíva v kontrole kolízie identifikátorov. Typová kontrola je vykonávaná za behu.
 \section{Generátor kódu}
 Generovaný kód sme ukládali do listu, kde jedna položka listu predstavuje jednu inštrukciu v cieľovom jazyku IFJcode18. V liste sme aplikovali logické preusporiadanie vždy po ukončení vyhodnocovania aktuálneho rámca a to tak aby všetky premenné boli definované a inicializovane na hodnotu \texttt{nil} na začiatku daného rámca. Po ukončení všetkých analýz sme jedným priechodom vygenerovali celý list na štandartný výstup.
 \section{Tabuľka symbolov}
