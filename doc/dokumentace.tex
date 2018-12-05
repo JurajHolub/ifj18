@@ -84,8 +84,15 @@ Hlavnými funkciami lexikálnej analýzy sú \texttt{get\_token()} a \texttt{ret
 %%probably will be deleted
 
 %%Token reprezentuje štruktúra majúca dva prvky \texttt{int type}, kde predávame typ daného tokenu pomocou konštánt a \texttt{string\_t attribute}, čo je premenná dátového typu \texttt{string\_t} pre prácu s dynamickými reťazcami, kde predávame názov premennej, alebo text dátového typu string v jazyku IFJ18.
+Token sa skladá z:
+\begin{itemize}
+	\item \textbf{Typ}: určuje typ tokenu (kľučové slová, premenná, konštanta...).
+	\item \textbf{Atribút}: určuje hodnotu tokenu ak jeho hodnota nieje určená typom (hodnota konštanty, identifikátor premennej...).
+\end{itemize}
 
 Funkcia \texttt{ret\_token()} vracia token z parseru scanneru. Potom čo je funkcia \texttt{get\_token()} spustená, tak pri ďalšom volaní je vrátený predošlý token. Táto funkcia je volaná parserom a môže požiadať až o dve predošlé tokeny, takže scanner musí mať stále uložené dva predošlé tokeny.
+
+Pre reťazcové konštanty robí lexikálny analyzátor automatickú konverziu na reprezentáciu reťazca v cieľovom jazyku IFJcode18. Token predávaný syntaktickej analýze obsahujúci reťazcovú konštantu je teda vždy prekonvertovaný do správneho formátu výstupného jazyka.
 
 Diagram konečného automatu, který špecifikuje lexikálny analyzátor \ref{fsm}.
 
