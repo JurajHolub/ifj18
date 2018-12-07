@@ -153,8 +153,8 @@ V ostatných prípadoch sa použije pravidlo 24, resp. 25.
 		7: & \textless params\textgreater & $\rightarrow$ & ID \textless param\textunderscore list\textgreater \\
 		8: & \textless param\textunderscore list\textgreater & $\rightarrow$ &  ) EOL \textless function\textunderscore body\textgreater \\
 		9: & \textless param\textunderscore list\textgreater & $\rightarrow$ &  , ID \textless param\textunderscore list\textgreater \\
-		10: & \textless function-body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless fun\textunderscore body\textgreater \\
-		11: & \textless function-body\textgreater & $\rightarrow$ & end EOL \\
+		10: & \textless function\textunderscore body\textgreater & $\rightarrow$ & \textless statement\textgreater \textless function\textunderscore body\textgreater \\
+		11: & \textless function\textunderscore body\textgreater & $\rightarrow$ & end EOL \\
 		12: & \textless statement\textgreater & $\rightarrow$ & \textless if\textunderscore statement\textgreater \\
 		13: & \textless statement\textgreater & $\rightarrow$ & \textless while\textunderscore statement\textgreater \\
 		14: & \textless statement\textgreater & $\rightarrow$ & \textless assignment\textgreater  EOL \\
@@ -194,7 +194,7 @@ V ostatných prípadoch sa použije pravidlo 24, resp. 25.
 		\bf \textless function\textunderscore def\textgreater &   &   &   &   & 5  &   &   &   &   &   &   &   &   &   &   \\ \hline
 		\bf \textless params\textgreater &   &   & 7 &   &   &   &   &   &   &   &   & 6 &   &   &   \\ \hline
 		\bf \textless param\textunderscore list\textgreater &   &   &   &   &   & 9 &   &   &   &   &   & 8 &   &   &   \\ \hline
-		\bf \textless function-body\textgreater &   &   & 10 & 10 &   &   & 11 & 10 &   & 10 &   & 10 &   &   &   \\ \hline
+		\bf \textless function\textunderscore body\textgreater &   &   & 10 & 10 &   &   & 11 & 10 &   & 10 &   & 10 &   &   &   \\ \hline
 		\bf \textless statement\textgreater &   &   & 14 & 14 &   &   &   & 12 &   & 13  &   & 14 &   &   & 14 \\ \hline
 		\bf \textless if\textunderscore statement\textgreater &   &   &   &   &   &   &   & 15 &   &   &   &   &   &   &   \\ \hline
 		\bf \textless if\textunderscore body\textgreater &   &   & 16 & 16 &   &   &   & 16  & 17 & 16 &   & 16 &   &   & 16 \\ \hline
